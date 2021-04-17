@@ -7,6 +7,8 @@ class RiscemuBaseException(BaseException):
         pass
 
 
+# Parsing exceptions:
+
 class ParseException(RiscemuBaseException):
     def __init__(self, msg, data=None):
         super().__init__()
@@ -42,6 +44,8 @@ def ASSERT_IN(a1, a2):
         raise ParseException("ASSERTION_FAILED: Expected {} to not be in {}".format(a1, a2), (a1, a2))
 
 
+# MMU Exceptions
+
 class MemoryAccessException(RiscemuBaseException):
     def __init__(self, msg, addr, size, op):
         super(MemoryAccessException, self).__init__()
@@ -71,6 +75,8 @@ class OutOfMemoryEsception(RiscemuBaseException):
         )
 
 
+# CPU Exceptions
+
 class UnimplementedInstruction(RiscemuBaseException):
     def __init__(self, ins: 'LoadedInstruction'):
         self.ins = ins
@@ -80,6 +86,7 @@ class UnimplementedInstruction(RiscemuBaseException):
             self.__class__.__name__,
             repr(self.ins)
         )
+
 
 class InvalidRegisterException(RiscemuBaseException):
     def __init__(self, reg):
@@ -91,5 +98,18 @@ class InvalidRegisterException(RiscemuBaseException):
             self.reg
         )
 
+
 def INS_NOT_IMPLEMENTED(ins):
     raise UnimplementedInstruction(ins)
+
+
+class  NumberFormatException(RiscemuBaseException):
+    def __init__(self, msg):
+        super().__init__()
+        self.msg = msg
+
+    def message(self):
+        return "{}({})".format(
+            self.__class__.__name__,
+            self.msg
+        )

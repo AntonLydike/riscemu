@@ -1,3 +1,5 @@
+from .Exceptions import NumberFormatException
+
 def align_addr(addr: int, to_bytes: int = 8):
     """
     align an address to `to_bytes` (meaning addr & to_bytes = 0)
@@ -14,16 +16,18 @@ def parse_numeric_argument(arg: str):
     return int(arg)
 
 
-def int_to_bytes(val, bytes=4):
+def int_to_bytes(val, bytes=4, unsigned=False):
     """
     int -> byte (two's complement)
     """
+    if unsigned and val < 0:
+        raise NumberFormatException("unsigned negative number!")
     return bytearray([
         (val >> ((bytes-i-1) * 8)) & 0xFF for i in range(bytes)
     ])
 
 
-def int_from_bytes(bytes):
+def int_from_bytes(bytes, unsigned=False):
     """
     byte -> int (two's complement)
     """
@@ -32,9 +36,10 @@ def int_from_bytes(bytes):
         num = num << 8
         num += b
     sign = num >> (len(bytes) * 8 - 1)
-    if sign:
+    if sign and not unsigned:
         return num - 2 ** (8 * len(bytes))
     return num
+
 
 FMT_ORANGE = '\033[33m'
 FMT_GRAY = '\033[37m'
