@@ -5,6 +5,7 @@ from .Exceptions import *
 from .helpers import *
 from .Config import RunConfig
 from .Registers import Registers
+from .Syscall import SyscallInterface, Syscall
 
 import typing
 if typing.TYPE_CHECKING:
@@ -14,14 +15,14 @@ if typing.TYPE_CHECKING:
 
 class CPU:
     def __init__(self, conf: RunConfig):
-        from . import MMU, Executable, LoadedExecutable, LoadedInstruction
+        from . import MMU
+        self.pc = 0
+        self.exit = False
+        self.exit_code = 0
+        self.conf = conf
 
         self.mmu = MMU(conf)
         self.regs = Registers()
-        self.pc = 0
-        self.exit = False
-        self.conf = conf
-
         self.syscall_int = SyscallInterface()
 
     def load(self, e: 'Executable'):
@@ -215,6 +216,7 @@ class CPU:
         INS_NOT_IMPLEMENTED(ins)
 
     def instruction_scall(self, ins: 'LoadedInstruction'):
+        ASSERT_LEN(ins.args, 0)
         syscall = Syscall(self.regs.get('a7'), self.regs)
         self.syscall_int.handle_syscall(syscall)
 
@@ -235,14 +237,3 @@ class CPU:
             if method.startswith('instruction_'):
                 yield method[12:]
 
-
-@dataclass(frozen=True)
-class Syscall:
-    id: int
-    registers: Registers
-
-
-class SyscallInterface:
-    def handle_syscall(self, scall: Syscall):
-        print("syscall {} received!".format(scall.id))
-        scall.registers.dump_reg_a()

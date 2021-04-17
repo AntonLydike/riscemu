@@ -99,11 +99,23 @@ class InvalidRegisterException(RiscemuBaseException):
         )
 
 
+class InvalidSyscallException(RiscemuBaseException):
+    def __init__(self, scall):
+        self.scall = scall
+
+    def message(self):
+        return "{}(Invalid syscall: {})".format(
+            self.__class__.__name__,
+            self.scall
+        )
+
+
+
 def INS_NOT_IMPLEMENTED(ins):
     raise UnimplementedInstruction(ins)
 
 
-class  NumberFormatException(RiscemuBaseException):
+class NumberFormatException(RiscemuBaseException):
     def __init__(self, msg):
         super().__init__()
         self.msg = msg
