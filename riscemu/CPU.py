@@ -130,6 +130,7 @@ class CPU:
         )
 
     def instruction_addi(self, ins: 'LoadedInstruction'):
+        ASSERT_LEN(ins.args, 3)
         dst = ins.get_reg(0)
         src1 = ins.get_reg(1)
         imm = ins.get_imm(2)
@@ -250,23 +251,29 @@ class CPU:
         self.pc = addr
 
     def instruction_ret(self, ins: 'LoadedInstruction'):
+        ASSERT_LEN(ins.args, 0)
         self.pc = self.regs.get('ra')
+
+    def instruction_ecall(self, ins: 'LoadedInstruction'):
+        self.instruction_scall(ins)
+
+    def instruction_ebreak(self, ins: 'LoadedInstruction'):
+        self.instruction_ebreak(ins)
 
     def instruction_scall(self, ins: 'LoadedInstruction'):
         ASSERT_LEN(ins.args, 0)
         syscall = Syscall(self.regs.get('a7'), self.regs)
         self.syscall_int.handle_syscall(syscall)
 
-    def instruction_break(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+    def instruction_sbreak(self, ins: 'LoadedInstruction'):
+        if self.conf.debug_instruction:
+            import code
+            code.interact(local=dict(globals(), **locals()))
+
 
     def instruction_nop(self, ins: 'LoadedInstruction'):
         pass
 
-    def instruction_dbg(self, ins: 'LoadedInstruction'):
-        if self.conf.debug_instruction:
-            import code
-            code.interact(local=dict(globals(), **locals()))
 
     @staticmethod
     def all_instructions():

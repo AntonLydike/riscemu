@@ -11,8 +11,8 @@ if __name__ == '__main__':
     parser.add_argument('default_stack_size', type=int, help='Default stack size of loaded programs', default=None,
                         metavar='default-stack-size')
     parser.add_argument('debug_instruction', type=bool, default=True, metavar='debug-instruction',
-                        help='Adds the dbg instruction, which launches an interactive debuggin session, smilar to '
-                             'a breakpoint.')
+                        help='Switches to an interactive python interpreter when ebreak/sbreak instruction '
+                             'is encountered. Otherwise these instructions are treated as nop.')
 
     parser.add_argument('print_tokens', metavar='print-tokens', type=bool, help='Print tokens after tokenization',
                         default=False)
