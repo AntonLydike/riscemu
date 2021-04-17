@@ -35,10 +35,21 @@ def int_from_bytes(bytes, unsigned=False):
     for b in bytes:
         num = num << 8
         num += b
-    sign = num >> (len(bytes) * 8 - 1)
-    if sign and not unsigned:
-        return num - 2 ** (8 * len(bytes))
-    return num
+
+    if unsigned:
+        return num
+
+    return to_signed(num)
+
+
+def to_unsigned(num: int, bytes=4):
+    if num < 0:
+        return 2**(bytes * 8) - num
+
+
+def to_signed(num: int, bytes=4):
+    if num >> (bytes * 8 - 1):
+        return num - 2 ** (8 * bytes)
 
 
 # Colors

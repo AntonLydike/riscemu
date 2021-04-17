@@ -178,10 +178,20 @@ class CPU:
         INS_NOT_IMPLEMENTED(ins)
 
     def instruction_beq(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        ASSERT_LEN(ins.args, 3)
+        reg1 = ins.get_reg(0)
+        reg2 = ins.get_reg(1)
+        dest = ins.get_imm(2)
+        if self.regs.get(reg1) == self.regs.get(reg2):
+            self.pc = dest
 
     def instruction_bne(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        ASSERT_LEN(ins.args, 3)
+        reg1 = ins.get_reg(0)
+        reg2 = ins.get_reg(1)
+        dest = ins.get_imm(2)
+        if self.regs.get(reg1) != self.regs.get(reg2):
+            self.pc = dest
 
     def instruction_blt(self, ins: 'LoadedInstruction'):
         ASSERT_LEN(ins.args, 3)
@@ -192,13 +202,28 @@ class CPU:
             self.pc = dest
 
     def instruction_bge(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        ASSERT_LEN(ins.args, 3)
+        reg1 = ins.get_reg(0)
+        reg2 = ins.get_reg(1)
+        dest = ins.get_imm(2)
+        if self.regs.get(reg1) >= self.regs.get(reg2):
+            self.pc = dest
 
     def instruction_bltu(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        ASSERT_LEN(ins.args, 3)
+        reg1 = to_unsigned(ins.get_reg(0))
+        reg2 = to_unsigned(ins.get_reg(1))
+        dest = ins.get_imm(2)
+        if self.regs.get(reg1) < self.regs.get(reg2):
+            self.pc = dest
 
     def instruction_bgeu(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        ASSERT_LEN(ins.args, 3)
+        reg1 = to_unsigned(ins.get_reg(0))
+        reg2 = to_unsigned(ins.get_reg(1))
+        dest = ins.get_imm(2)
+        if self.regs.get(reg1) >= self.regs.get(reg2):
+            self.pc = dest
 
     def instruction_j(self, ins: 'LoadedInstruction'):
         INS_NOT_IMPLEMENTED(ins)
