@@ -1,8 +1,9 @@
 from dataclasses import dataclass
+from typing import Optional
 
-@dataclass()
+
+@dataclass(frozen=True, init=True)
 class RunConfig:
-    color = True
-    preffered_stack_size = None
-    debug_instruction = True
-
+    color: bool = True
+    preffered_stack_size: Optional[int] = None
+    debug_instruction: bool = True
