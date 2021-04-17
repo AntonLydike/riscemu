@@ -143,7 +143,14 @@ class CPU:
         )
 
     def instruction_sub(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        ASSERT_LEN(ins.args, 3)
+        dst = ins.get_reg(0)
+        src1 = ins.get_reg(1)
+        src2 = ins.get_reg(2)
+        self.regs.set(
+            dst,
+            self.regs.get(src1) - self.regs.get(src2)
+        )
 
     def instruction_lui(self, ins: 'LoadedInstruction'):
         INS_NOT_IMPLEMENTED(ins)
@@ -152,7 +159,14 @@ class CPU:
         INS_NOT_IMPLEMENTED(ins)
 
     def instruction_xor(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        ASSERT_LEN(ins.args, 3)
+        dst = ins.get_reg(0)
+        src1 = ins.get_reg(1)
+        src2 = ins.get_reg(2)
+        self.regs.set(
+            dst,
+            self.regs.get(src1) ^ self.regs.get(src2)
+        )
 
     def instruction_xori(self, ins: 'LoadedInstruction'):
         INS_NOT_IMPLEMENTED(ins)

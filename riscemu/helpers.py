@@ -44,13 +44,14 @@ def int_from_bytes(bytes, unsigned=False):
 
 def to_unsigned(num: int, bytes=4):
     if num < 0:
-        return 2**(bytes * 8) - num
+        return 2**(bytes * 8) + num
+    return num
 
 
 def to_signed(num: int, bytes=4):
     if num >> (bytes * 8 - 1):
         return num - 2 ** (8 * bytes)
-
+    return num
 
 # Colors
 
