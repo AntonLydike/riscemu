@@ -1,3 +1,3 @@
 from .CPU import *
-from .tokenizer import *
+from .Tokenizer import *
 

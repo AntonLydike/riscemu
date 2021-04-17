@@ -26,5 +26,12 @@ loop:
     tk = RiscVTokenizer(RiscVInput(example_progr))
     tk.tokenize()
 
+    print("tokens:")
     for token in tk.tokens:
         print(token)
+
+    ep = ExecutableParser(tk)
+    ep.parse()
+
+    print(ep)
+

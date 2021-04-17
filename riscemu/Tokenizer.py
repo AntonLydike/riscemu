@@ -231,7 +231,7 @@ class RiscVPseudoOpToken(RiscVToken):
 class RiscVTokenizer:
     def __init__(self, input: RiscVInput):
         self.input = input
-        self.tokens = []
+        self.tokens: List[RiscVToken] = []
 
     def tokenize(self):
         while self.input.has_next():
@@ -296,4 +296,3 @@ class RiscVTokenizer:
     def parse_comment(self):
         # just consume the rest
         self.input.consume(regex=REG_UNTIL_NEWLINE)
-
