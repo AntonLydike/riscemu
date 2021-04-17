@@ -4,9 +4,9 @@ from .Exceptions import *
 from .helpers import parse_numeric_argument, align_addr
 
 import typing
+
 if typing.TYPE_CHECKING:
     from .Tokenizer import RiscVInstructionToken
-
 
 
 @dataclass(frozen=True)
@@ -59,6 +59,15 @@ class Executable:
     sections: Dict[str, MemorySection]
     symbols: Dict[str, Tuple[str, int]]
     stack_pref: Optional[int]
+
+    def __repr__(self):
+        return "{}(sections = {}, symbols = {}, stack = {}, run_ptr = {})".format(
+            self.__class__.__name__,
+            " ".join(self.sections.keys()),
+            " ".join(self.symbols.keys()),
+            self.stack_pref,
+            self.run_ptr
+        )
 
 
 ### LOADING CODE

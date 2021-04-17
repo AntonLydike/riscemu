@@ -27,6 +27,7 @@ class ExecutableParser:
                 self.handle_symbol(token)
             elif isinstance(token, RiscVPseudoOpToken):
                 self.handle_pseudo_op(token)
+        return self
 
     def get_execuable(self):
         start_ptr = ('text', 0)
