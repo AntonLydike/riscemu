@@ -21,7 +21,7 @@ loop:
         # exit gracefully
         addi a0, zero, 0
         addi a7, zero, 93
-        dbg                 # launch debugger
+        ebreak                 # launch debugger
         scall               # exit with code 0
     """
     tk = RiscVTokenizer(RiscVInput(example_progr))
@@ -36,11 +36,10 @@ loop:
 
     exe = ep.get_execuable()
 
-    cpu = CPU()
+    cpu = CPU(RunConfig())
     le = cpu.load(exe)
 
     cpu.run_loaded(le)
 
-    print('a')
 
 

@@ -1,5 +1,5 @@
 import traceback
-from dataclasses import dataclass
+from typing import Tuple
 
 from .Exceptions import *
 from .helpers import *
@@ -8,9 +8,9 @@ from .Registers import Registers
 from .Syscall import SyscallInterface, Syscall
 
 import typing
+
 if typing.TYPE_CHECKING:
     from . import MMU, Executable, LoadedExecutable, LoadedInstruction
-
 
 
 class CPU:
@@ -23,7 +23,7 @@ class CPU:
         self.conf = conf
 
         self.mmu = MMU(conf)
-        self.regs = Registers()
+        self.regs = Registers(conf)
         self.syscall_int = SyscallInterface()
 
     def load(self, e: 'Executable'):
@@ -48,9 +48,11 @@ class CPU:
                 self.pc += 1
                 self.__run_instruction(ins)
         except RiscemuBaseException as ex:
-            print("[CPU] excpetion caught at {}:".format(ins))
+            print(FMT_ERROR + "[CPU] excpetion caught at {}:".format(ins) + FMT_NONE)
             print("      " + ex.message())
             traceback.print_exception(type(ex), ex, ex.__traceback__)
+
+        print("Program exited with code {}".format(self.exit_code))
 
     def __run_instruction(self, ins: 'LoadedInstruction'):
         name = 'instruction_' + ins.name
@@ -276,9 +278,6 @@ class CPU:
         addr = ins.get_imm(0)
         self.pc = addr
 
-    def instruction_jr(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
-
     def instruction_jal(self, ins: 'LoadedInstruction'):
         reg = 'ra'  # default register is ra
         if len(ins.args) == 1:
@@ -305,11 +304,11 @@ class CPU:
         self.instruction_scall(ins)
 
     def instruction_ebreak(self, ins: 'LoadedInstruction'):
-        self.instruction_ebreak(ins)
+        self.instruction_sbreak(ins)
 
     def instruction_scall(self, ins: 'LoadedInstruction'):
         ASSERT_LEN(ins.args, 0)
-        syscall = Syscall(self.regs.get('a7'), self.regs)
+        syscall = Syscall(self.regs.get('a7'), self.regs, self)
         self.syscall_int.handle_syscall(syscall)
 
     def instruction_sbreak(self, ins: 'LoadedInstruction'):
@@ -317,14 +316,11 @@ class CPU:
             import code
             code.interact(local=dict(globals(), **locals()))
 
-
     def instruction_nop(self, ins: 'LoadedInstruction'):
         pass
-
 
     @staticmethod
     def all_instructions():
         for method in vars(CPU):
             if method.startswith('instruction_'):
                 yield method[12:]
-
