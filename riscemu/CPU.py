@@ -207,13 +207,25 @@ class CPU:
         INS_NOT_IMPLEMENTED(ins)
 
     def instruction_jal(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        reg = 'ra'  # default register is ra
+        if len(ins.args) == 1:
+            addr = ins.get_imm(0)
+        else:
+            ASSERT_LEN(ins.args, 2)
+            reg = ins.get_reg(0)
+            addr = ins.get_imm(1)
+        self.regs.set(reg, self.pc)
+        self.pc = addr
 
     def instruction_jalr(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        ASSERT_LEN(ins.args, 2)
+        reg = ins.get_reg(0)
+        addr = ins.get_imm(1)
+        self.regs.set(reg, self.pc)
+        self.pc = addr
 
     def instruction_ret(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        self.pc = self.regs.get('ra')
 
     def instruction_scall(self, ins: 'LoadedInstruction'):
         ASSERT_LEN(ins.args, 0)
@@ -224,7 +236,7 @@ class CPU:
         INS_NOT_IMPLEMENTED(ins)
 
     def instruction_nop(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        pass
 
     def instruction_dbg(self, ins: 'LoadedInstruction'):
         if self.conf.debug_instruction:
