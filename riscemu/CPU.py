@@ -172,25 +172,53 @@ class CPU:
         INS_NOT_IMPLEMENTED(ins)
 
     def instruction_or(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        ASSERT_LEN(ins.args, 3)
+        dst = ins.get_reg(0)
+        src1 = ins.get_reg(1)
+        src2 = ins.get_reg(2)
+        self.regs.set(
+            dst,
+            self.regs.get(src1) | self.regs.get(src2)
+        )
 
     def instruction_ori(self, ins: 'LoadedInstruction'):
         INS_NOT_IMPLEMENTED(ins)
 
     def instruction_and(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        ASSERT_LEN(ins.args, 3)
+        dst = ins.get_reg(0)
+        src1 = ins.get_reg(1)
+        src2 = ins.get_reg(2)
+        self.regs.set(
+            dst,
+            self.regs.get(src1) & self.regs.get(src2)
+        )
 
     def instruction_andi(self, ins: 'LoadedInstruction'):
         INS_NOT_IMPLEMENTED(ins)
 
     def instruction_slt(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        ASSERT_LEN(ins.args, 3)
+        dst = ins.get_reg(0)
+        src1 = ins.get_reg(1)
+        src2 = ins.get_reg(2)
+        self.regs.set(
+            dst,
+            int(self.regs.get(src1) < self.regs.get(src2))
+        )
 
     def instruction_slti(self, ins: 'LoadedInstruction'):
         INS_NOT_IMPLEMENTED(ins)
 
     def instruction_sltu(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        ASSERT_LEN(ins.args, 3)
+        dst = ins.get_reg(0)
+        src1 = ins.get_reg(1)
+        src2 = ins.get_reg(2)
+        self.regs.set(
+            dst,
+            int(to_unsigned(self.regs.get(src1)) < to_unsigned(self.regs.get(src2)))
+        )
 
     def instruction_sltiu(self, ins: 'LoadedInstruction'):
         INS_NOT_IMPLEMENTED(ins)
