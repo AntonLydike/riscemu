@@ -53,7 +53,7 @@ class InstructionMemorySection(MemorySection):
         ]
 
 
-@dataclass(frozen=True)
+@dataclass()
 class Executable:
     run_ptr: Tuple[str, int]
     sections: Dict[str, MemorySection]

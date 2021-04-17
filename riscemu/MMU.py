@@ -1,5 +1,4 @@
-from dataclasses import dataclass
-
+from .Config import RunConfig
 from .Executable import Executable, LoadedExecutable, LoadedMemorySection
 from .helpers import align_addr
 from .Exceptions import OutOfMemoryEsception
@@ -14,10 +13,11 @@ class MMU:
     binaries: List[LoadedExecutable]
     last_bin: Optional[LoadedExecutable] = None
 
-    def __init__(self):
+    def __init__(self, conf: RunConfig):
         self.sections = list()
         self.binaries = list()
         self.last_bin = None
+        self.conf = conf
 
     def load_bin(self, bin: Executable):
         if self.last_bin is None:
@@ -26,6 +26,10 @@ class MMU:
             addr = self.last_bin.size + self.last_bin.base_addr
         # align to 8 byte word
         addr = align_addr(addr)
+
+        # apply preferred stack size from config
+        if bin.stack_pref is None:
+            bin.stack_pref = self.conf.preffered_stack_size
 
         loaded_bin = LoadedExecutable(bin, addr)
 

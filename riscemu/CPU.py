@@ -4,25 +4,20 @@ from collections import defaultdict
 
 from .Exceptions import *
 from .helpers import *
+from .Config import RunConfig
 
 import typing
+
 if typing.TYPE_CHECKING:
     from . import MMU, Executable, LoadedExecutable, LoadedInstruction
 
-COLOR = True
-
-FMT_ORANGE = '\033[33m'
-FMT_GRAY = '\033[37m'
-FMT_BOLD = '\033[1m'
-FMT_NONE = '\033[0m'
-FMT_UNDERLINE = '\033[4m'
-
 
 class Registers:
-    def __init__(self):
+    def __init__(self, conf: RunConfig):
         self.vals = defaultdict(lambda: 0)
         self.last_mod = None
         self.last_access = None
+        self.conf = conf
 
     def dump(self, small=False):
         named_regs = [self.reg_repr(reg) for reg in Registers.named_registers()]
@@ -67,6 +62,8 @@ class Registers:
 
     def reg_repr(self, reg):
         txt = '{:4}=0x{:08X}'.format(reg, self.get(reg))
+        if not self.conf.color:
+            return txt
         if reg == 'fp':
             reg = 's0'
         if reg == self.last_mod:
@@ -112,14 +109,16 @@ class Registers:
     def named_registers():
         return ['zero', 'ra', 'sp', 'gp', 'tp', 'fp']
 
+
 class CPU:
-    def __init__(self):
+    def __init__(self, conf: RunConfig):
         from . import MMU, Executable, LoadedExecutable, LoadedInstruction
 
-        self.mmu = MMU()
+        self.mmu = MMU(conf)
         self.regs = Registers()
         self.pc = 0
         self.exit = False
+        self.conf = conf
 
         self.syscall_int = SyscallInterface()
 
@@ -289,7 +288,6 @@ class CPU:
         if self.regs.get(reg1) < self.regs.get(reg2):
             self.pc = dest
 
-
     def instruction_bge(self, ins: 'LoadedInstruction'):
         INS_NOT_IMPLEMENTED(ins)
 
@@ -325,8 +323,9 @@ class CPU:
         INS_NOT_IMPLEMENTED(ins)
 
     def instruction_dbg(self, ins: 'LoadedInstruction'):
-        import code
-        code.interact(local=dict(globals(), **locals()))
+        if self.conf.debug_instruction:
+            import code
+            code.interact(local=dict(globals(), **locals()))
 
     @staticmethod
     def all_instructions():
@@ -345,5 +344,3 @@ class SyscallInterface:
     def handle_syscall(self, scall: Syscall):
         print("syscall {} received!".format(scall.id))
         scall.registers.dump_reg_a()
-
-

@@ -36,3 +36,8 @@ def int_from_bytes(bytes):
         return num - 2 ** (8 * len(bytes))
     return num
 
+FMT_ORANGE = '\033[33m'
+FMT_GRAY = '\033[37m'
+FMT_BOLD = '\033[1m'
+FMT_NONE = '\033[0m'
+FMT_UNDERLINE = '\033[4m'

@@ -11,3 +11,5 @@ from .ExecutableParser import ExecutableParser
 from .MMU import MMU
 
 from .CPU import CPU, Registers, Syscall, SyscallInterface
+
+from .Config import RunConfig
