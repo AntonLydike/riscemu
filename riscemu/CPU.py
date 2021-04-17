@@ -102,7 +102,7 @@ class CPU:
             reg = ins.get_reg(1)
             imm = ins.get_imm(2)
         addr = self.regs.get(reg) + imm
-        self.mmu.write(addr, 4, int_to_bytes(self.regs.get(reg), 4))
+        self.mmu.write(addr, 4, int_to_bytes(self.regs.get(src), 4))
 
     def instruction_sll(self, ins: 'LoadedInstruction'):
         INS_NOT_IMPLEMENTED(ins)
@@ -123,6 +123,7 @@ class CPU:
         INS_NOT_IMPLEMENTED(ins)
 
     def instruction_add(self, ins: 'LoadedInstruction'):
+        ASSERT_LEN(ins.args, 3)
         dst = ins.get_reg(0)
         src1 = ins.get_reg(1)
         src2 = ins.get_reg(2)
@@ -142,7 +143,6 @@ class CPU:
         )
 
     def instruction_sub(self, ins: 'LoadedInstruction'):
-
         INS_NOT_IMPLEMENTED(ins)
 
     def instruction_lui(self, ins: 'LoadedInstruction'):
