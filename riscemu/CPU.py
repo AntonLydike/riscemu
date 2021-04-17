@@ -17,6 +17,7 @@ class CPU:
     def __init__(self, conf: RunConfig):
         from . import MMU
         self.pc = 0
+        self.cycle = 0
         self.exit = False
         self.exit_code = 0
         self.conf = conf
@@ -42,6 +43,7 @@ class CPU:
         ins = None
         try:
             while not self.exit:
+                self.cycle += 1
                 ins = self.mmu.read_ins(self.pc)
                 self.pc += 1
                 self.__run_instruction(ins)
@@ -140,6 +142,7 @@ class CPU:
         )
 
     def instruction_sub(self, ins: 'LoadedInstruction'):
+
         INS_NOT_IMPLEMENTED(ins)
 
     def instruction_lui(self, ins: 'LoadedInstruction'):
@@ -227,7 +230,9 @@ class CPU:
             self.pc = dest
 
     def instruction_j(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        ASSERT_LEN(ins.args, 1)
+        addr = ins.get_imm(0)
+        self.pc = addr
 
     def instruction_jr(self, ins: 'LoadedInstruction'):
         INS_NOT_IMPLEMENTED(ins)
