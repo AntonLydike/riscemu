@@ -111,22 +111,64 @@ class CPU:
         self.mmu.write(addr, 4, int_to_bytes(self.regs.get(rd), 4))
 
     def instruction_sll(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        ASSERT_LEN(ins.args, 3)
+        dst = ins.get_reg(0)
+        src1 = ins.get_reg(1)
+        src2 = ins.get_reg(2)
+        self.regs.set(
+            dst,
+            to_signed(to_unsigned(self.regs.get(src1)) << (self.regs.get(src2) & 0b11111))
+        )
 
     def instruction_slli(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        ASSERT_LEN(ins.args, 3)
+        dst = ins.get_reg(0)
+        src1 = ins.get_reg(1)
+        imm = ins.get_imm(2)
+        self.regs.set(
+            dst,
+            to_signed(to_unsigned(self.regs.get(src1)) << (imm & 0b11111))
+        )
 
     def instruction_srl(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        ASSERT_LEN(ins.args, 3)
+        dst = ins.get_reg(0)
+        src1 = ins.get_reg(1)
+        src2 = ins.get_reg(2)
+        self.regs.set(
+            dst,
+            to_signed(to_unsigned(self.regs.get(src1)) >> (self.regs.get(src2) & 0b11111))
+        )
 
     def instruction_srli(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        ASSERT_LEN(ins.args, 3)
+        dst = ins.get_reg(0)
+        src1 = ins.get_reg(1)
+        imm = ins.get_imm(2)
+        self.regs.set(
+            dst,
+            to_signed(to_unsigned(self.regs.get(src1)) >> (imm & 0b11111))
+        )
 
     def instruction_sra(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        ASSERT_LEN(ins.args, 3)
+        dst = ins.get_reg(0)
+        src1 = ins.get_reg(1)
+        src2 = ins.get_reg(2)
+        self.regs.set(
+            dst,
+            self.regs.get(src1) >> (self.regs.get(src2) & 0b11111)
+        )
 
     def instruction_srai(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        ASSERT_LEN(ins.args, 3)
+        dst = ins.get_reg(0)
+        src1 = ins.get_reg(1)
+        imm = ins.get_imm(2)
+        self.regs.set(
+            dst,
+            self.regs.get(src1) >> (imm & 0b11111)
+        )
 
     def instruction_add(self, ins: 'LoadedInstruction'):
         ASSERT_LEN(ins.args, 3)
