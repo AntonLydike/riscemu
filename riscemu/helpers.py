@@ -43,6 +43,7 @@ def int_from_bytes(bytes, unsigned=False):
 
 # Colors
 
+FMT_RED = '\033[31m'
 FMT_ORANGE = '\033[33m'
 FMT_GRAY = '\033[37m'
 FMT_CYAN = '\033[36m'
@@ -51,3 +52,5 @@ FMT_BOLD = '\033[1m'
 FMT_MAGENTA = '\033[35m'
 FMT_NONE = '\033[0m'
 FMT_UNDERLINE = '\033[4m'
+
+FMT_ERROR = FMT_RED + FMT_BOLD
