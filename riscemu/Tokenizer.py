@@ -2,7 +2,7 @@ import re
 from enum import IntEnum
 from typing import List
 
-from . import CPU, Registers
+from .CPU import CPU, Registers
 
 REGISTERS = list(Registers.all_registers())
 
@@ -105,10 +105,14 @@ class RiscVInput:
         return self.content[at:at + size]
 
     def peek_one_of(self, options: List[str]):
+        longest_peek = 0
+        ret = False
         for text in options:
             if self.peek(text=text):
-                return text
-        return False
+                if len(text) > longest_peek:
+                    longest_peek = len(text)
+                    ret = text
+        return ret
 
     def consume(self, size: int = 1, regex: re.Pattern = None, text: str = None, regex_group: int = 0):
         at = self.pos
@@ -138,10 +142,15 @@ class RiscVInput:
         return self.content[at:at + size]
 
     def consume_one_of(self, options: List[str]):
+        longest_peek = 0
+        ret = False
         for text in options:
             if self.peek(text=text):
-                return self.consume(text=text)
-        return False
+                if len(text) > longest_peek:
+                    longest_peek = len(text)
+                    ret = text
+        self.consume(text=ret)
+        return ret
 
     def seek_newline(self):
         return self.consume(regex=REG_WHITESPACE_UNTIL_NEWLINE, regex_group=1)

@@ -1,5 +1,13 @@
+import traceback
 from dataclasses import dataclass
 from collections import defaultdict
+
+from .Exceptions import *
+from .helpers import *
+
+import typing
+if typing.TYPE_CHECKING:
+    from . import MMU, Executable, LoadedExecutable, LoadedInstruction
 
 COLOR = True
 
@@ -11,11 +19,10 @@ FMT_UNDERLINE = '\033[4m'
 
 
 class Registers:
-    def __init__(self, cpu: 'CPU'):
-        self.cpu = cpu
+    def __init__(self):
         self.vals = defaultdict(lambda: 0)
-        self.last_mod = 'ft0'
-        self.last_access = 'a3'
+        self.last_mod = None
+        self.last_access = None
 
     def dump(self, small=False):
         named_regs = [self.reg_repr(reg) for reg in Registers.named_registers()]
@@ -55,6 +62,9 @@ class Registers:
             print("\t" + " ".join(line))
         print(")")
 
+    def dump_reg_a(self):
+        print("Registers[a]:" + " ".join(self.reg_repr('a{}'.format(i)) for i in range(8)))
+
     def reg_repr(self, reg):
         txt = '{:4}=0x{:08X}'.format(reg, self.get(reg))
         if reg == 'fp':
@@ -74,18 +84,16 @@ class Registers:
             print("[Registers.set] trying to set read-only register: {}".format(reg))
             return False
         if reg not in Registers.all_registers():
-            print("[Registers.set] invalid register name: {}".format(reg))
-            return False
+            raise InvalidRegisterException(reg)
         # replace fp register with s1, as these are the same register
         if reg == 'fp':
             reg = 's1'
         self.last_mod = reg
-        setattr(self, reg, val)
+        self.vals[reg] = val
 
     def get(self, reg):
         if not reg in Registers.all_registers():
-            print("[Registers.get] invalid register name: {}".format(reg))
-            return 0
+            raise InvalidRegisterException(reg)
         if reg == 'fp':
             reg = 's0'
         return self.vals[reg]
@@ -105,134 +113,220 @@ class Registers:
         return ['zero', 'ra', 'sp', 'gp', 'tp', 'fp']
 
 class CPU:
-    def instruction_lb(self, instruction):
-        pass
+    def __init__(self):
+        from . import MMU, Executable, LoadedExecutable, LoadedInstruction
 
-    def instruction_lh(self, instruction):
-        pass
+        self.mmu = MMU()
+        self.regs = Registers()
+        self.pc = 0
+        self.exit = False
 
-    def instruction_lw(self, instruction):
-        pass
+        self.syscall_int = SyscallInterface()
 
-    def instruction_lbu(self, instruction):
-        pass
+    def load(self, e: 'Executable'):
+        return self.mmu.load_bin(e)
 
-    def instruction_lhu(self, instruction):
-        pass
+    def run_loaded(self, le: 'LoadedExecutable'):
+        self.pc = le.run_ptr
+        sp, hp = le.stack_heap
+        self.regs.set('sp', sp)
+        self.regs.set('a0', hp)  # set a0 to point to the heap
 
-    def instruction_sb(self, instruction):
-        pass
+        self.__run()
 
-    def instruction_sh(self, instruction):
-        pass
+    def __run(self):
+        if self.pc <= 0:
+            return False
+        ins = None
+        try:
+            while not self.exit:
+                ins = self.mmu.read_ins(self.pc)
+                self.pc += 1
+                self.__run_instruction(ins)
+        except RiscemuBaseException as ex:
+            print("[CPU] excpetion caught at {}:".format(ins))
+            print("      " + ex.message())
+            traceback.print_exception(type(ex), ex, ex.__traceback__)
 
-    def instruction_sw(self, instruction):
-        pass
+    def __run_instruction(self, ins: 'LoadedInstruction'):
+        name = 'instruction_' + ins.name
+        if hasattr(self, name):
+            getattr(self, name)(ins)
+        else:
+            raise RuntimeError("Unknown instruction: {}".format(ins))
 
-    def instruction_sll(self, instruction):
-        pass
+    def instruction_lb(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
 
-    def instruction_slli(self, instruction):
-        pass
+    def instruction_lh(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
 
-    def instruction_srl(self, instruction):
-        pass
+    def instruction_lw(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
 
-    def instruction_srli(self, instruction):
-        pass
+    def instruction_lbu(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
 
-    def instruction_sra(self, instruction):
-        pass
+    def instruction_lhu(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
 
-    def instruction_srai(self, instruction):
-        pass
+    def instruction_sb(self, ins: 'LoadedInstruction'):
+        src = ins.get_reg(0)
+        if len(ins.args) == 2:
+            reg, imm = ins.get_imm_reg(1)
+        else:
+            reg = ins.get_reg(1)
+            imm = ins.get_imm(2)
+        addr = self.regs.get(reg) + imm
+        self.mmu.write(addr, 1, int_to_bytes(self.regs.get(reg), 1))
 
-    def instruction_add(self, instruction):
-        pass
+    def instruction_sh(self, ins: 'LoadedInstruction'):
+        src = ins.get_reg(0)
+        if len(ins.args) == 2:
+            reg, imm = ins.get_imm_reg(1)
+        else:
+            reg = ins.get_reg(1)
+            imm = ins.get_imm(2)
+        addr = self.regs.get(reg) + imm
+        self.mmu.write(addr, 2, int_to_bytes(self.regs.get(reg), 2))
 
-    def instruction_addi(self, instruction):
-        pass
+    def instruction_sw(self, ins: 'LoadedInstruction'):
+        src = ins.get_reg(0)
+        if len(ins.args) == 2:
+            imm, reg = ins.get_imm_reg(1)
+        else:
+            reg = ins.get_reg(1)
+            imm = ins.get_imm(2)
+        addr = self.regs.get(reg) + imm
+        self.mmu.write(addr, 4, int_to_bytes(self.regs.get(reg), 4))
 
-    def instruction_sub(self, instruction):
-        pass
+    def instruction_sll(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
 
-    def instruction_lui(self, instruction):
-        pass
+    def instruction_slli(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
 
-    def instruction_auipc(self, instruction):
-        pass
+    def instruction_srl(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
 
-    def instruction_xor(self, instruction):
-        pass
+    def instruction_srli(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
 
-    def instruction_xori(self, instruction):
-        pass
+    def instruction_sra(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
 
-    def instruction_or(self, instruction):
-        pass
+    def instruction_srai(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
 
-    def instruction_ori(self, instruction):
-        pass
+    def instruction_add(self, ins: 'LoadedInstruction'):
+        dst = ins.get_reg(0)
+        src1 = ins.get_reg(1)
+        src2 = ins.get_reg(2)
+        self.regs.set(
+            dst,
+            self.regs.get(src1) + self.regs.get(src2)
+        )
 
-    def instruction_and(self, instruction):
-        pass
+    def instruction_addi(self, ins: 'LoadedInstruction'):
+        dst = ins.get_reg(0)
+        src1 = ins.get_reg(1)
+        imm = ins.get_imm(2)
+        self.regs.set(
+            dst,
+            self.regs.get(src1) + imm
+        )
 
-    def instruction_andi(self, instruction):
-        pass
+    def instruction_sub(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
 
-    def instruction_slt(self, instruction):
-        pass
+    def instruction_lui(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
 
-    def instruction_slti(self, instruction):
-        pass
+    def instruction_auipc(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
 
-    def instruction_sltu(self, instruction):
-        pass
+    def instruction_xor(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
 
-    def instruction_sltiu(self, instruction):
-        pass
+    def instruction_xori(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
 
-    def instruction_beq(self, instruction):
-        pass
+    def instruction_or(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
 
-    def instruction_bne(self, instruction):
-        pass
+    def instruction_ori(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
 
-    def instruction_blt(self, instruction):
-        pass
+    def instruction_and(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
 
-    def instruction_bge(self, instruction):
-        pass
+    def instruction_andi(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
 
-    def instruction_bltu(self, instruction):
-        pass
+    def instruction_slt(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
 
-    def instruction_bgeu(self, instruction):
-        pass
+    def instruction_slti(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
 
-    def instruction_j(self, instruction):
-        pass
+    def instruction_sltu(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
 
-    def instruction_jr(self, instruction):
-        pass
+    def instruction_sltiu(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
 
-    def instruction_jal(self, instruction):
-        pass
+    def instruction_beq(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
 
-    def instruction_jalr(self, instruction):
-        pass
+    def instruction_bne(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
 
-    def instruction_ret(self, instruction):
-        pass
+    def instruction_blt(self, ins: 'LoadedInstruction'):
+        ASSERT_LEN(ins.args, 3)
+        reg1 = ins.get_reg(0)
+        reg2 = ins.get_reg(1)
+        dest = ins.get_imm(2)
+        if self.regs.get(reg1) < self.regs.get(reg2):
+            self.pc = dest
 
-    def instruction_scall(self, instruction):
-        pass
 
-    def instruction_break(self, instruction):
-        pass
+    def instruction_bge(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
 
-    def instruction_nop(self, instruction):
-        pass
+    def instruction_bltu(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
+
+    def instruction_bgeu(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
+
+    def instruction_j(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
+
+    def instruction_jr(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
+
+    def instruction_jal(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
+
+    def instruction_jalr(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
+
+    def instruction_ret(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
+
+    def instruction_scall(self, ins: 'LoadedInstruction'):
+        syscall = Syscall(self.regs.get('a7'), self.regs)
+        self.syscall_int.handle_syscall(syscall)
+
+    def instruction_break(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
+
+    def instruction_nop(self, ins: 'LoadedInstruction'):
+        INS_NOT_IMPLEMENTED(ins)
+
+    def instruction_dbg(self, ins: 'LoadedInstruction'):
+        import code
+        code.interact(local=dict(globals(), **locals()))
 
     @staticmethod
     def all_instructions():
@@ -249,8 +343,7 @@ class Syscall:
 
 class SyscallInterface:
     def handle_syscall(self, scall: Syscall):
-        pass
+        print("syscall {} received!".format(scall.id))
+        scall.registers.dump_reg_a()
 
 
-a = Registers(None)
-a.dump()
