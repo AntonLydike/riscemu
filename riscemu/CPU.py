@@ -61,50 +61,54 @@ class CPU:
         else:
             raise RuntimeError("Unknown instruction: {}".format(ins))
 
+    def parse_mem_ins(self, ins: 'LoadedInstruction') -> Tuple[str, int]:
+        """
+        parses both rd, rs1, imm and rd, imm(rs1) arguments and returns (rd, imm+rs1)
+        (so a register and address tuple for memory instructions)
+        """
+        if len(ins.args) == 3:
+            # handle rd, rs1, imm
+            rs1 = ins.get_reg(1)
+            imm = ins.get_imm(2)
+        else:
+            ASSERT_LEN(ins.args, 2)
+            ASSERT_IN("(", ins.args[1])
+            imm, rs1 = ins.get_imm_reg(1)
+            # handle rd, imm(rs1)
+        rd = ins.get_reg(0)
+        return rd, self.regs.get(rs1) + imm
+
     def instruction_lb(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        rd, addr = self.parse_mem_ins(ins)
+        self.regs.set(rd, int_from_bytes(self.mmu.read(addr, 1)))
 
     def instruction_lh(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        rd, addr = self.parse_mem_ins(ins)
+        self.regs.set(rd, int_from_bytes(self.mmu.read(addr, 2)))
 
     def instruction_lw(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        rd, addr = self.parse_mem_ins(ins)
+        self.regs.set(rd, int_from_bytes(self.mmu.read(addr, 4)))
 
     def instruction_lbu(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        rd, addr = self.parse_mem_ins(ins)
+        self.regs.set(rd, int_from_bytes(self.mmu.read(addr, 1), unsigned=True))
 
     def instruction_lhu(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        rd, addr = self.parse_mem_ins(ins)
+        self.regs.set(rd, int_from_bytes(self.mmu.read(addr, 2), unsigned=True))
 
     def instruction_sb(self, ins: 'LoadedInstruction'):
-        src = ins.get_reg(0)
-        if len(ins.args) == 2:
-            reg, imm = ins.get_imm_reg(1)
-        else:
-            reg = ins.get_reg(1)
-            imm = ins.get_imm(2)
-        addr = self.regs.get(reg) + imm
-        self.mmu.write(addr, 1, int_to_bytes(self.regs.get(reg), 1))
+        rd, addr = self.parse_mem_ins(ins)
+        self.mmu.write(addr, 1, int_to_bytes(self.regs.get(rd), 1))
 
     def instruction_sh(self, ins: 'LoadedInstruction'):
-        src = ins.get_reg(0)
-        if len(ins.args) == 2:
-            reg, imm = ins.get_imm_reg(1)
-        else:
-            reg = ins.get_reg(1)
-            imm = ins.get_imm(2)
-        addr = self.regs.get(reg) + imm
-        self.mmu.write(addr, 2, int_to_bytes(self.regs.get(reg), 2))
+        rd, addr = self.parse_mem_ins(ins)
+        self.mmu.write(addr, 2, int_to_bytes(self.regs.get(rd), 2))
 
     def instruction_sw(self, ins: 'LoadedInstruction'):
-        src = ins.get_reg(0)
-        if len(ins.args) == 2:
-            imm, reg = ins.get_imm_reg(1)
-        else:
-            reg = ins.get_reg(1)
-            imm = ins.get_imm(2)
-        addr = self.regs.get(reg) + imm
-        self.mmu.write(addr, 4, int_to_bytes(self.regs.get(src), 4))
+        rd, addr = self.parse_mem_ins(ins)
+        self.mmu.write(addr, 4, int_to_bytes(self.regs.get(rd), 4))
 
     def instruction_sll(self, ins: 'LoadedInstruction'):
         INS_NOT_IMPLEMENTED(ins)
