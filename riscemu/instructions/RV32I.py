@@ -127,7 +127,10 @@ class RV32I(InstructionSet):
         )
 
     def instruction_lui(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        ASSERT_LEN(ins.args, 2)
+        reg = ins.get_reg(0)
+        imm = ins.get_imm(1)
+        self.regs.set(reg, imm << 12)
 
     def instruction_auipc(self, ins: 'LoadedInstruction'):
         INS_NOT_IMPLEMENTED(ins)
