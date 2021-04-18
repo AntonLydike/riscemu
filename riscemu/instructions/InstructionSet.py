@@ -8,8 +8,7 @@ class InstructionSet(ABC):
     """
     Represents a collection of instructions
     """
-    def __init__(self, name):
-        self.name = name
+    def __init__(self):
         self.cpu: typing.Optional['CPU'] = None
         self.mmu: typing.Optional['MMU'] = None
         self.regs: typing.Optional['Registers'] = None
@@ -41,6 +40,6 @@ class InstructionSet(ABC):
 
     def __repr__(self):
         return "InstructionSet[{}] with {} instructions".format(
-            self.name,
+            self.__class__.__name__,
             len(list(self.get_instructions()))
         )

@@ -1,7 +1,7 @@
 if __name__ == '__main__':
     from . import *
     from .helpers import *
-    from .Instructions.RV32I import RV32I
+    from .instructions import RV32I, RVM
     import argparse
     import sys
 
@@ -61,7 +61,7 @@ if __name__ == '__main__':
     FMT_PRINT = FMT_BOLD + FMT_MAGENTA
 
     try:
-        cpu = CPU(cfg, [RV32I()])
+        cpu = CPU(cfg, [RV32I, RVM])
         loaded_exe = None
         for file in args.files:
             tk = cpu.get_tokenizer(RiscVInput.from_file(file))

@@ -2,10 +2,8 @@ from .InstructionSet import *
 
 from ..helpers import int_from_bytes, int_to_bytes, to_unsigned, to_signed
 
+
 class RV32I(InstructionSet):
-    def __init__(self):
-        super().__init__('RV32I')
-        
     def instruction_lb(self, ins: 'LoadedInstruction'):
         rd, addr = self.parse_mem_ins(ins)
         self.regs.set(rd, int_from_bytes(self.mmu.read(addr, 1)))

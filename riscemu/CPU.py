@@ -1,5 +1,5 @@
 import traceback
-from typing import Tuple, List, Dict, Callable
+from typing import Tuple, List, Dict, Callable, Type
 
 from .Tokenizer import RiscVTokenizer
 
@@ -14,11 +14,11 @@ import typing
 
 if typing.TYPE_CHECKING:
     from . import Executable, LoadedExecutable, LoadedInstruction
-    from .Instructions.InstructionSet import InstructionSet
+    from .instructions.InstructionSet import InstructionSet
 
 
 class CPU:
-    def __init__(self, conf: RunConfig, instruction_sets: List['InstructionSet']):
+    def __init__(self, conf: RunConfig, instruction_sets: List[Type['InstructionSet']]):
         # setup CPU states
         self.pc = 0
         self.cycle = 0
@@ -32,10 +32,12 @@ class CPU:
         self.syscall_int = SyscallInterface()
 
         # load all instruction sets
-        self.sets = instruction_sets
+        self.instruction_sets: List['InstructionSet'] = list()
         self.instructions: Dict[str, Callable[[LoadedInstruction], None]] = dict()
-        for ins_set in instruction_sets:
+        for set_class in instruction_sets:
+            ins_set = set_class()
             self.instructions.update(ins_set.load(self))
+            self.instruction_sets.append(ins_set)
 
         # provide global syscall symbols if option is set
         if conf.include_scall_symbols:
