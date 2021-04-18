@@ -2,12 +2,7 @@ import re
 from enum import IntEnum
 from typing import List
 
-from .CPU import CPU, Registers
 from .Exceptions import ParseException
-
-REGISTERS = list(Registers.all_registers())
-
-INSTRUCTIONS = list(CPU.all_instructions())
 
 PSEUDO_OPS = [
     '.asciiz',
@@ -245,10 +240,11 @@ class RiscVPseudoOpToken(RiscVToken):
 
 
 class RiscVTokenizer:
-    def __init__(self, input: RiscVInput):
+    def __init__(self, input: RiscVInput, instructions: List[str]):
         self.input = input
         self.tokens: List[RiscVToken] = []
         self.name = input.name
+        self.instructions = instructions
 
     def tokenize(self):
         while self.input.has_next():
@@ -268,7 +264,7 @@ class RiscVTokenizer:
                 self.parse_comment()
 
             # must be instruction
-            elif self.input.peek_one_of(INSTRUCTIONS):
+            elif self.input.peek_one_of(self.instructions):
                 self.parse_instruction()
             else:
                 token = self.input.peek(size=5)
@@ -295,7 +291,7 @@ class RiscVTokenizer:
                 self.input.context()))
 
     def parse_instruction(self):
-        ins = self.input.consume_one_of(INSTRUCTIONS)
+        ins = self.input.consume_one_of(self.instructions)
         args = []
         self.input.consume_whitespace(linebreak=False)
         while self.input.peek(regex=REG_VALID_ARGUMENT) and len(args) < 3:

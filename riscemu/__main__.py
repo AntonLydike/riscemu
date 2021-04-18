@@ -1,6 +1,7 @@
 if __name__ == '__main__':
     from . import *
     from .helpers import *
+    from .Instructions.RV32I import RV32I
     import argparse
     import sys
 
@@ -60,10 +61,10 @@ if __name__ == '__main__':
     FMT_PRINT = FMT_BOLD + FMT_MAGENTA
 
     try:
-        cpu = CPU(cfg)
+        cpu = CPU(cfg, [RV32I()])
         loaded_exe = None
         for file in args.files:
-            tk = RiscVTokenizer(RiscVInput.from_file(file))
+            tk = cpu.get_tokenizer(RiscVInput.from_file(file))
             tk.tokenize()
             loaded_exe = cpu.load(ExecutableParser(tk).parse())
         # run the last loaded executable
