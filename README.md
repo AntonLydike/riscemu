@@ -53,6 +53,7 @@ If multiple files are specified, all are loaded into memeory, but only the last 
 later, maybe the `_init` section of each binary is executed before the main loop starts? 
 
 ## Debugging
+Debugging is done using the `ebreak` (formerly `sbreak`) instruction, which will launch a debugging session if encountered.
 See [docs/debugging.md](docs/debugging.md) for more info.
 
 ![debuggin the fibs program](docs/debug-session.png)
