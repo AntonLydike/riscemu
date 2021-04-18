@@ -6,15 +6,15 @@ from .Exceptions import InvalidRegisterException
 class Registers:
     def __init__(self, conf: RunConfig):
         self.vals = defaultdict(lambda: 0)
-        self.last_mod = None
-        self.last_access = None
+        self.last_set = None
+        self.last_read = None
         self.conf = conf
 
-    def dump(self, small=False):
+    def dump(self, full=False):
         named_regs = [self.reg_repr(reg) for reg in Registers.named_registers()]
 
         lines = [[] for i in range(12)]
-        if small:
+        if not full:
             regs = [('a', 8), ('s', 12), ('t', 7)]
         else:
             regs = [
@@ -37,7 +37,7 @@ class Registers:
             FMT_ORANGE + FMT_UNDERLINE + 'read' + FMT_NONE,
             FMT_ORANGE + FMT_BOLD + 'written' + FMT_NONE
         ))
-        if small:
+        if not full:
             print("\t" + " ".join(named_regs[0:3]))
             print("\t" + " ".join(named_regs[3:]))
             print("\t" + "--------------- " * 3)
@@ -52,20 +52,20 @@ class Registers:
         print("Registers[a]:" + " ".join(self.reg_repr('a{}'.format(i)) for i in range(8)))
 
     def reg_repr(self, reg):
-        txt = '{:4}=0x{:08X}'.format(reg, self.get(reg))
+        txt = '{:4}=0x{:08X}'.format(reg, self.get(reg, False))
         if reg == 'fp':
             reg = 's0'
-        if reg == self.last_mod:
+        if reg == self.last_set:
             return FMT_ORANGE + FMT_BOLD + txt + FMT_NONE
-        if reg == self.last_access:
+        if reg == self.last_read:
             return FMT_ORANGE + FMT_UNDERLINE + txt + FMT_NONE
         if reg == 'zero':
             return txt
-        if self.get(reg) == 0 and reg not in Registers.named_registers():
+        if self.get(reg, False) == 0 and reg not in Registers.named_registers():
             return FMT_GRAY + txt + FMT_NONE
         return txt
 
-    def set(self, reg, val):
+    def set(self, reg, val, mark_set=True):
         if reg == 'zero':
             print("[Registers.set] trying to set read-only register: {}".format(reg))
             return False
@@ -74,15 +74,17 @@ class Registers:
         # replace fp register with s1, as these are the same register
         if reg == 'fp':
             reg = 's1'
-        self.last_mod = reg
+        if mark_set:
+            self.last_set = reg
         self.vals[reg] = val
 
-    def get(self, reg):
-        if not reg in Registers.all_registers():
+    def get(self, reg, mark_read=True):
+        if reg not in Registers.all_registers():
             raise InvalidRegisterException(reg)
         if reg == 'fp':
             reg = 's0'
-        self.last_access = reg
+        if mark_read:
+            self.last_read = reg
         return self.vals[reg]
 
     @staticmethod

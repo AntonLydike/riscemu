@@ -12,6 +12,7 @@ def launch_debug_session(cpu: 'CPU', mmu: 'MMU', reg: 'Registers', prompt=""):
 
     # setup some aliases
     registers = reg
+    regs = reg
     memory = mmu
     mem = mmu
     syscall_interface = cpu.syscall_int
