@@ -84,6 +84,7 @@ class Registers:
             raise InvalidRegisterException(reg)
         if reg == 'fp':
             reg = 's0'
+        self.last_access = reg
         return self.vals[reg]
 
     @staticmethod
