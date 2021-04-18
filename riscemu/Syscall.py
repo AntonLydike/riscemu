@@ -98,7 +98,7 @@ class SyscallInterface:
 
         data = scall.cpu.mmu.read(addr, size)
 
-        if not isinstance(str, bytearray):
+        if not isinstance(data, bytearray):
             print(FMT_SYSCALL + '[Syscall] write: writing from .text region not supported.' + FMT_NONE)
             return scall.ret(-1)
 
