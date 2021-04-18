@@ -1,6 +1,7 @@
 from abc import abstractmethod
 from .colors import *
 
+
 class RiscemuBaseException(BaseException):
     @abstractmethod
     def message(self):
@@ -48,6 +49,7 @@ class LinkerException(RiscemuBaseException):
     def __init__(self, msg, data):
         self.msg = msg
         self.data = data
+
     def message(self):
         return FMT_PARSE + "{}(\"{}\", data={})".format(self.__class__.__name__, self.msg, self.data) + FMT_NONE
 
@@ -116,7 +118,6 @@ class InvalidSyscallException(RiscemuBaseException):
             self.__class__.__name__,
             self.scall
         ) + FMT_NONE
-
 
 
 def INS_NOT_IMPLEMENTED(ins):
