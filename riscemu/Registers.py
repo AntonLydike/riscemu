@@ -53,8 +53,6 @@ class Registers:
 
     def reg_repr(self, reg):
         txt = '{:4}=0x{:08X}'.format(reg, self.get(reg))
-        if not self.conf.color:
-            return txt
         if reg == 'fp':
             reg = 's0'
         if reg == self.last_mod:

@@ -4,36 +4,60 @@ if __name__ == '__main__':
     import argparse
     import sys
 
+
+    class OptionStringAction(argparse.Action):
+        def __init__(self, option_strings, dest, keys=None, **kwargs):
+            if keys is None:
+                raise ValueError('must define "keys" argument')
+            if isinstance(keys, dict):
+                keys_d = keys
+            elif isinstance(keys, (list, tuple)):
+                keys_d = {}
+                for k in keys:
+                    if isinstance(k, tuple):
+                        k, v = k
+                    else:
+                        v = False
+                    keys_d[k] = v
+            else:
+                keys_d = dict()
+            super().__init__(option_strings, dest, default=keys_d, **kwargs)
+            self.keys = keys_d
+
+        def __call__(self, parser, namespace, values, option_string=None):
+            d = {}
+            d.update(self.keys)
+            for x in values.split(','):
+                if x in self.keys:
+                    d[x] = True
+            setattr(namespace, self.dest, d)
+
+
     parser = argparse.ArgumentParser(description='RISC-V Userspace parser and emulator', prog='riscemu')
     parser.add_argument('files', metavar='file.asm', type=str, nargs='+',
                         help='The assembly files to load, the last one will be run')
 
-    # RunConfig parameters
-    parser.add_argument('--no-color', type=bool, help='no colored output', default=False,
-                        nargs='?')
+    parser.add_argument('--options', '-o', action=OptionStringAction,
+                        keys=('disable_debug', 'no_syscall_symbols', 'fail_on_ex'))
+
+    parser.add_argument('--syscall-opts', '-so', action=OptionStringAction,
+                        keys=('fs_access', 'disable_input'))
+
     parser.add_argument('--default_stack_size', type=int, help='Default stack size of loaded programs', default=None,
                         metavar='default-stack-size', nargs='?')
-    parser.add_argument('--debug_instruction', type=bool, default=True, metavar='debug-instruction',
-                        help='Switches to an interactive python interpreter when ebreak/sbreak instruction '
-                             'is encountered. Otherwise these instructions are treated as nop.', nargs='?')
-
-    parser.add_argument('--print_tokens', metavar='print-tokens', type=bool, help='Print tokens after tokenization',
-                        default=False, nargs='?')
 
     args = parser.parse_args()
 
-
     cfg = RunConfig(
-        color=not args.no_color,
         preffered_stack_size=args.default_stack_size,
-        debug_instruction=args.debug_instruction
+        debug_instruction=not args.options['disable_debug'],
+        include_scall_symbols=not args.options['no_syscall_symbols'],
+        debug_on_exception=not args.options['fail_on_ex'],
+        scall_fs=args.syscall_opts['fs_access'],
+        scall_input=not args.syscall_opts['disable_input']
     )
 
-    if cfg.color:
-        FMT_PRINT = FMT_BOLD + FMT_MAGENTA
-    else:
-        FMT_NONE = ""
-        FMT_PRINT = ""
+    FMT_PRINT = FMT_BOLD + FMT_MAGENTA
 
     try:
         cpu = CPU(cfg)
@@ -41,14 +65,7 @@ if __name__ == '__main__':
         for file in args.files:
             tk = RiscVTokenizer(RiscVInput.from_file(file))
             tk.tokenize()
-
-            if args.print_tokens:
-                print(FMT_PRINT + "Tokens:" + FMT_NONE)
-                for token in tk.tokens:
-                    print(token)
-
             loaded_exe = cpu.load(ExecutableParser(tk).parse())
-
         # run the last loaded executable
         cpu.run_loaded(loaded_exe)
     except RiscemuBaseException as e:
