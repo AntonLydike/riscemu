@@ -112,6 +112,9 @@ class ExecutableParser:
         val = parse_numeric_argument(op.args[1])
         self.symbols[name] = ('_static_', val)
 
+    def op_align(self, op: 'RiscVPseudoOpToken'):
+        pass
+
     ## Section handler code
     def set_sec(self, name: str, flags: MemoryFlags, cls=MemorySection):
         if name not in self.sections:
