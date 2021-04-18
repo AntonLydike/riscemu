@@ -1,4 +1,4 @@
-from .Exceptions import ASSERT_NOT_NULL, ASSERT_LEN, ASSERT_IN, ASSERT_EQ, ASSERT_NOT_IN
+from .Exceptions import *
 
 from .Tokenizer import RiscVToken, RiscVInput, RiscVTokenizer, RiscVInstructionToken, RiscVSymbolToken, \
     RiscVPseudoOpToken, TokenType

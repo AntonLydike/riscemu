@@ -36,7 +36,7 @@ class ExecutableParser:
             start_ptr = self.symbols['_start']
         elif 'main' in self.symbols:
             start_ptr = self.symbols['main']
-        return Executable(start_ptr, self.sections, self.symbols, self.stack_pref, self.tokenizer.name)
+        return Executable(start_ptr, self.sections, self.symbols, self.stack_pref, self.globals, self.tokenizer.name)
 
     def parse_instruction(self, ins: 'RiscVInstructionToken'):
         if self.active_section is None:
@@ -103,7 +103,7 @@ class ExecutableParser:
 
     def op_global(self, op: 'RiscVPseudoOpToken'):
         ASSERT_LEN(op.args, 1)
-        name = op.args[1]
+        name = op.args[0]
         self.globals.append(name)
 
     def op_set(self, op: 'RiscVPseudoOpToken'):

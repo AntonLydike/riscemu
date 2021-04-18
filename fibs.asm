@@ -4,6 +4,7 @@ fibs:   .space 56
 
         .text
 main:
+func_fibs:
         addi s1, zero, 0     # storage index
         addi s2, zero, 56    # last storage index
         addi t0, zero, 1     # t0 = F_{i}
@@ -20,3 +21,8 @@ loop:
         addi a7, zero, 93
         ebreak               # launch debugger
         scall                # exit with code 0
+
+
+.set test_val, 0xFF
+
+.global func_fibs

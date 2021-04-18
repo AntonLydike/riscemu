@@ -66,15 +66,17 @@ class Executable:
     sections: Dict[str, MemorySection]
     symbols: Dict[str, Tuple[str, int]]
     stack_pref: Optional[int]
+    exported_symbols: List[str]
     name: str
 
     def __repr__(self):
-        return "{}(sections = {}, symbols = {}, stack = {}, run_ptr = {})".format(
+        return "{}(sections = {}, symbols = {}, stack = {}, run_ptr = {}, globals={})".format(
             self.__class__.__name__,
             " ".join(self.sections.keys()),
             " ".join(self.symbols.keys()),
             self.stack_pref,
-            self.run_ptr
+            self.run_ptr,
+            ",".join(self.exported_symbols)
         )
 
 
@@ -98,8 +100,8 @@ class LoadedInstruction:
             raise ParseException("Instruction {} expected argument at {} (args: {})".format(self.name, num, self.args))
         arg = self.args[num]
         # look up symbols
-        if arg in self.bin.symbols:
-            return self.bin.symbols[arg]
+        if self.bin.has_symb(arg):
+            return self.bin.lookup_symbol(arg)
         return parse_numeric_argument(arg)
 
     def get_imm_reg(self, num: int):
@@ -111,8 +113,8 @@ class LoadedInstruction:
         arg = self.args[num]
         ASSERT_IN("(", arg)
         imm, reg = arg[:-1].split("(")
-        if imm in self.bin.symbols:
-            return self.bin.symbols[imm], reg
+        if self.bin.has_symb(imm):
+            return self.bin.lookup_symbol(imm), reg
         return parse_numeric_argument(imm), reg
 
     def get_reg(self, num: int):
@@ -244,13 +246,17 @@ class LoadedExecutable:
     symbols: Dict[str, int]
     run_ptr: int
     stack_heap: Tuple[int, int]  # pointers to stack and heap, are nullptr if no stack/heap is available
+    exported_symbols: Dict[str, int]
+    global_symbol_table: Dict[str, int]
 
-    def __init__(self, exe: Executable, base_addr: int):
+    def __init__(self, exe: Executable, base_addr: int, global_symbol_table: Dict[str, int]):
         self.name = exe.name
         self.base_addr = base_addr
         self.sections = list()
         self.sections_by_name = dict()
         self.symbols = dict()
+        self.exported_symbols = dict()
+        self.global_symbol_table = dict()
 
         # stack/heap if wanted
         if exe.stack_pref is not None:
@@ -281,14 +287,28 @@ class LoadedExecutable:
             curr = align_addr(loaded_sec.size + curr)
 
         for name, (sec_name, offset) in exe.symbols.items():
-            ASSERT_IN(sec_name, self.sections_by_name)
-            self.symbols[name] = self.sections_by_name[sec_name].base + offset
+            if sec_name == '_static_':
+                self.symbols[name] = offset
+            else:
+                ASSERT_IN(sec_name, self.sections_by_name)
+                self.symbols[name] = self.sections_by_name[sec_name].base + offset
+
+        for name in exe.exported_symbols:
+            self.exported_symbols[name] = self.symbols[name]
 
         self.size = curr - base_addr
 
         # translate run_ptr from executable
         run_ptr_sec, run_ptr_off = exe.run_ptr
         self.run_ptr = self.sections_by_name[run_ptr_sec].base + run_ptr_off
+
+    def lookup_symbol(self, name):
+        if name in self.symbols:
+            return self.symbols[name]
+        if name in self.global_symbol_table:
+            return self.global_symbol_table[name]
+        raise LinkerException('Symbol {} not found!'.format(name), (self,))
+
 
     def __repr__(self):
         return '{}[{}](base=0x{:08X}, size={}bytes, sections={}, run_ptr=0x{:08X})'.format(
@@ -299,3 +319,6 @@ class LoadedExecutable:
             " ".join(self.sections_by_name.keys()),
             self.run_ptr
         )
+
+    def has_symb(self, arg):
+        return arg in self.symbols or arg in self.global_symbol_table

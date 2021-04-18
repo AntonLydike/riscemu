@@ -2,6 +2,7 @@ if __name__ == '__main__':
     from . import *
     from .helpers import *
     import argparse
+    import sys
 
     parser = argparse.ArgumentParser(description='RISC-V Userspace parser and emulator', prog='riscemu')
     parser.add_argument('file', metavar='file.asm', type=str, help='The assembly file to interpret and run')
@@ -33,15 +34,21 @@ if __name__ == '__main__':
         FMT_NONE = ""
         FMT_PRINT = ""
 
-    tk = RiscVTokenizer(RiscVInput.from_file(args.file))
-    tk.tokenize()
+    try:
+        tk = RiscVTokenizer(RiscVInput.from_file(args.file))
+        tk.tokenize()
 
-    if args.print_tokens:
-        print(FMT_PRINT + "Tokens:" + FMT_NONE)
-        for token in tk.tokens:
-            print(token)
+        if args.print_tokens:
+            print(FMT_PRINT + "Tokens:" + FMT_NONE)
+            for token in tk.tokens:
+                print(token)
 
-    executable = ExecutableParser(tk).parse()
+        executable = ExecutableParser(tk).parse()
+    except RiscemuBaseException as e:
+        print("Error while parsing: {}".format(e.message()))
+        import traceback
+        traceback.print_exception(type(e), e, e.__traceback__)
+        sys.exit(1)
 
     cpu = CPU(cfg)
     le = cpu.load(executable)

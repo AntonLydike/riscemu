@@ -23,7 +23,7 @@ PSEUDO_OPS = [
     '.data',
     '.half',
     '.text',
-    '.word'
+    '.word',
     '.set',
 ]
 

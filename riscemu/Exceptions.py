@@ -44,6 +44,14 @@ def ASSERT_IN(a1, a2):
         raise ParseException("ASSERTION_FAILED: Expected {} to not be in {}".format(a1, a2), (a1, a2))
 
 
+class LinkerException(RiscemuBaseException):
+    def __init__(self, msg, data):
+        self.msg = msg
+        self.data = data
+    def message(self):
+        return FMT_PARSE + "{}(\"{}\", data={})".format(self.__class__.__name__, self.msg, self.data) + FMT_NONE
+
+
 # MMU Exceptions
 
 class MemoryAccessException(RiscemuBaseException):
@@ -64,7 +72,7 @@ class MemoryAccessException(RiscemuBaseException):
         ) + FMT_NONE
 
 
-class OutOfMemoryEsception(RiscemuBaseException):
+class OutOfMemoryException(RiscemuBaseException):
     def __init__(self, action):
         self.action = action
 

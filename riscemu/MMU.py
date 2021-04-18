@@ -1,7 +1,7 @@
 from .Config import RunConfig
 from .Executable import Executable, LoadedExecutable, LoadedMemorySection
 from .helpers import align_addr
-from .Exceptions import OutOfMemoryEsception
+from .Exceptions import OutOfMemoryException
 from typing import Dict, List, Tuple, Optional
 
 
@@ -20,6 +20,7 @@ class MMU:
         self.binaries = list()
         self.last_bin = None
         self.conf = conf
+        self.global_symbols = dict()
 
     def load_bin(self, bin: Executable):
         if self.last_bin is None:
@@ -33,10 +34,10 @@ class MMU:
         if bin.stack_pref is None:
             bin.stack_pref = self.conf.preffered_stack_size
 
-        loaded_bin = LoadedExecutable(bin, addr)
+        loaded_bin = LoadedExecutable(bin, addr, self.global_symbols)
 
         if loaded_bin.size + addr > self.max_size:
-            raise OutOfMemoryEsception('load of executable')
+            raise OutOfMemoryException('load of executable')
 
         self.binaries.append(loaded_bin)
         self.last_bin = loaded_bin
@@ -44,6 +45,8 @@ class MMU:
         # read sections into sec dict
         for sec in loaded_bin.sections:
             self.sections.append(sec)
+
+        self.global_symbols.update(loaded_bin.exported_symbols)
 
         print("Successfully loaded {}".format(loaded_bin))
 
