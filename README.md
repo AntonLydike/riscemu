@@ -22,7 +22,7 @@ Program exited with code 0
 ```
 
 
-See the docs on [asembly](docs/assembly.md) and [the cpu](docs/CPU.md) for more detail on how to write assembly code for this emulator.
+See the docs on [asembly](docs/assembly.md) for more detail on how to write assembly code for this emulator.
 See the [list of implemented syscalls](docs/syscalls.md) for more details on how to syscall.
 
 Currently, symbols (such as `main:`) are looked-up at runtime. This allows for better debugging, I believe.
