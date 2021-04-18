@@ -226,24 +226,24 @@ class RV32I(InstructionSet):
 
     def instruction_bge(self, ins: 'LoadedInstruction'):
         ASSERT_LEN(ins.args, 3)
-        reg1 = self.get_reg(ins, 0)
-        reg2 = self.get_reg(ins, 1)
-        dest = self.get_reg(ins, 2)
+        reg1 = self.get_reg_content(ins, 0)
+        reg2 = self.get_reg_content(ins, 1)
+        dest = ins.get_imm(2)
         if reg1 >= reg2:
             self.pc = dest
 
     def instruction_bltu(self, ins: 'LoadedInstruction'):
         ASSERT_LEN(ins.args, 3)
-        reg1 = self.get_reg(ins, 0)
-        reg2 = self.get_reg(ins, 1)
+        reg1 = self.get_reg_content(ins, 0)
+        reg2 = self.get_reg_content(ins, 1)
         dest = ins.get_imm(2)
         if to_unsigned(reg1) < to_unsigned(reg2):
             self.pc = dest
 
     def instruction_bgeu(self, ins: 'LoadedInstruction'):
         ASSERT_LEN(ins.args, 3)
-        reg1 = to_unsigned(self.get_reg(ins, 0))
-        reg2 = to_unsigned(self.get_reg(ins, 1))
+        reg1 = to_unsigned(self.get_reg_content(ins, 0))
+        reg2 = to_unsigned(self.get_reg_content(ins, 1))
         dest = ins.get_imm(2)
         if reg1 >= reg2:
             self.pc = dest
@@ -292,6 +292,3 @@ class RV32I(InstructionSet):
 
     def instruction_nop(self, ins: 'LoadedInstruction'):
         pass
-
-    def get_reg(self, ins: 'LoadedInstruction', ind: int):
-        return self.regs.get(ins.get_reg(ind))

@@ -30,6 +30,21 @@ class InstructionSet(ABC):
     def parse_mem_ins(self, ins: 'LoadedInstruction'):
         return self.cpu.parse_mem_ins(ins)
 
+    def parse_rd_rs_rs(self, ins: 'LoadedInstruction'):
+        ASSERT_LEN(ins.args, 3)
+        return ins.get_reg(0), self.get_reg_content(ins, 1), self.get_reg_content(ins, 2)
+
+    def parse_rd_rs_imm(self, ins: 'LoadedInstruction'):
+        ASSERT_LEN(ins.args, 3)
+        return ins.get_reg(0), self.get_reg_content(ins, 1), ins.get_imm(2)
+
+    def get_reg_content(self, ins: 'LoadedInstruction', ind: int):
+        """
+        get the register name from ins and then return the register contents
+        """
+        return self.regs.get(ins.get_reg(ind))
+
+
     @property
     def pc(self):
         return self.cpu.pc
