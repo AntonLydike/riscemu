@@ -360,7 +360,15 @@ class CPU:
     def instruction_sbreak(self, ins: 'LoadedInstruction'):
         if self.conf.debug_instruction:
             import code
-            code.interact(local=dict(globals(), **locals()))
+            import readline
+            import rlcompleter
+
+            vars = globals()
+            vars.update(locals())
+
+            readline.set_completer(rlcompleter.Completer(vars).complete)
+            readline.parse_and_bind("tab: complete")
+            code.InteractiveConsole(vars).interact()
 
     def instruction_nop(self, ins: 'LoadedInstruction'):
         pass
