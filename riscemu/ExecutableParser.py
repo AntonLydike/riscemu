@@ -87,13 +87,13 @@ class ExecutableParser:
     def op_ascii(self, op: 'RiscVPseudoOpToken'):
         ASSERT_IN(self.active_section, ('data', 'rodata'))
         ASSERT_LEN(op.args, 1)
-        str = op.args[0][1:-1]
+        str = op.args[0][1:-1].encode('ascii').decode('unicode_escape')
         self.curr_sec().add(bytearray(str, 'ascii'))
 
     def op_asciiz(self, op: 'RiscVPseudoOpToken'):
         ASSERT_IN(self.active_section, ('data', 'rodata'))
         ASSERT_LEN(op.args, 1)
-        str = op.args[0][1:-1]
+        str = op.args[0][1:-1].encode('ascii').decode('unicode_escape')
         self.curr_sec().add(bytearray(str + '\0', 'ascii'))
 
     def op_stack(self, op: 'RiscVPseudoOpToken'):
