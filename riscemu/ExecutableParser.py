@@ -98,7 +98,7 @@ class ExecutableParser:
 
     def op_stack(self, op: 'RiscVPseudoOpToken'):
         ASSERT_LEN(op.args, 1)
-        size = parse_numeric_argument(op.args)
+        size = parse_numeric_argument(op.args[0])
         self.stack_pref = size
 
     def op_global(self, op: 'RiscVPseudoOpToken'):

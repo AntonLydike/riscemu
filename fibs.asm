@@ -1,3 +1,4 @@
+        .stack 0xFFFF
         .data 0x200
 
 fibs:   .space 56

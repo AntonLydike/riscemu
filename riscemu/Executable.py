@@ -221,8 +221,9 @@ class LoadedMemorySection:
             print(FMT_BOLD + FMT_MAGENTA + "..." + FMT_NONE)
 
     def __repr__(self):
-        return "{} at 0x{:08X} (size={}bytes, flags={}, owner={})".format(
+        return "{}[{}] at 0x{:08X} (size={}bytes, flags={}, owner={})".format(
             self.__class__.__name__,
+            self.name,
             self.base,
             self.size,
             self.flags,
@@ -258,20 +259,6 @@ class LoadedExecutable:
         self.exported_symbols = dict()
         self.global_symbol_table = dict()
 
-        # stack/heap if wanted
-        if exe.stack_pref is not None:
-            self.sections.append(LoadedMemorySection(
-                'stack',
-                base_addr,
-                exe.stack_pref,
-                bytearray(exe.stack_pref),
-                MemoryFlags(read_only=False, executable=False),
-                self.name
-            ))
-            self.stack_heap = (self.base_addr, self.base_addr + exe.stack_pref)
-        else:
-            self.stack_heap = (0, 0)
-
         curr = base_addr
         for sec in exe.sections.values():
             loaded_sec = LoadedMemorySection(
@@ -285,6 +272,21 @@ class LoadedExecutable:
             self.sections.append(loaded_sec)
             self.sections_by_name[loaded_sec.name] = loaded_sec
             curr = align_addr(loaded_sec.size + curr)
+
+
+        # stack/heap if wanted
+        if exe.stack_pref is not None:
+            self.sections.append(LoadedMemorySection(
+                'stack',
+                curr,
+                exe.stack_pref,
+                bytearray(exe.stack_pref),
+                MemoryFlags(read_only=False, executable=False),
+                self.name
+            ))
+            self.stack_heap = (curr, curr + exe.stack_pref)
+        else:
+            self.stack_heap = (0, 0)
 
         for name, (sec_name, offset) in exe.symbols.items():
             if sec_name == '_static_':
