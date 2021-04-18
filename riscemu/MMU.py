@@ -74,6 +74,14 @@ class MMU:
     def dump(self, addr, *args, **kwargs):
         self.get_sec_containing(addr).dump(addr, *args, **kwargs)
 
+    def symbol(self, symb:str):
+        print(FMT_MEM + "Lookup for symbol {}:".format(symb) + FMT_NONE)
+        if symb in self.global_symbols:
+            print("   Found global symbol {}: 0x{:X}".format(symb, self.global_symbols[symb]))
+        for b in self.binaries:
+            if symb in b.symbols:
+                print("   Found local symbol {}: 0x{:X} in {}".format(symb, b.symbols[symb], b.name))
+
     def __repr__(self):
         return "MMU(\n\t{}\n)".format(
             "\n\t".join(repr(x) for x in self.sections)
