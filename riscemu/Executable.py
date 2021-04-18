@@ -257,7 +257,7 @@ class LoadedExecutable:
         self.sections_by_name = dict()
         self.symbols = dict()
         self.exported_symbols = dict()
-        self.global_symbol_table = dict()
+        self.global_symbol_table = global_symbol_table
 
         curr = base_addr
         for sec in exe.sections.values():
