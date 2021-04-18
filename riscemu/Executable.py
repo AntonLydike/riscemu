@@ -211,6 +211,14 @@ class LoadedMemorySection:
         else:
             print(FMT_BOLD + FMT_MAGENTA + "..." + FMT_NONE)
 
+    def __repr__(self):
+        return "{} at 0x{:08X} (size={}bytes, flags={}, owner={})".format(
+            self.__class__.__name__,
+            self.base,
+            self.size,
+            self.flags,
+            self.owner
+        )
 
 class LoadedExecutable:
     """

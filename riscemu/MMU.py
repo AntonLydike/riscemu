@@ -67,3 +67,8 @@ class MMU:
     # debugging interactions:
     def dump(self, addr, *args, **kwargs):
         self.get_sec_containing(addr).dump(addr, *args, **kwargs)
+
+    def __repr__(self):
+        return "MMU(\n\t{}\n)".format(
+            "\n\t".join(repr(x) for x in self.sections)
+        )
