@@ -1,4 +1,4 @@
-# RiscV (userspace) emulator in python
+# RISC-V (userspace) emulator in python
 
 Implementing a basic RISC-V emulator, aimed at being easily extendable.
 
@@ -11,32 +11,18 @@ andi, slt, slti, sltu, sltiu, beq, bne, blt, bge, bltu, bgeu,
 j, jr, jal, jalr, ret, scall, break, nop
 ````
 
-Current register implementation (should be all standard userspace registers): 
-```
-Registers[read,written](
-        zero=0x00000000 ra  =0x00000000 sp  =0x00000000 gp  =0x00000000 tp  =0x00000000 fp  =0x00000000
-        --------------- --------------- --------------- --------------- --------------- --------------- 
-        a0  =0x00000000 s0  =0x00000000 t0  =0x00000000 ft0 =0x00000000 fa0 =0x00000000 fs0 =0x00000000
-        a1  =0x00000000 s1  =0x00000000 t1  =0x00000000 ft1 =0x00000000 fa1 =0x00000000 fs1 =0x00000000
-        a2  =0x00000000 s2  =0x00000000 t2  =0x00000000 ft2 =0x00000000 fa2 =0x00000000 fs2 =0x00000000
-        a3  =0x00000000 s3  =0x00000000 t3  =0x00000000 ft3 =0x00000000 fa3 =0x00000000 fs3 =0x00000000
-        a4  =0x00000000 s4  =0x00000000 t4  =0x00000000 ft4 =0x00000000 fa4 =0x00000000 fs4 =0x00000000
-        a5  =0x00000000 s5  =0x00000000 t5  =0x00000000 ft5 =0x00000000 fa5 =0x00000000 fs5 =0x00000000
-        a6  =0x00000000 s6  =0x00000000 t6  =0x00000000 ft6 =0x00000000 fa6 =0x00000000 fs6 =0x00000000
-        a7  =0x00000000 s7  =0x00000000                 ft7 =0x00000000 fa7 =0x00000000 fs7 =0x00000000
-                        s8  =0x00000000                                                 fs8 =0x00000000
-                        s9  =0x00000000                                                 fs9 =0x00000000
-                        s10 =0x00000000                                                 fs10=0x00000000
-                        s11 =0x00000000                                                 fs11=0x00000000
-)
-```
+See the docs on [asembly](docs/assembly.md) and [the cpu](docs/CPU.md) for more detail.
 
-Current pseudo ops:
-```
-.align, .ascii, .asciiz, .byte, .data, .double, .extern,
-.float, .globl, .half, .kdata, .ktext, .set, .space, .text, .word
-```
+Currently, symbols (such as `main:`) are looked-up in runtime. This allows for better debugging, I believe.
+
+Basic IO should work, as open, read, write and close are supported for stdin/stdout/stderr and even aribtrary file paths (if enabled)
 
 ## Resources:
   * Pseudo ops: https://www.codetd.com/article/8981522
+  * RISC-V reference card: https://www.cl.cam.ac.uk/teaching/1617/ECAD+Arch/files/docs/RISCVGreenCardv8-20151013.pdf
   
+## TODO:
+ * add global symbol lookup table
+ * better pseudo-ops
+ * mmu inspect methods
+ 
