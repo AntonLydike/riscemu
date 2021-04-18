@@ -78,10 +78,16 @@ def split_accepting_quotes(string, at=REG_ARG_SPLIT, quotes=('"', "'")):
 
 
 class RiscVInput:
-    def __init__(self, content: str):
+    def __init__(self, content: str, name: str):
         self.content = content
         self.pos = 0
         self.len = len(content)
+        self.name = name
+
+    @staticmethod
+    def from_file(src: str):
+        with open(src, 'r') as f:
+            return RiscVInput(f.read(), src)
 
     def peek(self, offset: int = 0, size: int = 1, regex: re.Pattern = None, text: str = None, regex_group: int = 0):
         at = self.pos + offset
@@ -89,7 +95,7 @@ class RiscVInput:
         if regex:
             if not isinstance(regex, re.Pattern):
                 print("uncompiled regex passed to peek!")
-                reges = re.compile(regex)
+                regex = re.compile(regex)
             match = regex.match(self.content[at:])
             if match is None:
                 return None
@@ -241,6 +247,7 @@ class RiscVTokenizer:
     def __init__(self, input: RiscVInput):
         self.input = input
         self.tokens: List[RiscVToken] = []
+        self.name = input.name
 
     def tokenize(self):
         while self.input.has_next():

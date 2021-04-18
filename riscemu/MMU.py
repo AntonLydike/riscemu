@@ -43,6 +43,8 @@ class MMU:
         for sec in loaded_bin.sections:
             self.sections.append(sec)
 
+        print("Successfully loaded {}".format(loaded_bin))
+
         return loaded_bin
 
     def get_sec_containing(self, addr: int):

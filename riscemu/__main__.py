@@ -20,7 +20,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    print(args)
 
     cfg = RunConfig(
         color=not args.no_color,
@@ -34,10 +33,7 @@ if __name__ == '__main__':
         FMT_NONE = ""
         FMT_PRINT = ""
 
-    with open(args.file, 'r') as f:
-        asm = f.read()
-
-    tk = RiscVTokenizer(RiscVInput(asm))
+    tk = RiscVTokenizer(RiscVInput.from_file(args.file))
     tk.tokenize()
 
     if args.print_tokens:
@@ -45,9 +41,7 @@ if __name__ == '__main__':
         for token in tk.tokens:
             print(token)
 
-    executable = ExecutableParser(tk).parse().get_execuable()
-
-    print(FMT_PRINT + "Executable:" + FMT_NONE, executable)
+    executable = ExecutableParser(tk).parse()
 
     cpu = CPU(cfg)
     le = cpu.load(executable)

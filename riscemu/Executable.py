@@ -59,6 +59,7 @@ class Executable:
     sections: Dict[str, MemorySection]
     symbols: Dict[str, Tuple[str, int]]
     stack_pref: Optional[int]
+    name: str
 
     def __repr__(self):
         return "{}(sections = {}, symbols = {}, stack = {}, run_ptr = {})".format(
@@ -129,6 +130,7 @@ class LoadedMemorySection:
     size: int
     content: Union[List[LoadedInstruction], bytearray] = field(repr=False)
     flags: MemoryFlags
+    owner: str
 
     def read(self, offset: int, size: int):
         if offset < 0:
@@ -220,6 +222,7 @@ class LoadedExecutable:
     It still holds a symbol table, that is not accessible memory since I don't want to deal with
     binary strings in memory etc.
     """
+    name: str
     base_addr: int
     sections_by_name: Dict[str, LoadedMemorySection]
     sections: List[LoadedMemorySection]
@@ -228,6 +231,7 @@ class LoadedExecutable:
     stack_heap: Tuple[int, int]  # pointers to stack and heap, are nullptr if no stack/heap is available
 
     def __init__(self, exe: Executable, base_addr: int):
+        self.name = exe.name
         self.base_addr = base_addr
         self.sections = list()
         self.sections_by_name = dict()
@@ -240,7 +244,8 @@ class LoadedExecutable:
                 base_addr,
                 exe.stack_pref,
                 bytearray(exe.stack_pref),
-                MemoryFlags(read_only=False, executable=False)
+                MemoryFlags(read_only=False, executable=False),
+                self.name
             ))
             self.stack_heap = (self.base_addr, self.base_addr + exe.stack_pref)
         else:
@@ -253,7 +258,8 @@ class LoadedExecutable:
                 curr,
                 sec.size,
                 sec.continuous_content(self),
-                sec.flags
+                sec.flags,
+                self.name
             )
             self.sections.append(loaded_sec)
             self.sections_by_name[loaded_sec.name] = loaded_sec
@@ -269,8 +275,12 @@ class LoadedExecutable:
         run_ptr_sec, run_ptr_off = exe.run_ptr
         self.run_ptr = self.sections_by_name[run_ptr_sec].base + run_ptr_off
 
-        print("successfully loaded binary\n\tsize: {}\n\tsections: {}\n\trun_ptr: 0x{:08x}".format(
+    def __repr__(self):
+        return '{}[{}](base=0x{:08X}, size={}bytes, sections={}, run_ptr=0x{:08X})'.format(
+            self.__class__.__name__,
+            self.name,
+            self.base_addr,
             self.size,
             " ".join(self.sections_by_name.keys()),
             self.run_ptr
-        ))
+        )

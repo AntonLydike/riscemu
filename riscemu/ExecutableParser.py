@@ -27,7 +27,7 @@ class ExecutableParser:
                 self.handle_symbol(token)
             elif isinstance(token, RiscVPseudoOpToken):
                 self.handle_pseudo_op(token)
-        return self
+        return self.get_execuable()
 
     def get_execuable(self):
         start_ptr = ('text', 0)
@@ -35,7 +35,7 @@ class ExecutableParser:
             start_ptr = self.symbols['_start']
         elif 'main' in self.symbols:
             start_ptr = self.symbols['main']
-        return Executable(start_ptr, self.sections, self.symbols, self.stack_pref)
+        return Executable(start_ptr, self.sections, self.symbols, self.stack_pref, self.tokenizer.name)
 
     def parse_instruction(self, ins: 'RiscVInstructionToken'):
         if self.active_section is None:
