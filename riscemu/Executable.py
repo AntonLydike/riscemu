@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Dict, List, Tuple, Union, Optional
 from .Exceptions import *
-from .helpers import parse_numeric_argument, align_addr
+from .helpers import *
 
 import typing
 
@@ -127,7 +127,7 @@ class LoadedMemorySection:
     name: str
     base: int
     size: int
-    content: Union[List[LoadedInstruction], bytearray]
+    content: Union[List[LoadedInstruction], bytearray] = field(repr=False)
     flags: MemoryFlags
 
     def read(self, offset: int, size: int):
@@ -161,6 +161,53 @@ class LoadedMemorySection:
 
         for i in range(size):
             self.content[offset + i] = data[i]
+
+    def dump(self, at_addr=None, fmt='hex', max_rows=10, group=4, bytes_per_row=16, all=False):
+        highlight = -1
+        if at_addr is None:
+            at_addr = self.base
+        else:
+            highlight = at_addr - self.base
+
+        at_off = at_addr - self.base
+        start = max(align_addr(at_off - ((max_rows * bytes_per_row) // 2), 8) - 8, 0)
+        if all:
+            end = self.size
+        else:
+            end = min(start + (max_rows * bytes_per_row), self.size)
+
+
+        fmt_str = "    0x{:0" + str(ceil(log(self.base + end, 16))) + "X}:  {}"
+
+        if self.flags.executable:
+            # this section holds instructions!
+            start = max(self.base - at_addr - (max_rows // 2), 0)
+            end = min(self.size, start + max_rows)
+            print(FMT_BOLD + FMT_MAGENTA + "MemorySection {} at base 0x{:08X}, viewing {} instructions:".format(
+                self.name, self.base, end - start
+            ) + FMT_NONE)
+            for i in range(start, end):
+                if i == highlight:
+                    ins = FMT_UNDERLINE + FMT_ORANGE + repr(self.content[i]) + FMT_NONE
+                else:
+                    ins = repr(self.content[i])
+                print(fmt_str.format(self.base + i, ins))
+        else:
+            print(FMT_BOLD + FMT_MAGENTA + "MemorySection {} at base 0x{:08X}, viewing {} bytes:".format(
+                self.name, self.base, end - start
+            ) + FMT_NONE)
+            for i in range(start, end, bytes_per_row):
+                data = self.content[start + i: min(start + i + bytes_per_row, end)]
+                if start + i <= highlight <= start + i + bytes_per_row:
+                    # do hightlight here!
+                    hi_ind = (highlight - start - i) // group
+                    print(fmt_str.format(self.base + start + i, format_bytes(data, fmt, group, highlight=hi_ind)))
+                else:
+                    print(fmt_str.format(self.base + start + i, format_bytes(data, fmt, group)))
+        if end == self.size:
+            print(FMT_BOLD + FMT_MAGENTA + "End of section!" + FMT_NONE)
+        else:
+            print(FMT_BOLD + FMT_MAGENTA + "..." + FMT_NONE)
 
 
 class LoadedExecutable:
