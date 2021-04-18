@@ -144,7 +144,7 @@ class LoadedMemorySection:
     def read(self, offset: int, size: int):
         if offset < 0:
             raise MemoryAccessException('Invalid offset {}'.format(offset), self.base + offset, size, 'read')
-        if offset + size >= self.size:
+        if offset + size > self.size:
             raise MemoryAccessException('Outside section boundary of section {}'.format(self.name), self.base + offset,
                                         size, 'read')
         return self.content[offset: offset + size]
