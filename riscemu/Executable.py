@@ -14,6 +14,13 @@ class MemoryFlags:
     read_only: bool
     executable: bool
 
+    def __repr__(self):
+        return "{}({},{})".format(
+            self.__class__.__name__,
+            'ro' if self.read_only else 'rw',
+            'x' if self.executable else '-'
+        )
+
 
 @dataclass
 class MemorySection:
