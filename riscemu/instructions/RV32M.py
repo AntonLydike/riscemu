@@ -2,7 +2,7 @@ from .InstructionSet import *
 from ..helpers import int_from_bytes, int_to_bytes, to_unsigned, to_signed
 
 
-class RVM(InstructionSet):
+class RV32M(InstructionSet):
     def instruction_mul(self, ins: 'LoadedInstruction'):
         INS_NOT_IMPLEMENTED(ins)
 
