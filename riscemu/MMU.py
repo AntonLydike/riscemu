@@ -13,6 +13,8 @@ class MMU:
     binaries: List[LoadedExecutable]
     last_bin: Optional[LoadedExecutable] = None
 
+    global_symbols: Dict[str, int]
+
     def __init__(self, conf: RunConfig):
         self.sections = list()
         self.binaries = list()

@@ -18,6 +18,7 @@ class ExecutableParser:
         self.active_section: Optional[str] = None
         self.implicit_sections = False
         self.stack_pref: Optional[int] = None
+        self.globals: List[str] = list()
 
     def parse(self):
         for token in self.tokenizer.tokens:
@@ -99,6 +100,17 @@ class ExecutableParser:
         ASSERT_LEN(op.args, 1)
         size = parse_numeric_argument(op.args)
         self.stack_pref = size
+
+    def op_global(self, op: 'RiscVPseudoOpToken'):
+        ASSERT_LEN(op.args, 1)
+        name = op.args[1]
+        self.globals.append(name)
+
+    def op_set(self, op: 'RiscVPseudoOpToken'):
+        ASSERT_LEN(op.args, 2)
+        name = op.args[0]
+        val = parse_numeric_argument(op.args[1])
+        self.symbols[name] = ('_static_', val)
 
     ## Section handler code
     def set_sec(self, name: str, flags: MemoryFlags, cls=MemorySection):
