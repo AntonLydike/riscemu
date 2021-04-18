@@ -372,3 +372,9 @@ class CPU:
         for method in vars(CPU):
             if method.startswith('instruction_'):
                 yield method[12:]
+
+    def __repr__(self):
+        return "CPU(pc=0x{:08X}, cycle={})".format(
+            self.pc,
+            self.cycle
+        )
