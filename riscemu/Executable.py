@@ -192,8 +192,8 @@ class LoadedMemorySection:
             # this section holds instructions!
             start = max(self.base - at_addr - (max_rows // 2), 0)
             end = min(self.size, start + max_rows)
-            print(FMT_BOLD + FMT_MAGENTA + "MemorySection {} at base 0x{:08X}, viewing {} instructions:".format(
-                self.name, self.base, end - start
+            print(FMT_BOLD + FMT_MAGENTA + "{}, viewing {} instructions:".format(
+                self, end - start
             ) + FMT_NONE)
             for i in range(start, end):
                 if i == highlight:
@@ -202,8 +202,8 @@ class LoadedMemorySection:
                     ins = repr(self.content[i])
                 print(fmt_str.format(self.base + i, ins))
         else:
-            print(FMT_BOLD + FMT_MAGENTA + "MemorySection {} at base 0x{:08X}, viewing {} bytes:".format(
-                self.name, self.base, end - start
+            print(FMT_BOLD + FMT_MAGENTA + "{}, viewing {} bytes:".format(
+                self, end - start
             ) + FMT_NONE)
             for i in range(start, end, bytes_per_row):
                 data = self.content[start + i: min(start + i + bytes_per_row, end)]
