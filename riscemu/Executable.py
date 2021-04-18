@@ -184,17 +184,17 @@ class LoadedMemorySection:
         start = max(align_addr(at_off - ((max_rows * bytes_per_row) // 2), 8) - 8, 0)
         if all:
             end = self.size
+            start = 0
         else:
             end = min(start + (max_rows * bytes_per_row), self.size)
-
 
         fmt_str = "    0x{:0" + str(ceil(log(self.base + end, 16))) + "X}:  {}"
 
         if self.flags.executable:
             # this section holds instructions!
-            start = max(self.base - at_addr - (max_rows // 2), 0)
-            end = min(self.size, start + max_rows)
-            print(FMT_BOLD + FMT_MAGENTA + "{}, viewing {} instructions:".format(
+            start = 0 if all else max(at_off - (max_rows // 2), 0)
+            end = self.size if all else min(self.size, start + max_rows)
+            print(FMT_MEM + "{}, viewing {} instructions:".format(
                 self, end - start
             ) + FMT_NONE)
             for i in range(start, end):
@@ -204,7 +204,7 @@ class LoadedMemorySection:
                     ins = repr(self.content[i])
                 print(fmt_str.format(self.base + i, ins))
         else:
-            print(FMT_BOLD + FMT_MAGENTA + "{}, viewing {} bytes:".format(
+            print(FMT_MEM +  "{}, viewing {} bytes:".format(
                 self, end - start
             ) + FMT_NONE)
             for i in range(start, end, bytes_per_row):
@@ -216,9 +216,9 @@ class LoadedMemorySection:
                 else:
                     print(fmt_str.format(self.base + start + i, format_bytes(data, fmt, group)))
         if end == self.size:
-            print(FMT_BOLD + FMT_MAGENTA + "End of section!" + FMT_NONE)
+            print(FMT_MEM + "End of section!" + FMT_NONE)
         else:
-            print(FMT_BOLD + FMT_MAGENTA + "..." + FMT_NONE)
+            print(FMT_MEM + "More bytes ..." + FMT_NONE)
 
     def __repr__(self):
         return "{}[{}] at 0x{:08X} (size={}bytes, flags={}, owner={})".format(
@@ -229,6 +229,7 @@ class LoadedMemorySection:
             self.flags,
             self.owner
         )
+
 
 class LoadedExecutable:
     """
@@ -273,7 +274,6 @@ class LoadedExecutable:
             self.sections_by_name[loaded_sec.name] = loaded_sec
             curr = align_addr(loaded_sec.size + curr)
 
-
         # stack/heap if wanted
         if exe.stack_pref is not None:
             self.sections.append(LoadedMemorySection(
@@ -310,7 +310,6 @@ class LoadedExecutable:
         if name in self.global_symbol_table:
             return self.global_symbol_table[name]
         raise LinkerException('Symbol {} not found!'.format(name), (self,))
-
 
     def __repr__(self):
         return '{}[{}](base=0x{:08X}, size={}bytes, sections={}, run_ptr=0x{:08X})'.format(
