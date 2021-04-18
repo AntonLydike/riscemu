@@ -14,6 +14,7 @@ def launch_debug_session(cpu: 'CPU', mmu: 'MMU', reg: 'Registers', prompt=""):
     registers = reg
     memory = mmu
     mem = mmu
+    syscall_interface = cpu.syscall_int
 
     vars = globals()
     vars.update(locals())

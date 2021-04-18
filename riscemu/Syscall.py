@@ -170,3 +170,9 @@ class SyscallInterface:
         return {
             ('SCALL_' + name.upper()): num for num, name in SYSCALLS.items()
         }
+
+    def __repr__(self):
+        return "{}(\n\tfiles={}\n)".format(
+            self.__class__.__name__,
+            self.open_files
+        )
