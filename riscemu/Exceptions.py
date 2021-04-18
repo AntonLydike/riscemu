@@ -1,5 +1,5 @@
 from abc import abstractmethod
-
+from .colors import *
 
 class RiscemuBaseException(BaseException):
     @abstractmethod
@@ -16,7 +16,7 @@ class ParseException(RiscemuBaseException):
         self.data = data
 
     def message(self):
-        return "{}(\"{}\", data={})".format(self.__class__.__name__, self.msg, self.data)
+        return FMT_PARSE + "{}(\"{}\", data={})".format(self.__class__.__name__, self.msg, self.data) + FMT_NONE
 
 
 def ASSERT_EQ(a1, a2):
@@ -55,13 +55,13 @@ class MemoryAccessException(RiscemuBaseException):
         self.op = op
 
     def message(self):
-        return "{}(During {} at 0x{:08x} of size {}: {})".format(
+        return FMT_MEM + "{}(During {} at 0x{:08x} of size {}: {})".format(
             self.__class__.__name__,
             self.op,
             self.addr,
             self.size,
             self.msg
-        )
+        ) + FMT_NONE
 
 
 class OutOfMemoryEsception(RiscemuBaseException):
@@ -69,10 +69,10 @@ class OutOfMemoryEsception(RiscemuBaseException):
         self.action = action
 
     def message(self):
-        return '{}(Ran out of memory during {})'.format(
+        return + FMT_MEM + '{}(Ran out of memory during {})'.format(
             self.__class__.__name__,
             self.action
-        )
+        ) + FMT_NONE
 
 
 # CPU Exceptions
@@ -82,10 +82,10 @@ class UnimplementedInstruction(RiscemuBaseException):
         self.ins = ins
 
     def message(self):
-        return "{}({})".format(
+        return FMT_CPU + "{}({})".format(
             self.__class__.__name__,
             repr(self.ins)
-        )
+        ) + FMT_NONE
 
 
 class InvalidRegisterException(RiscemuBaseException):
@@ -93,10 +93,10 @@ class InvalidRegisterException(RiscemuBaseException):
         self.reg = reg
 
     def message(self):
-        return "{}(Invalid register {})".format(
+        return FMT_CPU + "{}(Invalid register {})".format(
             self.__class__.__name__,
             self.reg
-        )
+        ) + FMT_NONE
 
 
 class InvalidSyscallException(RiscemuBaseException):
@@ -104,10 +104,10 @@ class InvalidSyscallException(RiscemuBaseException):
         self.scall = scall
 
     def message(self):
-        return "{}(Invalid syscall: {})".format(
+        return FMT_SYSCALL + "{}(Invalid syscall: {})".format(
             self.__class__.__name__,
             self.scall
-        )
+        ) + FMT_NONE
 
 
 

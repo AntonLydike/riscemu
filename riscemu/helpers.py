@@ -1,5 +1,6 @@
 from math import log10, ceil, log
 from .Exceptions import NumberFormatException
+from .colors import *
 
 
 def align_addr(addr: int, to_bytes: int = 8):
@@ -54,21 +55,6 @@ def to_signed(num: int, bytes=4):
     if num >> (bytes * 8 - 1):
         return num - 2 ** (8 * bytes)
     return num
-
-
-# Colors
-
-FMT_RED = '\033[31m'
-FMT_ORANGE = '\033[33m'
-FMT_GRAY = '\033[37m'
-FMT_CYAN = '\033[36m'
-FMT_GREEN = '\033[32m'
-FMT_BOLD = '\033[1m'
-FMT_MAGENTA = '\033[35m'
-FMT_NONE = '\033[0m'
-FMT_UNDERLINE = '\033[4m'
-
-FMT_ERROR = FMT_RED + FMT_BOLD
 
 
 def create_chunks(my_list, chunk_size):
