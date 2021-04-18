@@ -6,6 +6,7 @@ from .helpers import *
 from .Config import RunConfig
 from .Registers import Registers
 from .Syscall import SyscallInterface, Syscall
+from .debug import launch_debug_session
 
 import typing
 
@@ -48,9 +49,12 @@ class CPU:
                 self.pc += 1
                 self.__run_instruction(ins)
         except RiscemuBaseException as ex:
-            print(FMT_ERROR + "[CPU] excpetion caught at {}:".format(ins) + FMT_NONE)
+            print(FMT_ERROR + "[CPU] excpetion caught at 0x{:08X}: {}:".format(self.pc-1, ins) + FMT_NONE)
             print("      " + ex.message())
             traceback.print_exception(type(ex), ex, ex.__traceback__)
+            if self.conf.debug_on_exception:
+                launch_debug_session(self, self.mmu, self.regs,
+                                     "Exception encountered, launching debug:".format(self.pc-1))
 
         print("Program exited with code {}".format(self.exit_code))
 
@@ -358,17 +362,7 @@ class CPU:
         self.syscall_int.handle_syscall(syscall)
 
     def instruction_sbreak(self, ins: 'LoadedInstruction'):
-        if self.conf.debug_instruction:
-            import code
-            import readline
-            import rlcompleter
-
-            vars = globals()
-            vars.update(locals())
-
-            readline.set_completer(rlcompleter.Completer(vars).complete)
-            readline.parse_and_bind("tab: complete")
-            code.InteractiveConsole(vars).interact()
+        launch_debug_session(self, self.mmu, self.regs, "Debug instruction encountered at 0x{:08X}".format(self.pc))
 
     def instruction_nop(self, ins: 'LoadedInstruction'):
         pass
