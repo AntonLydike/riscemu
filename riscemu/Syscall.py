@@ -70,12 +70,12 @@ class SyscallInterface:
         """
         fileno = scall.registers.get('a0')
         addr = scall.registers.get('a1')
-        len = scall.registers.get('a2')
+        size = scall.registers.get('a2')
         if fileno not in self.open_files:
             scall.registers.set('a0', -1)
             return
 
-        chars = self.open_files[fileno].read(len)
+        chars = self.open_files[fileno].read(size)
         try:
             data = bytearray(chars, 'ascii')
             scall.cpu.mmu.write(addr, len(data), data)

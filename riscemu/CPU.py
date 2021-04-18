@@ -83,6 +83,7 @@ class CPU:
                 launch_debug_session(self, self.mmu, self.regs,
                                      "Exception encountered, launching debug:".format(self.pc-1))
 
+        print()
         print(FMT_CPU + "Program exited with code {}".format(self.exit_code) + FMT_NONE)
 
     def __run_instruction(self, ins: 'LoadedInstruction'):
