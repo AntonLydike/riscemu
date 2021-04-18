@@ -12,7 +12,7 @@ This emulator contains:
 
 
 ## Running simple Assembly:
-A couple of basic assembly programs are provided inside `examples/`, such as [`exit.asm`](examples/exit.asm), which just exits with code 0
+A couple of basic assembly programs are provided inside `examples/`, such as [`hello-world.asm`](examples/hello-world.asm).
 
 You can run it by typing `python -m riscemu examples/hello-world.asm`. It will produce output similar to:
 ```
