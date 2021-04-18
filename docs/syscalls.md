@@ -10,7 +10,8 @@ Performing a syscall is quite simple:
     scall               
 ```
 
-In order to use the global syscall symbols, run with the `--syscall-symbols` flag (not implemented yet)
+The global symbols (e.g. `SCALL_READ`) are loaded by default. If you specify the option `no_syscall_symbols`, they will be omitted.
+
 
 ## Read (63) `SCALL_READ`
 * `a0`: source file descriptor
@@ -40,7 +41,7 @@ In order to use the global syscall symbols, run with the `--syscall-symbols` fla
 
 Requires flag `--scall-fs` to be set to True
 
-## Close (1025) `SCALL_OPEN`
+## Close (1025) `SCALL_CLOSE`
 * `a0`: file descriptor to close
 * `return: a0`: 0 if closed correctly or -1
 
