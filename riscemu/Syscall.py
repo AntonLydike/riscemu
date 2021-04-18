@@ -165,3 +165,8 @@ class SyscallInterface:
     def exit(self, scall: Syscall):
         scall.cpu.exit = True
         scall.cpu.exit_code = scall.registers.get('a0')
+
+    def get_syscall_symbols(self):
+        symbols = dict()
+        for num, name in SYSCALLS.items():
+            symbols['SCALL_' + name.upper()] = num

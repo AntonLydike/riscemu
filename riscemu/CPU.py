@@ -27,6 +27,10 @@ class CPU:
         self.regs = Registers(conf)
         self.syscall_int = SyscallInterface()
 
+        # provide global syscall symbols if option is set
+        if conf.include_scall_symbols:
+            self.mmu.global_symbols.update(self.syscall_int.get_syscall_symbols())
+
     def load(self, e: 'Executable'):
         return self.mmu.load_bin(e)
 
