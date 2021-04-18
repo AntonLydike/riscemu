@@ -62,4 +62,6 @@ class MMU:
         sec = self.get_sec_containing(addr)
         return sec.write(addr - sec.base, size, data)
 
-
+    # debugging interactions:
+    def dump(self, addr, *args, **kwargs):
+        self.get_sec_containing(addr).dump(addr, *args, **kwargs)
