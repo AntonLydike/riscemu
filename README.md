@@ -52,6 +52,12 @@ disable_io              Disallow reading/writing from stdin/stdout/stderr
 If multiple files are specified, all are loaded into memeory, but only the last one is executed. This might be improved 
 later, maybe the `_init` section of each binary is executed before the main loop starts? 
 
+## Debugging
+See [docs/debugging.md](docs/debugging.md) for more info.
+
+![debuggin the fibs program](docs/debug-session.png)
+
+
 ## Resources:
   * Pseudo ops: https://www.codetd.com/article/8981522
   * RISC-V reference card: https://www.cl.cam.ac.uk/teaching/1617/ECAD+Arch/files/docs/RISCVGreenCardv8-20151013.pdf
