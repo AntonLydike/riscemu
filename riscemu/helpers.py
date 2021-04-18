@@ -14,7 +14,7 @@ def parse_numeric_argument(arg: str):
     """
     parse hex or int strings
     """
-    if arg.startswith('0x') or arg.startswith('0X'):
+    if '0x' in arg or '0X' in arg:
         return int(arg, 16)
     return int(arg)
 
