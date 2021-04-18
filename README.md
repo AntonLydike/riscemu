@@ -63,7 +63,6 @@ See [docs/debugging.md](docs/debugging.md) for more info.
   * RISC-V reference card: https://www.cl.cam.ac.uk/teaching/1617/ECAD+Arch/files/docs/RISCVGreenCardv8-20151013.pdf
   
 ## TODO:
- * Prevent tokenizer infinite loop on unknown instructions
  * Move cpu instructions to different file, allow for instruction set selection and composition
  * Add a cycle limit to the options and CPU to catch infinite loops
  * Move away from `print` and use `logging.logger` instead

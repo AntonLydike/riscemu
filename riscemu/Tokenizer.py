@@ -3,6 +3,7 @@ from enum import IntEnum
 from typing import List
 
 from .CPU import CPU, Registers
+from .Exceptions import ParseException
 
 REGISTERS = list(Registers.all_registers())
 
@@ -130,7 +131,6 @@ class RiscVInput:
                 regex = re.compile(regex)
             match = regex.match(self.content[at:])
             if match is None:
-                print("Regex matched none at {}!".format(self.context()))
                 return None
 
             if regex_group != 0 and not match.group(0).startswith(match.group(regex_group)):
@@ -272,9 +272,7 @@ class RiscVTokenizer:
                 self.parse_instruction()
             else:
                 token = self.input.peek(size=5)
-                print("Unknown token around {} at: {}".format(repr(token), repr(self.input.context())))
-                self.input.consume_whitespace()
-                print("After whitespace at: {}".format(repr(self.input.context())))
+                raise ParseException("Unknown token around {} at: {}".format(repr(token), repr(self.input.context())))
             self.input.consume_whitespace()
 
     def parse_pseudo_op(self):
