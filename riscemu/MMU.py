@@ -2,6 +2,7 @@ from .Config import RunConfig
 from .Executable import Executable, LoadedExecutable, LoadedMemorySection
 from .helpers import align_addr
 from .Exceptions import OutOfMemoryException
+from .colors import *
 from typing import Dict, List, Tuple, Optional
 
 
@@ -48,7 +49,7 @@ class MMU:
 
         self.global_symbols.update(loaded_bin.exported_symbols)
 
-        print("Successfully loaded {}".format(loaded_bin))
+        print(FMT_MEM + "Successfully loaded{}: {}".format(FMT_NONE, loaded_bin))
 
         return loaded_bin
 
