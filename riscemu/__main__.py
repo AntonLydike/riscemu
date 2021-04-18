@@ -5,7 +5,8 @@ if __name__ == '__main__':
     import sys
 
     parser = argparse.ArgumentParser(description='RISC-V Userspace parser and emulator', prog='riscemu')
-    parser.add_argument('file', metavar='file.asm', type=str, help='The assembly file to interpret and run')
+    parser.add_argument('files', metavar='file.asm', type=str, nargs='+',
+                        help='The assembly files to load, the last one will be run')
 
     # RunConfig parameters
     parser.add_argument('--no-color', type=bool, help='no colored output', default=False,
@@ -35,22 +36,25 @@ if __name__ == '__main__':
         FMT_PRINT = ""
 
     try:
-        tk = RiscVTokenizer(RiscVInput.from_file(args.file))
-        tk.tokenize()
+        cpu = CPU(cfg)
+        loaded_exe = None
+        for file in args.files:
+            tk = RiscVTokenizer(RiscVInput.from_file(file))
+            tk.tokenize()
 
-        if args.print_tokens:
-            print(FMT_PRINT + "Tokens:" + FMT_NONE)
-            for token in tk.tokens:
-                print(token)
+            if args.print_tokens:
+                print(FMT_PRINT + "Tokens:" + FMT_NONE)
+                for token in tk.tokens:
+                    print(token)
 
-        executable = ExecutableParser(tk).parse()
+            loaded_exe = cpu.load(ExecutableParser(tk).parse())
+
+        # run the last loaded executable
+        cpu.run_loaded(loaded_exe)
     except RiscemuBaseException as e:
         print("Error while parsing: {}".format(e.message()))
         import traceback
         traceback.print_exception(type(e), e, e.__traceback__)
         sys.exit(1)
 
-    cpu = CPU(cfg)
-    le = cpu.load(executable)
-    cpu.run_loaded(le)
 
