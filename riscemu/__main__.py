@@ -1,13 +1,14 @@
 if __name__ == '__main__':
     from . import *
     from .helpers import *
-    from .instructions import RV32I, RV32M
+    from .instructions import InstructionSetDict
     import argparse
     import sys
 
+    all_ins_names = list(InstructionSetDict.keys())
 
     class OptionStringAction(argparse.Action):
-        def __init__(self, option_strings, dest, keys=None, **kwargs):
+        def __init__(self, option_strings, dest, keys=None, omit_empty=False, **kwargs):
             if keys is None:
                 raise ValueError('must define "keys" argument')
             if isinstance(keys, dict):
@@ -24,13 +25,17 @@ if __name__ == '__main__':
                 keys_d = dict()
             super().__init__(option_strings, dest, default=keys_d, **kwargs)
             self.keys = keys_d
+            self.omit_empty = omit_empty
 
         def __call__(self, parser, namespace, values, option_string=None):
             d = {}
-            d.update(self.keys)
+            if not self.omit_empty:
+                d.update(self.keys)
             for x in values.split(','):
                 if x in self.keys:
                     d[x] = True
+                else:
+                    raise ValueError('Invalid parameter supplied: ' + x)
             setattr(namespace, self.dest, d)
 
 
@@ -43,6 +48,10 @@ if __name__ == '__main__':
 
     parser.add_argument('--syscall-opts', '-so', action=OptionStringAction,
                         keys=('fs_access', 'disable_input'))
+
+    parser.add_argument('--instruction-sets', '-is', action=OptionStringAction, help="Instruction sets to load, available are: {}. "
+                                                                        "All are enabled by default"
+                        .format(", ".join(all_ins_names)), keys={k: True for k in all_ins_names}, omit_empty=True)
 
     parser.add_argument('--default_stack_size', type=int, help='Default stack size of loaded programs', default=None,
                         metavar='default-stack-size', nargs='?')
@@ -60,8 +69,13 @@ if __name__ == '__main__':
 
     FMT_PRINT = FMT_BOLD + FMT_MAGENTA
 
+    # parse required instruction sets
+    ins_to_load = [
+        InstructionSetDict[name] for name, b in args.ins.items() if b
+    ]
+
     try:
-        cpu = CPU(cfg, [RV32I, RV32M])
+        cpu = CPU(cfg, ins_to_load)
         loaded_exe = None
         for file in args.files:
             tk = cpu.get_tokenizer(RiscVInput.from_file(file))
