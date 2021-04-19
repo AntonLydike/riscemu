@@ -48,21 +48,35 @@ class InstructionSet(ABC):
         rd = ins.get_reg(0)
         return rd, rs + imm
 
-    def parse_rd_rs_rs(self, ins: 'LoadedInstruction') -> Tuple[str, int, int]:
+    def parse_rd_rs_rs(self, ins: 'LoadedInstruction', signed=True) -> Tuple[str, int, int]:
         """
         Assumes the command is in <name> rd, rs1, rs2 format
         Returns the name of rd, and the values in rs1 and rs2
         """
         ASSERT_LEN(ins.args, 3)
-        return ins.get_reg(0), self.get_reg_content(ins, 1), self.get_reg_content(ins, 2)
+        if signed:
+            return ins.get_reg(0), \
+                   self.get_reg_content(ins, 1), \
+                   self.get_reg_content(ins, 2)
+        else:
+            return ins.get_reg(0), \
+                   to_unsigned(self.get_reg_content(ins, 1)), \
+                   to_unsigned(self.get_reg_content(ins, 2))
 
-    def parse_rd_rs_imm(self, ins: 'LoadedInstruction') -> Tuple[str, int, int]:
+    def parse_rd_rs_imm(self, ins: 'LoadedInstruction', signed=True) -> Tuple[str, int, int]:
         """
         Assumes the command is in <name> rd, rs, imm format
         Returns the name of rd, the value in rs and the immediate imm
         """
         ASSERT_LEN(ins.args, 3)
-        return ins.get_reg(0), self.get_reg_content(ins, 1), ins.get_imm(2)
+        if signed:
+            return ins.get_reg(0), \
+                   self.get_reg_content(ins, 1), \
+                   ins.get_imm(2)
+        else:
+            return ins.get_reg(0), \
+                   to_unsigned(self.get_reg_content(ins, 1)), \
+                   to_unsigned(ins.get_imm(2))
 
     def get_reg_content(self, ins: 'LoadedInstruction', ind: int) -> int:
         """
