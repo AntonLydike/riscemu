@@ -97,33 +97,24 @@ class RV32I(InstructionSet):
         )
 
     def instruction_add(self, ins: 'LoadedInstruction'):
-        ASSERT_LEN(ins.args, 3)
-        dst = ins.get_reg(0)
-        src1 = ins.get_reg(1)
-        src2 = ins.get_reg(2)
+        dst, rs1, rs2 = self.parse_rd_rs_rs(ins)
         self.regs.set(
             dst,
-            self.regs.get(src1) + self.regs.get(src2)
+            rs1 + rs2
         )
 
     def instruction_addi(self, ins: 'LoadedInstruction'):
-        ASSERT_LEN(ins.args, 3)
-        dst = ins.get_reg(0)
-        src1 = ins.get_reg(1)
-        imm = ins.get_imm(2)
+        dst, rs1, imm = self.parse_rd_rs_imm(ins)
         self.regs.set(
             dst,
-            self.regs.get(src1) + imm
+            rs1 + imm
         )
 
     def instruction_sub(self, ins: 'LoadedInstruction'):
-        ASSERT_LEN(ins.args, 3)
-        dst = ins.get_reg(0)
-        src1 = ins.get_reg(1)
-        src2 = ins.get_reg(2)
+        dst, rs1, rs2 = self.parse_rd_rs_rs(ins)
         self.regs.set(
             dst,
-            self.regs.get(src1) - self.regs.get(src2)
+            rs1 - rs2
         )
 
     def instruction_lui(self, ins: 'LoadedInstruction'):
@@ -133,120 +124,111 @@ class RV32I(InstructionSet):
         self.regs.set(reg, imm << 12)
 
     def instruction_auipc(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        ASSERT_LEN(ins.args, 2)
+        reg = ins.get_reg(0)
+        imm = to_unsigned(ins.get_imm(1))
+        self.pc += (imm << 12)
+        self.regs.set(reg, self.pc)
 
     def instruction_xor(self, ins: 'LoadedInstruction'):
-        ASSERT_LEN(ins.args, 3)
-        dst = ins.get_reg(0)
-        src1 = ins.get_reg(1)
-        src2 = ins.get_reg(2)
+        rd, rs1, rs2 = self.parse_rd_rs_rs(ins)
         self.regs.set(
-            dst,
-            self.regs.get(src1) ^ self.regs.get(src2)
+            rd,
+            rs1 ^ rs2
         )
 
     def instruction_xori(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        rd, rs1, imm = self.parse_rd_rs_imm(ins)
+        self.regs.set(
+            rd,
+            rs1 ^ imm
+        )
 
     def instruction_or(self, ins: 'LoadedInstruction'):
-        ASSERT_LEN(ins.args, 3)
-        dst = ins.get_reg(0)
-        src1 = ins.get_reg(1)
-        src2 = ins.get_reg(2)
+        rd, rs1, rs2 = self.parse_rd_rs_rs(ins)
         self.regs.set(
-            dst,
-            self.regs.get(src1) | self.regs.get(src2)
+            rd,
+            rs1 | rs2
         )
 
     def instruction_ori(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        rd, rs1, imm = self.parse_rd_rs_imm(ins)
+        self.regs.set(
+            rd,
+            rs1 | imm
+        )
 
     def instruction_and(self, ins: 'LoadedInstruction'):
-        ASSERT_LEN(ins.args, 3)
-        dst = ins.get_reg(0)
-        src1 = ins.get_reg(1)
-        src2 = ins.get_reg(2)
+        rd, rs1, rs2 = self.parse_rd_rs_rs(ins)
         self.regs.set(
-            dst,
-            self.regs.get(src1) & self.regs.get(src2)
+            rd,
+            rs1 & rs2
         )
 
     def instruction_andi(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        rd, rs1, imm = self.parse_rd_rs_imm(ins)
+        self.regs.set(
+            rd,
+            rs1 & imm
+        )
 
     def instruction_slt(self, ins: 'LoadedInstruction'):
-        ASSERT_LEN(ins.args, 3)
-        dst = ins.get_reg(0)
-        src1 = ins.get_reg(1)
-        src2 = ins.get_reg(2)
+        rd, rs1, rs2 = self.parse_rd_rs_rs(ins)
         self.regs.set(
-            dst,
-            int(self.regs.get(src1) < self.regs.get(src2))
+            rd,
+            int(rs1 < rs2)
         )
 
     def instruction_slti(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        rd, rs1, imm = self.parse_rd_rs_imm(ins)
+        self.regs.set(
+            rd,
+            int(rs1 < imm)
+        )
 
     def instruction_sltu(self, ins: 'LoadedInstruction'):
-        ASSERT_LEN(ins.args, 3)
-        dst = ins.get_reg(0)
-        src1 = ins.get_reg(1)
-        src2 = ins.get_reg(2)
+        dst, rs1, rs2 = self.parse_rd_rs_rs(ins, signed=False)
         self.regs.set(
             dst,
-            int(to_unsigned(self.regs.get(src1)) < to_unsigned(self.regs.get(src2)))
+            int(rs1 < rs2)
         )
 
     def instruction_sltiu(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        dst, rs1, imm = self.parse_rd_rs_imm(ins, signed=False)
+        self.regs.set(
+            dst,
+            int(rs1 < imm)
+        )
 
     def instruction_beq(self, ins: 'LoadedInstruction'):
-        ASSERT_LEN(ins.args, 3)
-        reg1 = ins.get_reg(0)
-        reg2 = ins.get_reg(1)
-        dest = ins.get_imm(2)
-        if self.regs.get(reg1) == self.regs.get(reg2):
-            self.pc = dest
+        rs1, rs2, dst = self.parse_rs_rs_imm(ins)
+        if rs1 == rs2:
+            self.pc = dst
 
     def instruction_bne(self, ins: 'LoadedInstruction'):
-        ASSERT_LEN(ins.args, 3)
-        reg1 = ins.get_reg(0)
-        reg2 = ins.get_reg(1)
-        dest = ins.get_imm(2)
-        if self.regs.get(reg1) != self.regs.get(reg2):
-            self.pc = dest
+        rs1, rs2, dst = self.parse_rs_rs_imm(ins)
+        if rs1 != rs2:
+            self.pc = dst
 
     def instruction_blt(self, ins: 'LoadedInstruction'):
-        ASSERT_LEN(ins.args, 3)
-        reg1 = ins.get_reg(0)
-        reg2 = ins.get_reg(1)
-        dest = ins.get_imm(2)
-        if self.regs.get(reg1) < self.regs.get(reg2):
-            self.pc = dest
+        rs1, rs2, dst = self.parse_rs_rs_imm(ins)
+        if rs1 < rs2:
+            self.pc = dst
 
     def instruction_bge(self, ins: 'LoadedInstruction'):
-        ASSERT_LEN(ins.args, 3)
-        reg1 = self.get_reg_content(ins, 0)
-        reg2 = self.get_reg_content(ins, 1)
-        dest = ins.get_imm(2)
-        if reg1 >= reg2:
-            self.pc = dest
+        rs1, rs2, dst = self.parse_rs_rs_imm(ins)
+        if rs1 >= rs2:
+            self.pc = dst
 
     def instruction_bltu(self, ins: 'LoadedInstruction'):
-        ASSERT_LEN(ins.args, 3)
-        reg1 = self.get_reg_content(ins, 0)
-        reg2 = self.get_reg_content(ins, 1)
-        dest = ins.get_imm(2)
-        if to_unsigned(reg1) < to_unsigned(reg2):
-            self.pc = dest
+        rs1, rs2, dst = self.parse_rs_rs_imm(ins, signed=False)
+        if rs1 < rs2:
+            self.pc = dst
 
     def instruction_bgeu(self, ins: 'LoadedInstruction'):
-        ASSERT_LEN(ins.args, 3)
-        reg1 = to_unsigned(self.get_reg_content(ins, 0))
-        reg2 = to_unsigned(self.get_reg_content(ins, 1))
-        dest = ins.get_imm(2)
-        if reg1 >= reg2:
-            self.pc = dest
+        rs1, rs2, dst = self.parse_rs_rs_imm(ins, signed=False)
+        if rs1 >= rs2:
+            self.pc = dst
 
     # technically deprecated
     def instruction_j(self, ins: 'LoadedInstruction'):
@@ -288,7 +270,9 @@ class RV32I(InstructionSet):
         self.cpu.syscall_int.handle_syscall(syscall)
 
     def instruction_sbreak(self, ins: 'LoadedInstruction'):
+        ASSERT_LEN(ins.args, 0)
         launch_debug_session(self.cpu, self.mmu, self.regs, "Debug instruction encountered at 0x{:08X}".format(self.pc))
 
     def instruction_nop(self, ins: 'LoadedInstruction'):
+        ASSERT_LEN(ins.args, 0)
         pass
