@@ -41,19 +41,19 @@ usage: riscemu [-h] [--options OPTIONS] [--syscall-opts SYSCALL_OPTS] [--instruc
 
 OPTIONS and SYSCALL_OPTIONS is a list of comma-separated flags that will be enabled
 
-    OPTIONS:
+--options OPTIONS: (-o)
 disable_debug           Disable the ebreak and sbreak instructions
 no_syscall_symbols      Don't make syscall symbols globally available
 fail_on_ex              Do not launch an interactive debugger when the CPU loop catches an exception
 
-    SYSCALL_OPTS:       Options to control syscall behaviour
+--syscall-opts SYSCALL_OPTS: (-so)
+                        Options to control syscall behaviour
 fs_access               Allow access to the filesystem
 disable_io              Disallow reading/writing from stdin/stdout/stderr
 
-    INSTRUCTION_SETS:   A list of comma separated instruction sets you want to load:
+--instruction-sets INSTRUCTION_SETS: (-is)
+                        A list of comma separated instruction sets you want to load:
                         Currently implemented: RV32I, RV32M
-    
-    
 ``` 
 
 If multiple files are specified, all are loaded into memeory, but only the last one is executed. This might be improved 
