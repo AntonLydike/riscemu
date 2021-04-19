@@ -5,15 +5,14 @@ Assembly tokenization should be working completely. It knows what instructions t
 
 ## Instruction sets:
 * RV32I
-    * all loads/stores: `lb, lh, lw, lbu, lhu, sw, sh, sb`
-    * supported arg format is either `rd, imm(reg)` or `rd, reg, imm`
-    * all branch statements: `beq, bne, blt, bge, bltu, bgeu`
-    * all jumps `j, jal, jalr, ret`
-    * basic arithmetic: `add, addi, sub, lui, auipc`)
-    * shifts: `sll, slli, srl, srli, sra, srai`
-    * `scall, ecall, sbreak, ebreak` (both `s` and `e` version are the same instruction)
-    * compares (non immediate): `slt, sltu, slti, sltiu`)
-    * logical (non immediate): `and, or, xor, andi, ori, xori`
+    * Loads/Stores: `lb, lh, lw, lbu, lhu, sw, sh, sb` (supported arg format is either `rd, imm(reg)` or `rd, reg, imm`)
+    * Branch statements: `beq, bne, blt, bge, bltu, bgeu`
+    * Jumps `j, jal, jalr, ret`
+    * Basic arithmetic: `add, addi, sub, lui, auipc`
+    * Shifts: `sll, slli, srl, srli, sra, srai`
+    * Syscall/Debugging:`scall, ecall, sbreak, ebreak` (both `s` and `e` version are the same instruction)
+    * Compares: `slt, sltu, slti, sltiu`
+    * Logical: `and, or, xor, andi, ori, xori`
     * Not implemented: `fence, fence.i, rdcycle, rdcycleh, rdtime, rdtimeh, rdinstret, rdinstreth`
 * RV32M
     * Multiplication: `mul, mulh`, not implemented yet are `mulhsu, mulhu`
