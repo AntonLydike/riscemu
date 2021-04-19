@@ -11,7 +11,11 @@ class RV32M(InstructionSet):
         )
 
     def instruction_mulh(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        rd, rs1, rs2 = self.parse_rd_rs_rs(ins)
+        self.regs.set(
+            rd,
+            (rs1 * rs2) >> 32
+        )
 
     def instruction_mulhsu(self, ins: 'LoadedInstruction'):
         INS_NOT_IMPLEMENTED(ins)
@@ -27,9 +31,7 @@ class RV32M(InstructionSet):
         )
 
     def instruction_divu(self, ins: 'LoadedInstruction'):
-        rd, rs1, rs2 = self.parse_rd_rs_rs(ins)
-        rs1 = to_unsigned(rs1)
-        rs2 = to_unsigned(rs2)
+        rd, rs1, rs2 = self.parse_rd_rs_rs(ins, signed=False)
         self.regs.set(
             rd,
             rs1 // rs2
@@ -43,9 +45,7 @@ class RV32M(InstructionSet):
         )
 
     def instruction_remu(self, ins: 'LoadedInstruction'):
-        rd, rs1, rs2 = self.parse_rd_rs_rs(ins)
-        rs1 = to_unsigned(rs1)
-        rs2 = to_unsigned(rs2)
+        rd, rs1, rs2 = self.parse_rd_rs_rs(ins, signed=False)
         self.regs.set(
             rd,
             rs1 % rs2
