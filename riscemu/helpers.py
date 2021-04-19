@@ -1,7 +1,7 @@
 from math import log10, ceil, log
 from .Exceptions import NumberFormatException
 from .colors import *
-
+from .Exceptions import *
 
 def align_addr(addr: int, to_bytes: int = 8):
     """
@@ -14,10 +14,12 @@ def parse_numeric_argument(arg: str):
     """
     parse hex or int strings
     """
-    if '0x' in arg or '0X' in arg:
-        return int(arg, 16)
-    return int(arg)
-
+    try:
+        if '0x' in arg or '0X' in arg:
+            return int(arg, 16)
+        return int(arg)
+    except ValueError as ex:
+        raise ParseException('Invalid immediate argument \"{}\", maybe missing symbol?'.format(arg), (arg, ex))
 
 def int_to_bytes(val, bytes=4, unsigned=False):
     """
