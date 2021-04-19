@@ -14,6 +14,7 @@ main:
         addi    s2, zero, 56    ; last storage index
         addi    t0, zero, 1     ; t0 = F_{i}
         addi    t1, zero, 1     ; t1 = F_{i+1}
+        ebreak                  ; launch debugger
 loop:
         sw      t0, fibs(s1)    ; save
         add     t2, t1, t0      ; t2 = F_{i+2}
@@ -21,14 +22,14 @@ loop:
         addi    t1, t2, 0       ; t1 = t2
         addi    s1, s1, 4       ; increment storage pointer
         blt     s1, s2, loop    ; loop as long as we did not reach array length
-        ; exit gracefully
         ebreak                  ; launch debugger
+        ; exit gracefully
         addi    a0, zero, 0
         addi    a7, zero, 93
         scall                   ; exit with code 0
 ```
 
-This calculates the fibonacci sequence and stores it in memory at `fibs`. After it calculated all fibonacci numbers, it
+This calculates the fibonacci sequence and stores it in memory at `fibs`. before and after it calculated all fibonacci numbers, it
 uses the `ebreak` instruction to open the debugger. Let's run it and see what happens:
 
 ```
@@ -41,7 +42,7 @@ Debug instruction encountered at 0x00000143
 In this interactive session, you have access to the cpu, registers, memory and syscall interface. You can look into everything,
 and most common tasks should have helper methods for them.
 
-Available objects are:
+**Available objects are:**
 
 * `mem`: (aka `mmu` or `memory`)
   * `dump(address, fmt='hex', max_rows=10, group=4, bytes_per_row=16, all=False`:
@@ -58,6 +59,14 @@ Available objects are:
 * `cpu`:
   * The CPU has the `pc` attribute and `cycle` attribute. Others won't be useful in this context. 
   
+**Available helpers are:**
+
+* `dump(regs | addr)` dumps either registers or memory address
+* `cont(verbose=True)` continue execution (verbose prints each executed instruction)
+* `step()` run the next instruction
+* `ins()` get current instruction (this reference is mutable, if you want to edit your code on the fly)
+
+
 Example:
 
 ![debuggin the fibs program](debug-session.png)

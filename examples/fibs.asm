@@ -10,6 +10,7 @@ main:
         addi    s2, zero, 56    ; last storage index
         addi    t0, zero, 1     ; t0 = F_{i}
         addi    t1, zero, 1     ; t1 = F_{i+1}
+        ebreak                  ; launch debugger
 loop:
         sw      t0, fibs(s1)    ; save
         add     t2, t1, t0      ; t2 = F_{i+2}
