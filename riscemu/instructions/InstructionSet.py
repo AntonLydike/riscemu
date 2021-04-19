@@ -78,6 +78,20 @@ class InstructionSet(ABC):
                    to_unsigned(self.get_reg_content(ins, 1)), \
                    to_unsigned(ins.get_imm(2))
 
+    def parse_rs_rs_imm(self, ins: 'LoadedInstruction', signed=True) -> Tuple[int, int, int]:
+        """
+        Assumes the command is in <name> rs1, rs2, imm format
+        Returns the values in rs1, rs2 and the immediate imm
+        """
+        if signed:
+            return self.get_reg_content(ins, 0), \
+                   self.get_reg_content(ins, 1), \
+                   ins.get_imm(2)
+        else:
+            return to_unsigned(self.get_reg_content(ins, 0)), \
+                   to_unsigned(self.get_reg_content(ins, 1)), \
+                   to_unsigned(ins.get_imm(2))
+
     def get_reg_content(self, ins: 'LoadedInstruction', ind: int) -> int:
         """
         get the register name from ins and then return the register contents
