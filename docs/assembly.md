@@ -3,18 +3,22 @@
 Assembly tokenization should be working completely. It knows what instructions the CPU implementation supports and parses based on them.
 
 
-## Instructions
-  * all loads/stores: `lb, lh, lw, lbu, lhu, sw, sh, sb`
+## Instruction sets:
+* RV32I
+    * all loads/stores: `lb, lh, lw, lbu, lhu, sw, sh, sb`
     * supported arg format is either `rd, imm(reg)` or `rd, reg, imm`
-  * all branch statements: `beq, bne, blt, bge, bltu, bgeu`
-  * all jumps `j, jal, jalr, ret`
-  * basic arithmetic: `add, addi, sub` (not `lui, auipc`)
-  * shifts: `sll, slli, srl, srli, sra, srai`
-  * `scall, ecall, sbreak, ebreak` (both `s` and `e` version are the same instruction)
-  * compares (non immediate): `slt, sltu` (not `slti, sltiu`)
-  * logical (non immediate): `and, or, xor` (not `andi, ori, xori`)
-  
-All unimplemented instructions can be added quite easily
+    * all branch statements: `beq, bne, blt, bge, bltu, bgeu`
+    * all jumps `j, jal, jalr, ret`
+    * basic arithmetic: `add, addi, sub, lui, auipc`)
+    * shifts: `sll, slli, srl, srli, sra, srai`
+    * `scall, ecall, sbreak, ebreak` (both `s` and `e` version are the same instruction)
+    * compares (non immediate): `slt, sltu, slti, sltiu`)
+    * logical (non immediate): `and, or, xor, andi, ori, xori`
+    * Not implemented: `fence, fence.i, rdcycle, rdcycleh, rdtime, rdtimeh, rdinstret, rdinstreth`
+* RV32M
+    * Multiplication: `mul, mulh`, not implemented yet are `mulhsu, mulhu`
+    * Division: `div, divu, rem, remu`
+
 
 
 ## Pseudo-ops
@@ -25,6 +29,7 @@ The following pseudo-ops are implemented as of yet:
 * `.section .<name>` same as `.<name>`, see sections
 * `.set <name>, <value>` to create a const symbol with a given value
 * `.global <name>` mark symbol `<name>` as a global symbol. It is available from all loaded programs
+* `.align <bytes>` currently a nop as cpu does not care about alignment as of now
 
 ## Sections: 
 Currently only these three sections are supported: 
