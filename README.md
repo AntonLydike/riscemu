@@ -61,6 +61,7 @@ See [docs/debugging.md](docs/debugging.md) for more info.
 
 ## Resources:
   * Pseudo ops: https://www.codetd.com/article/8981522
+  * detailed instruction definition: https://msyksphinz-self.github.io/riscv-isadoc/html/rvi.html#add
   * RISC-V reference card: https://www.cl.cam.ac.uk/teaching/1617/ECAD+Arch/files/docs/RISCVGreenCardv8-20151013.pdf
   
 ## TODO:
