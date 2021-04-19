@@ -25,6 +25,7 @@ class CPU:
         self.exit = False
         self.exit_code = 0
         self.conf = conf
+        self.active_debug = False # if a debugging session is currently runnign
 
         # setup MMU, registers and syscall handlers
         self.mmu = MMU(conf)
@@ -66,7 +67,30 @@ class CPU:
 
         self.__run()
 
-    def __run(self):
+    def continue_from_debugger(self, verbose=True):
+        """
+        dalled from the debugger to continue running
+        """
+        self.__run(verbose)
+
+    def step(self):
+        if self.exit:
+            print(FMT_CPU + "Program exited with code {}".format(self.exit_code) + FMT_NONE)
+        else:
+            try:
+                self.cycle += 1
+                ins = self.mmu.read_ins(self.pc)
+                print("Running instruction {} from 0x{:08X}".format(ins, self.pc))
+                self.pc += 1
+                self.__run_instruction(ins)
+            except LaunchDebuggerException:
+                print(FMT_CPU + "[CPU] Returning to debugger!" + FMT_NONE)
+            except RiscemuBaseException as ex:
+                self.pc -= 1
+                print(ex.message())
+
+
+    def __run(self, verbose=False):
         if self.pc <= 0:
             return False
         ins = None
@@ -74,14 +98,22 @@ class CPU:
             while not self.exit:
                 self.cycle += 1
                 ins = self.mmu.read_ins(self.pc)
+                if verbose:
+                    print(FMT_CPU + "   Running 0x{:08X}:{} {}".format(self.pc, FMT_NONE, ins))
                 self.pc += 1
                 self.__run_instruction(ins)
         except RiscemuBaseException as ex:
-            print(FMT_ERROR + "[CPU] excpetion caught at 0x{:08X}: {}:".format(self.pc-1, ins) + FMT_NONE)
-            print("      " + ex.message())
+            if not isinstance(ex, LaunchDebuggerException):
+                print(FMT_ERROR + "[CPU] excpetion caught at 0x{:08X}: {}:".format(self.pc-1, ins) + FMT_NONE)
+                print(ex.message())
+                self.pc -= 1
+
+            if self.active_debug:
+                print(FMT_CPU + "[CPU] Returning to debugger!" + FMT_NONE)
+                return
             if self.conf.debug_on_exception:
                 launch_debug_session(self, self.mmu, self.regs,
-                                     "Exception encountered, launching debug:".format(self.pc-1))
+                                     "Exception encountered, launching debug:")
 
         print()
         print(FMT_CPU + "Program exited with code {}".format(self.exit_code) + FMT_NONE)

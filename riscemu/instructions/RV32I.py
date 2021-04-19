@@ -271,7 +271,10 @@ class RV32I(InstructionSet):
 
     def instruction_sbreak(self, ins: 'LoadedInstruction'):
         ASSERT_LEN(ins.args, 0)
-        launch_debug_session(self.cpu, self.mmu, self.regs, "Debug instruction encountered at 0x{:08X}".format(self.pc))
+        if self.cpu.active_debug:
+            print("Debug instruction encountered at 0x{:08X}".format(self.pc-1))
+            raise LaunchDebuggerException()
+        launch_debug_session(self.cpu, self.mmu, self.regs, "Debug instruction encountered at 0x{:08X}".format(self.pc-1))
 
     def instruction_nop(self, ins: 'LoadedInstruction'):
         ASSERT_LEN(ins.args, 0)

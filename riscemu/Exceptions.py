@@ -134,3 +134,9 @@ class NumberFormatException(RiscemuBaseException):
             self.__class__.__name__,
             self.msg
         )
+
+
+# this exception is not printed and simply signals that an interactive debugging session is
+class LaunchDebuggerException(RiscemuBaseException):
+    def message(self):
+        return ""
