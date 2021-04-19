@@ -35,19 +35,19 @@ class CPU:
         self.instruction_sets: List['InstructionSet'] = list()
         self.instructions: Dict[str, Callable[[LoadedInstruction], None]] = dict()
         for set_class in instruction_sets:
-            ins_set = set_class()
-            self.instructions.update(ins_set.load(self))
+            ins_set = set_class(self)
+            self.instructions.update(ins_set.load())
             self.instruction_sets.append(ins_set)
 
         # provide global syscall symbols if option is set
         if conf.include_scall_symbols:
             self.mmu.global_symbols.update(self.syscall_int.get_syscall_symbols())
 
-    def get_tokenizer(self, input):
+    def get_tokenizer(self, tokenizer_input):
         """
         Returns a tokenizer that respects the language of the CPU
         """
-        return RiscVTokenizer(input, self.all_instructions())
+        return RiscVTokenizer(tokenizer_input, self.all_instructions())
 
     def load(self, e: 'Executable'):
         """
@@ -92,23 +92,6 @@ class CPU:
         else:
             # this should never be reached, as unknown instructions are imparseable
             raise RuntimeError("Unknown instruction: {}".format(ins))
-
-    def parse_mem_ins(self, ins: 'LoadedInstruction') -> Tuple[str, int]:
-        """
-        parses both rd, rs1, imm and rd, imm(rs1) arguments and returns (rd, imm+rs1)
-        (so a register and address tuple for memory instructions)
-        """
-        if len(ins.args) == 3:
-            # handle rd, rs1, imm
-            rs1 = ins.get_reg(1)
-            imm = ins.get_imm(2)
-        else:
-            ASSERT_LEN(ins.args, 2)
-            ASSERT_IN("(", ins.args[1])
-            imm, rs1 = ins.get_imm_reg(1)
-            # handle rd, imm(rs1)
-        rd = ins.get_reg(0)
-        return rd, self.regs.get(rs1) + imm
 
     def all_instructions(self) -> List[str]:
         return list(self.instructions.keys())
