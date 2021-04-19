@@ -80,7 +80,7 @@ class CPU:
             try:
                 self.cycle += 1
                 ins = self.mmu.read_ins(self.pc)
-                print("Running instruction {} from 0x{:08X}".format(ins, self.pc))
+                print(FMT_CPU + "   Running 0x{:08X}:{} {}".format(self.pc, FMT_NONE, ins))
                 self.pc += 1
                 self.__run_instruction(ins)
             except LaunchDebuggerException:
