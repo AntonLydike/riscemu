@@ -67,5 +67,6 @@ See [docs/debugging.md](docs/debugging.md) for more info.
 ## TODO:
  * Add a cycle limit to the options and CPU to catch infinite loops
  * Move away from `print` and use `logging.logger` instead
+ * Properly support stack/heap
  
  
