@@ -10,6 +10,7 @@ class InstructionSet(ABC):
     """
 
     def __init__(self, cpu: 'CPU'):
+        self.name = self.__class__.__name__
         self.cpu = cpu
         self.mmu = cpu.mmu
         self.regs = cpu.regs

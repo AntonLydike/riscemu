@@ -100,5 +100,5 @@ class CPU:
         return "CPU(pc=0x{:08X}, cycle={}, instructions={})".format(
             self.pc,
             self.cycle,
-            " ".join(s.name for s in self.sets)
+            " ".join(s.name for s in self.instruction_sets)
         )
