@@ -17,9 +17,15 @@ def launch_debug_session(cpu: 'CPU', mmu: 'MMU', reg: 'Registers', prompt=""):
     mem = mmu
     syscall_interface = cpu.syscall_int
 
-    vars = globals()
-    vars.update(locals())
+    def dump(what, *args, **kwargs):
+        if isinstance(what, Registers):
+            regs.dump(*args, **kwargs)
+        else:
+            mmu.dump(what, *args, **kwargs)
 
-    readline.set_completer(rlcompleter.Completer(vars).complete)
+    sess_vars = globals()
+    sess_vars.update(locals())
+
+    readline.set_completer(rlcompleter.Completer(sess_vars).complete)
     readline.parse_and_bind("tab: complete")
-    code.InteractiveConsole(vars).interact(banner=prompt, exitmsg="Resuming simulation")
+    code.InteractiveConsole(sess_vars).interact(banner=prompt, exitmsg="Resuming simulation")

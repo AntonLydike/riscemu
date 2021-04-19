@@ -53,10 +53,11 @@ class MMU:
 
         return loaded_bin
 
-    def get_sec_containing(self, addr: int):
+    def get_sec_containing(self, addr: int) -> Optional[LoadedMemorySection]:
         for sec in self.sections:
             if sec.base <= addr < sec.base + sec.size:
                 return sec
+        return None
 
     def read_ins(self, addr: int):
         sec = self.get_sec_containing(addr)
@@ -72,7 +73,10 @@ class MMU:
 
     # debugging interactions:
     def dump(self, addr, *args, **kwargs):
-        self.get_sec_containing(addr).dump(addr, *args, **kwargs)
+        sec = self.get_sec_containing(addr)
+        if sec is None:
+            return
+        sec.dump(addr, *args, **kwargs)
 
     def symbol(self, symb:str):
         print(FMT_MEM + "Lookup for symbol {}:".format(symb) + FMT_NONE)
