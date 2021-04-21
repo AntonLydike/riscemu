@@ -97,7 +97,15 @@ class RV32I(InstructionSet):
         )
 
     def instruction_add(self, ins: 'LoadedInstruction'):
-        dst, rs1, rs2 = self.parse_rd_rs_rs(ins)
+        dst = ""
+        if self.cpu.conf.add_accept_imm:
+            try:
+                dst, rs1, rs2 = self.parse_rd_rs_imm(ins)
+            except:
+                pass
+        if not dst:
+            dst, rs1, rs2 = self.parse_rd_rs_rs(ins)
+
         self.regs.set(
             dst,
             rs1 + rs2

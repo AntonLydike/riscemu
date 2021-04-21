@@ -6,6 +6,7 @@ from typing import Optional
 class RunConfig:
     preffered_stack_size: Optional[int] = None
     include_scall_symbols: bool = True
+    add_accept_imm: bool = False
     # debugging
     debug_instruction: bool = True
     debug_on_exception: bool = True

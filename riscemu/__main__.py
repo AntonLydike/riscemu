@@ -44,7 +44,7 @@ if __name__ == '__main__':
                         help='The assembly files to load, the last one will be run')
 
     parser.add_argument('--options', '-o', action=OptionStringAction,
-                        keys=('disable_debug', 'no_syscall_symbols', 'fail_on_ex'))
+                        keys=('disable_debug', 'no_syscall_symbols', 'fail_on_ex', 'add_accept_imm'))
 
     parser.add_argument('--syscall-opts', '-so', action=OptionStringAction,
                         keys=('fs_access', 'disable_input'))
@@ -63,6 +63,7 @@ if __name__ == '__main__':
         debug_instruction=not args.options['disable_debug'],
         include_scall_symbols=not args.options['no_syscall_symbols'],
         debug_on_exception=not args.options['fail_on_ex'],
+        add_accept_imm=args.options['add_accept_imm'],
         scall_fs=args.syscall_opts['fs_access'],
         scall_input=not args.syscall_opts['disable_input']
     )

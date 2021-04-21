@@ -45,6 +45,7 @@ OPTIONS and SYSCALL_OPTIONS is a list of comma-separated flags that will be enab
 disable_debug           Disable the ebreak and sbreak instructions
 no_syscall_symbols      Don't make syscall symbols globally available
 fail_on_ex              Do not launch an interactive debugger when the CPU loop catches an exception
+add_accept_imm          accept "add rd, rs, imm" instructions, even though they are not standard
 
 --syscall-opts SYSCALL_OPTS: (-so)
                         Options to control syscall behaviour
@@ -72,6 +73,8 @@ See [docs/debugging.md](docs/debugging.md) for more info.
   * RISC-V reference card: https://www.cl.cam.ac.uk/teaching/1617/ECAD+Arch/files/docs/RISCVGreenCardv8-20151013.pdf
   
 ## TODO:
+ * Currently registers don't enforce 32 bit (no overflows etc)
+ * Correctly handle 12 and 20 bit immediate (currently not limited to bits at all)
  * Add a cycle limit to the options and CPU to catch infinite loops
  * Move away from `print` and use `logging.logger` instead
  * Properly support stack/heap
