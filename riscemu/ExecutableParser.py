@@ -1,4 +1,4 @@
-from .helpers import parse_numeric_argument
+from .helpers import parse_numeric_argument, int_to_bytes
 from .Executable import Executable, InstructionMemorySection, MemorySection, MemoryFlags
 from .Exceptions import *
 
@@ -114,6 +114,12 @@ class ExecutableParser:
 
     def op_align(self, op: 'RiscVPseudoOpToken'):
         pass
+
+    def op_word(self, op: 'RiscVPseudoOpToken'):
+        ASSERT_LEN(op.args, 1)
+        val = parse_numeric_argument(op.args[0])
+        self.curr_sec().add(int_to_bytes(val, 4))
+
 
     ## Section handler code
     def set_sec(self, name: str, flags: MemoryFlags, cls=MemorySection):
