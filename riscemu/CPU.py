@@ -1,3 +1,4 @@
+import sys
 import traceback
 from typing import Tuple, List, Dict, Callable, Type
 
@@ -115,8 +116,14 @@ class CPU:
                 launch_debug_session(self, self.mmu, self.regs,
                                      "Exception encountered, launching debug:")
 
-        print()
-        print(FMT_CPU + "Program exited with code {}".format(self.exit_code) + FMT_NONE)
+        if self.exit:
+            print()
+            print(FMT_CPU + "Program exited with code {}".format(self.exit_code) + FMT_NONE)
+            sys.exit(self.exit_code)
+        else:
+            print()
+            print(FMT_CPU + "Program stopped without exiting!" + FMT_NONE)
+
 
     def __run_instruction(self, ins: 'LoadedInstruction'):
         if ins.name in self.instructions:
