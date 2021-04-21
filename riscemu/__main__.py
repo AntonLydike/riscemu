@@ -67,6 +67,10 @@ if __name__ == '__main__':
         scall_input=not args.syscall_opts['disable_input']
     )
 
+
+    if not hasattr(args, 'ins'):
+        setattr(args, 'ins', {k: True for k in all_ins_names})
+
     FMT_PRINT = FMT_BOLD + FMT_MAGENTA
 
     # parse required instruction sets
