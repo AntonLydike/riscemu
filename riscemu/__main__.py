@@ -1,3 +1,11 @@
+"""
+RiscEmu (c) 2021 Anton Lydike
+
+SPDX-License-Identifier: MIT
+
+This file holds the logic for starting the emulator from the CLI
+"""
+
 if __name__ == '__main__':
     from . import *
     from .helpers import *

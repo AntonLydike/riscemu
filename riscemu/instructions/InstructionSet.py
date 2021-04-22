@@ -1,12 +1,25 @@
-import typing
+"""
+RiscEmu (c) 2021 Anton Lydike
 
-from abc import ABC, abstractmethod
-from ..CPU import *
+SPDX-License-Identifier: BSD-2-Clause
+"""
+
+from typing import Tuple, Callable, Dict
+
+from abc import ABC
+from ..CPU import CPU
+from ..helpers import ASSERT_LEN, ASSERT_IN, to_unsigned
 
 
 class InstructionSet(ABC):
     """
     Represents a collection of instructions
+
+    Each instruction set has to inherit from this class. Each instruction should be it's own method:
+
+    instruction_<name>(self, ins: LoadedInstruction)
+
+    instructions containing a dot '.' should replace it with an underscore.
     """
 
     def __init__(self, cpu: 'CPU'):
@@ -15,7 +28,7 @@ class InstructionSet(ABC):
         self.mmu = cpu.mmu
         self.regs = cpu.regs
 
-    def load(self) -> typing.Dict[str, typing.Callable[['LoadedInstruction'], None]]:
+    def load(self) -> Dict[str, Callable[['LoadedInstruction'], None]]:
         """
         This is called by the CPU once it instantiates this instruction set
 
@@ -27,13 +40,18 @@ class InstructionSet(ABC):
         }
 
     def get_instructions(self):
+        """
+        Returns a list of all valid instruction names included in this instruction set
+
+        converts underscores in names to dots
+        """
         for member in dir(self):
             if member.startswith('instruction_'):
                 yield member[12:].replace('_', '.'), getattr(self, member)
 
     def parse_mem_ins(self, ins: 'LoadedInstruction') -> Tuple[str, int]:
         """
-        parses both rd, rs, imm and rd, imm(rs) arguments and returns (rd, imm+rs1)
+        parses both rd, rs, imm and rd, imm(rs) argument format and returns (rd, imm+rs1)
         (so a register and address tuple for memory instructions)
         """
         if len(ins.args) == 3:
@@ -101,6 +119,9 @@ class InstructionSet(ABC):
 
     @property
     def pc(self):
+        """
+        shorthand for self.cpu.pc
+        """
         return self.cpu.pc
 
     @pc.setter

@@ -1,10 +1,27 @@
+"""
+RiscEmu (c) 2021 Anton Lydike
+
+SPDX-License-Identifier: BSD-2-Clause
+"""
+
 from .InstructionSet import *
 
 from ..helpers import int_from_bytes, int_to_bytes, to_unsigned, to_signed
 from ..colors import FMT_DEBUG, FMT_NONE
+from ..debug import launch_debug_session
+from ..Exceptions import LaunchDebuggerException
+from ..Syscall import Syscall
 
 
 class RV32I(InstructionSet):
+    """
+    The RV32I instruction set. Some instructions are missing, such as
+    fence, fence.i, rdcycle, rdcycleh, rdtime, rdtimeh, rdinstret, rdinstreth
+    All atomic read/writes are also not implemented yet
+
+    See https://maxvytech.com/images/RV32I-11-2018.pdf for a more detailed overview
+    """
+
     def instruction_lb(self, ins: 'LoadedInstruction'):
         rd, addr = self.parse_mem_ins(ins)
         self.regs.set(rd, int_from_bytes(self.mmu.read(addr, 1)))
@@ -281,13 +298,13 @@ class RV32I(InstructionSet):
     def instruction_sbreak(self, ins: 'LoadedInstruction'):
         ASSERT_LEN(ins.args, 0)
         if self.cpu.active_debug:
-            print(FMT_DEBUG + "Debug instruction encountered at 0x{:08X}".format(self.pc-1) + FMT_NONE)
+            print(FMT_DEBUG + "Debug instruction encountered at 0x{:08X}".format(self.pc - 1) + FMT_NONE)
             raise LaunchDebuggerException()
         launch_debug_session(
             self.cpu,
             self.mmu,
             self.regs,
-            "Debug instruction encountered at 0x{:08X}".format(self.pc-1)
+            "Debug instruction encountered at 0x{:08X}".format(self.pc - 1)
         )
 
     def instruction_nop(self, ins: 'LoadedInstruction'):

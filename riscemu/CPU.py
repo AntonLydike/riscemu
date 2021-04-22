@@ -1,15 +1,23 @@
+"""
+RiscEmu (c) 2021 Anton Lydike
+
+SPDX-License-Identifier: BSD-2-Clause
+
+This file contains the CPU logic (not the individual instruction sets). See instructions/InstructionSet.py for more info
+on them.
+"""
 import sys
-import traceback
 from typing import Tuple, List, Dict, Callable, Type
 
 from .Tokenizer import RiscVTokenizer
 
-from .Syscall import *
-from .Exceptions import *
+from .Syscall import SyscallInterface
+from .Exceptions import RiscemuBaseException, LaunchDebuggerException
 from .MMU import MMU
 from .Config import RunConfig
 from .Registers import Registers
 from .debug import launch_debug_session
+from .colors import FMT_CPU, FMT_NONE, FMT_ERROR
 
 import typing
 
@@ -19,7 +27,18 @@ if typing.TYPE_CHECKING:
 
 
 class CPU:
+    """
+    This class represents a single CPU. It holds references to it's mmu, registers and syscall interrupt handler.
+
+    It is initialized with a configuration and a list of instruction sets.
+    """
     def __init__(self, conf: RunConfig, instruction_sets: List[Type['InstructionSet']]):
+        """
+        Creates a CPU instance.
+
+        :param conf: An instance of the current RunConfiguration
+        :param instruction_sets: A list of instruction set classes. These must inherit from the InstructionSet class
+        """
         # setup CPU states
         self.pc = 0
         self.cycle = 0
@@ -48,6 +67,8 @@ class CPU:
     def get_tokenizer(self, tokenizer_input):
         """
         Returns a tokenizer that respects the language of the CPU
+
+        :param tokenizer_input: an instance of the RiscVTokenizerInput class
         """
         return RiscVTokenizer(tokenizer_input, self.all_instructions())
 
@@ -70,11 +91,16 @@ class CPU:
 
     def continue_from_debugger(self, verbose=True):
         """
-        dalled from the debugger to continue running
+        called from the debugger to continue running
+
+        :param verbose: If True, will print each executed instruction to STDOUT
         """
         self.__run(verbose)
 
     def step(self):
+        """
+        Execute a single instruction, then return.
+        """
         if self.exit:
             print(FMT_CPU + "[CPU] Program exited with code {}".format(self.exit_code) + FMT_NONE)
         else:
@@ -131,11 +157,18 @@ class CPU:
             raise RuntimeError("Unknown instruction: {}".format(ins))
 
     def all_instructions(self) -> List[str]:
+        """
+        Return a list of all instructions this CPU can execute.
+        """
         return list(self.instructions.keys())
 
     def __repr__(self):
-        return "CPU(pc=0x{:08X}, cycle={}, instructions={})".format(
+        """
+        Returns a representation of the CPU and some of its state.
+        """
+        return "CPU(pc=0x{:08X}, cycle={}, exit={}, instructions={})".format(
             self.pc,
             self.cycle,
+            self.exit,
             " ".join(s.name for s in self.instruction_sets)
         )

@@ -1,8 +1,17 @@
+"""
+RiscEmu (c) 2021 Anton Lydike
+
+SPDX-License-Identifier: BSD-2-Clause
+"""
+
 from .InstructionSet import *
-from ..helpers import int_from_bytes, int_to_bytes, to_unsigned, to_signed
+from ..Exceptions import INS_NOT_IMPLEMENTED
 
 
 class RV32M(InstructionSet):
+    """
+    The RV32M Instruction set, containing multiplication and division instructions
+    """
     def instruction_mul(self, ins: 'LoadedInstruction'):
         rd, rs1, rs2 = self.parse_rd_rs_rs(ins)
         self.regs.set(
