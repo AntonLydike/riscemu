@@ -21,6 +21,7 @@ Hello world
 Program exited with code 0
 ```
 
+The [`read` syscall](docs/syscalls.md) defaults to readline behaviour. Reading "true chunks" (ignoring newlines) is currently not supported.  
 
 See the docs on [asembly](docs/assembly.md) for more detail on how to write assembly code for this emulator.
 See the [list of implemented syscalls](docs/syscalls.md) for more details on how to syscall.

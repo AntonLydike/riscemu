@@ -75,7 +75,7 @@ class SyscallInterface:
             scall.registers.set('a0', -1)
             return
 
-        chars = self.open_files[fileno].read(size)
+        chars = self.open_files[fileno].readline(size)
         try:
             data = bytearray(chars, 'ascii')
             scall.cpu.mmu.write(addr, len(data), data)
