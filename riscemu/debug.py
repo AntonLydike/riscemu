@@ -1,5 +1,7 @@
 import typing
 from .Registers import Registers
+from .colors import FMT_DEBUG, FMT_NONE
+
 if typing.TYPE_CHECKING:
     from . import *
 
@@ -42,5 +44,5 @@ def launch_debug_session(cpu: 'CPU', mmu: 'MMU', reg: 'Registers', prompt=""):
 
     readline.set_completer(rlcompleter.Completer(sess_vars).complete)
     readline.parse_and_bind("tab: complete")
-    code.InteractiveConsole(sess_vars).interact(banner=prompt, exitmsg="Exiting debugger")
+    code.InteractiveConsole(sess_vars).interact(banner=FMT_DEBUG + prompt + FMT_NONE, exitmsg="Exiting debugger")
     cpu.active_debug = False

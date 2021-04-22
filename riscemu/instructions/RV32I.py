@@ -1,6 +1,7 @@
 from .InstructionSet import *
 
 from ..helpers import int_from_bytes, int_to_bytes, to_unsigned, to_signed
+from ..colors import FMT_DEBUG, FMT_NONE
 
 
 class RV32I(InstructionSet):
@@ -280,9 +281,14 @@ class RV32I(InstructionSet):
     def instruction_sbreak(self, ins: 'LoadedInstruction'):
         ASSERT_LEN(ins.args, 0)
         if self.cpu.active_debug:
-            print("Debug instruction encountered at 0x{:08X}".format(self.pc-1))
+            print(FMT_DEBUG + "Debug instruction encountered at 0x{:08X}".format(self.pc-1) + FMT_NONE)
             raise LaunchDebuggerException()
-        launch_debug_session(self.cpu, self.mmu, self.regs, "Debug instruction encountered at 0x{:08X}".format(self.pc-1))
+        launch_debug_session(
+            self.cpu,
+            self.mmu,
+            self.regs,
+            "Debug instruction encountered at 0x{:08X}".format(self.pc-1)
+        )
 
     def instruction_nop(self, ins: 'LoadedInstruction'):
         ASSERT_LEN(ins.args, 0)
