@@ -1,3 +1,10 @@
+"""
+RiscEmu (c) 2021 Anton Lydike
+
+SPDX-License-Identifier: BSD-2-Clause
+"""
+
+
 import typing
 from .Registers import Registers
 from .colors import FMT_DEBUG, FMT_NONE

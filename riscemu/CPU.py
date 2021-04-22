@@ -62,7 +62,7 @@ class CPU:
 
         # provide global syscall symbols if option is set
         if conf.include_scall_symbols:
-            self.mmu.global_symbols.update(self.syscall_int.get_syscall_symbols())
+            self.mmu.global_symbols.update(get_syscall_symbols())
 
     def get_tokenizer(self, tokenizer_input):
         """

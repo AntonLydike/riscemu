@@ -1,3 +1,9 @@
+"""
+RiscEmu (c) 2021 Anton Lydike
+
+SPDX-License-Identifier: BSD-2-Clause
+"""
+
 # Colors
 
 FMT_RED = '\033[31m'

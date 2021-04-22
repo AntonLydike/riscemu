@@ -1,3 +1,9 @@
+"""
+RiscEmu (c) 2021 Anton Lydike
+
+SPDX-License-Identifier: BSD-2-Clause
+"""
+
 import re
 from enum import IntEnum
 from typing import List
@@ -75,6 +81,9 @@ def split_accepting_quotes(string, at=REG_ARG_SPLIT, quotes=('"', "'")):
 
 
 class RiscVInput:
+    """
+    Represents an Assembly file
+    """
     def __init__(self, content: str, name: str):
         self.content = content
         self.pos = 0
@@ -240,10 +249,13 @@ class RiscVPseudoOpToken(RiscVToken):
 
 
 class RiscVTokenizer:
-    def __init__(self, input: RiscVInput, instructions: List[str]):
-        self.input = input
+    """
+    A tokenizer for the RISC-V syntax of a given CPU
+    """
+    def __init__(self, input_assembly: RiscVInput, instructions: List[str]):
+        self.input = input_assembly
         self.tokens: List[RiscVToken] = []
-        self.name = input.name
+        self.name = input_assembly.name
         self.instructions = instructions
 
     def tokenize(self):

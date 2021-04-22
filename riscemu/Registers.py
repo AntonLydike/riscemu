@@ -1,17 +1,35 @@
+"""
+RiscEmu (c) 2021 Anton Lydike
+
+SPDX-License-Identifier: BSD-2-Clause
+"""
+
 from .Config import RunConfig
 from .helpers import *
 from collections import defaultdict
 from .Exceptions import InvalidRegisterException
 
 class Registers:
+    """
+    Represents a bunch of registers
+    """
+
     def __init__(self, conf: RunConfig):
+        """
+        Initialize the register configuration, respecting the RunConfig conf
+        :param conf: The RunConfig
+        """
         self.vals = defaultdict(lambda: 0)
         self.last_set = None
         self.last_read = None
         self.conf = conf
 
     def dump(self, full=False):
-        named_regs = [self.reg_repr(reg) for reg in Registers.named_registers()]
+        """
+        Dump all registers to stdout
+        :param full: If True, floating point registers are dumped too
+        """
+        named_regs = [self._reg_repr(reg) for reg in Registers.named_registers()]
 
         lines = [[] for i in range(12)]
         if not full:
@@ -31,7 +49,7 @@ class Registers:
                     lines[i].append(" " * 15)
                 else:
                     reg = '{}{}'.format(name, i)
-                    lines[i].append(self.reg_repr(reg))
+                    lines[i].append(self._reg_repr(reg))
 
         print("Registers[{},{}](".format(
             FMT_ORANGE + FMT_UNDERLINE + 'read' + FMT_NONE,
@@ -49,9 +67,12 @@ class Registers:
         print(")")
 
     def dump_reg_a(self):
-        print("Registers[a]:" + " ".join(self.reg_repr('a{}'.format(i)) for i in range(8)))
+        """
+        Dump the a registers
+        """
+        print("Registers[a]:" + " ".join(self._reg_repr('a{}'.format(i)) for i in range(8)))
 
-    def reg_repr(self, reg):
+    def _reg_repr(self, reg):
         txt = '{:4}=0x{:08X}'.format(reg, self.get(reg, False))
         if reg == 'fp':
             reg = 's0'
@@ -65,7 +86,14 @@ class Registers:
             return FMT_GRAY + txt + FMT_NONE
         return txt
 
-    def set(self, reg, val, mark_set=True):
+    def set(self, reg, val, mark_set=True) -> bool:
+        """
+        Set a register content to val
+        :param reg: The register to set
+        :param val: The new value
+        :param mark_set: If True, marks this register as "last accessed" (only used internally)
+        :return: If the operation was successful
+        """
         if reg == 'zero':
             print("[Registers.set] trying to set read-only register: {}".format(reg))
             return False
@@ -77,8 +105,15 @@ class Registers:
         if mark_set:
             self.last_set = reg
         self.vals[reg] = val
+        return True
 
     def get(self, reg, mark_read=True):
+        """
+        Retuns the contents of register reg
+        :param reg: The register name
+        :param mark_read: If the register should be markes as "last read" (only used internally)
+        :return: The contents of register reg
+        """
         if reg not in Registers.all_registers():
             raise InvalidRegisterException(reg)
         if reg == 'fp':
@@ -89,6 +124,10 @@ class Registers:
 
     @staticmethod
     def all_registers():
+        """
+        Return a list of all valid registers
+        :return: The list
+        """
         return ['zero', 'ra', 'sp', 'gp', 'tp', 's0', 'fp',
                 't0', 't1', 't2', 't3', 't4', 't5', 't6',
                 's1', 's2', 's3', 's4', 's5', 's6', 's7', 's8', 's9', 's10', 's11',
@@ -99,4 +138,8 @@ class Registers:
 
     @staticmethod
     def named_registers():
+        """
+        Return all named registers
+        :return: The list
+        """
         return ['zero', 'ra', 'sp', 'gp', 'tp', 'fp']

@@ -1,6 +1,10 @@
-from math import log10, ceil, log
-from .Exceptions import NumberFormatException
-from .colors import *
+"""
+RiscEmu (c) 2021 Anton Lydike
+
+SPDX-License-Identifier: BSD-2-Clause
+"""
+
+from math import log10, ceil
 from .Exceptions import *
 
 

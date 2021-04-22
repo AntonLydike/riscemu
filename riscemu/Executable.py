@@ -1,3 +1,13 @@
+"""
+RiscEmu (c) 2021 Anton Lydike
+
+SPDX-License-Identifier: BSD-2-Clause
+
+This file holds Executable and LoadedExecutable classes as well as loading and some linking code.
+
+FIXME: refactor this code into muliple files
+"""
+
 from dataclasses import dataclass, field
 from typing import Dict, List, Tuple, Union, Optional
 from .Exceptions import *

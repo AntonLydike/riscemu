@@ -1,3 +1,9 @@
+"""
+RiscEmu (c) 2021 Anton Lydike
+
+SPDX-License-Identifier: BSD-2-Clause
+"""
+
 from dataclasses import dataclass
 from typing import Dict, IO
 import sys
@@ -11,6 +17,9 @@ import typing
 if typing.TYPE_CHECKING:
     from . import CPU
 
+"""
+All available syscalls (mapped id->name)
+"""
 SYSCALLS = {
     63:   'read',
     64:   'write',
@@ -19,6 +28,9 @@ SYSCALLS = {
     1025: 'close',
 }
 
+"""
+All available file open modes
+"""
 OPEN_MODES = {
     0: 'rb',
     1: 'wb',
@@ -30,6 +42,9 @@ OPEN_MODES = {
 
 @dataclass(frozen=True)
 class Syscall:
+    """
+    Represents a syscall
+    """
     id: int
     registers: Registers
     cpu: 'CPU'
@@ -46,7 +61,21 @@ class Syscall:
     def ret(self, code):
         self.registers.set('a0', code)
 
+
+def get_syscall_symbols():
+    """
+    Retuns a dictionary of all syscall symbols (SCALL_<name> -> id)
+    :return:
+    """
+    return {
+        ('SCALL_' + name.upper()): num for num, name in SYSCALLS.items()
+    }
+
+
 class SyscallInterface:
+    """
+    Handles syscalls
+    """
     open_files: Dict[int, IO]
     next_open_handle: int
 
@@ -163,13 +192,11 @@ class SyscallInterface:
         return scall.ret(0)
 
     def exit(self, scall: Syscall):
+        """
+        Exit syscall. Exits the system with status code a0
+        """
         scall.cpu.exit = True
         scall.cpu.exit_code = scall.registers.get('a0')
-
-    def get_syscall_symbols(self):
-        return {
-            ('SCALL_' + name.upper()): num for num, name in SYSCALLS.items()
-        }
 
     def __repr__(self):
         return "{}(\n\tfiles={}\n)".format(

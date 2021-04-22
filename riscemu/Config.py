@@ -1,3 +1,9 @@
+"""
+RiscEmu (c) 2021 Anton Lydike
+
+SPDX-License-Identifier: BSD-2-Clause
+"""
+
 from dataclasses import dataclass
 from typing import Optional
 
