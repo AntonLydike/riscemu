@@ -78,8 +78,8 @@ def highlight_in_list(items, hi_ind):
     return " ".join([apply_highlight(item, i, hi_ind) for i, item in enumerate(items)])
 
 
-def format_bytes(bytes, fmt, group=1, highlight=-1):
-    chunks = create_chunks(bytes, group)
+def format_bytes(byte_arr: bytearray, fmt: str, group: int = 1, highlight: int = -1):
+    chunks = create_chunks(byte_arr, group)
     if fmt == 'hex':
         return highlight_in_list(['0x{}'.format(ch.hex()) for ch in chunks], highlight)
     if fmt == 'int':
@@ -90,5 +90,5 @@ def format_bytes(bytes, fmt, group=1, highlight=-1):
         return highlight_in_list([('{:0' + spc + 'd}').format(int_from_bytes(ch, unsigned=True)) for ch in chunks],
                                  highlight)
     if fmt == 'ascii':
-        spc = str(4 * group)
-        return highlight_in_list([('{:>' + spc + '}').format(ch.decode('ascii')) for ch in chunks], highlight)
+        print("printing ascii", "".join(chr(b) for b in byte_arr))
+        return "".join(repr(chr(b))[1:-1] for b in byte_arr)
