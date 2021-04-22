@@ -49,7 +49,7 @@ class MMU:
 
         self.global_symbols.update(loaded_bin.exported_symbols)
 
-        print(FMT_MEM + "Successfully loaded{}: {}".format(FMT_NONE, loaded_bin))
+        print(FMT_MEM + "[MMU] Successfully loaded{}: {}".format(FMT_NONE, loaded_bin))
 
         return loaded_bin
 
@@ -79,7 +79,7 @@ class MMU:
         sec.dump(addr, *args, **kwargs)
 
     def symbol(self, symb:str):
-        print(FMT_MEM + "Lookup for symbol {}:".format(symb) + FMT_NONE)
+        print(FMT_MEM + "[MMU] Lookup for symbol {}:".format(symb) + FMT_NONE)
         if symb in self.global_symbols:
             print("   Found global symbol {}: 0x{:X}".format(symb, self.global_symbols[symb]))
         for b in self.binaries:

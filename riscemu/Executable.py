@@ -204,7 +204,7 @@ class LoadedMemorySection:
                     ins = repr(self.content[i])
                 print(fmt_str.format(self.base + i, ins))
         else:
-            print(FMT_MEM +  "{}, viewing {} bytes:".format(
+            print(FMT_MEM + "{}, viewing {} bytes:".format(
                 self, end - start
             ) + FMT_NONE)
             for i in range(start, end, bytes_per_row):

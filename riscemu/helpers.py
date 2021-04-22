@@ -3,6 +3,7 @@ from .Exceptions import NumberFormatException
 from .colors import *
 from .Exceptions import *
 
+
 def align_addr(addr: int, to_bytes: int = 8):
     """
     align an address to `to_bytes` (meaning addr & to_bytes = 0)
@@ -20,6 +21,7 @@ def parse_numeric_argument(arg: str):
         return int(arg)
     except ValueError as ex:
         raise ParseException('Invalid immediate argument \"{}\", maybe missing symbol?'.format(arg), (arg, ex))
+
 
 def int_to_bytes(val, bytes=4, unsigned=False):
     """

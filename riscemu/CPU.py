@@ -76,7 +76,7 @@ class CPU:
 
     def step(self):
         if self.exit:
-            print(FMT_CPU + "Program exited with code {}".format(self.exit_code) + FMT_NONE)
+            print(FMT_CPU + "[CPU] Program exited with code {}".format(self.exit_code) + FMT_NONE)
         else:
             try:
                 self.cycle += 1
