@@ -26,7 +26,7 @@ class CPU:
         self.exit = False
         self.exit_code = 0
         self.conf = conf
-        self.active_debug = False # if a debugging session is currently runnign
+        self.active_debug = False  # if a debugging session is currently runnign
 
         # setup MMU, registers and syscall handlers
         self.mmu = MMU(conf)
@@ -90,7 +90,6 @@ class CPU:
                 self.pc -= 1
                 print(ex.message())
 
-
     def __run(self, verbose=False):
         if self.pc <= 0:
             return False
@@ -105,7 +104,7 @@ class CPU:
                 self.__run_instruction(ins)
         except RiscemuBaseException as ex:
             if not isinstance(ex, LaunchDebuggerException):
-                print(FMT_ERROR + "[CPU] excpetion caught at 0x{:08X}: {}:".format(self.pc-1, ins) + FMT_NONE)
+                print(FMT_ERROR + "[CPU] excpetion caught at 0x{:08X}: {}:".format(self.pc - 1, ins) + FMT_NONE)
                 print(ex.message())
                 self.pc -= 1
 
@@ -122,8 +121,7 @@ class CPU:
             sys.exit(self.exit_code)
         else:
             print()
-            print(FMT_CPU + "Program stopped without exiting!" + FMT_NONE)
-
+            print(FMT_CPU + "Program stopped without exiting - perhaps you stopped the debugger?" + FMT_NONE)
 
     def __run_instruction(self, ins: 'LoadedInstruction'):
         if ins.name in self.instructions:

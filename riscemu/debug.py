@@ -33,7 +33,7 @@ def launch_debug_session(cpu: 'CPU', mmu: 'MMU', reg: 'Registers', prompt=""):
         print("Current instruction at 0x{:08X}:".format(cpu.pc))
         return mmu.read_ins(cpu.pc)
 
-    def cont(verbose=True):
+    def cont(verbose=False):
         cpu.continue_from_debugger(verbose)
 
     def step():
