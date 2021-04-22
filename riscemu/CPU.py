@@ -65,7 +65,7 @@ class CPU:
         sp, hp = le.stack_heap
         self.regs.set('sp', sp)
         self.regs.set('a0', hp)  # set a0 to point to the heap
-
+        print(FMT_CPU + '[CPU] Started running from 0x{:08X} ({})'.format(le.run_ptr, le.name) + FMT_NONE)
         self.__run()
 
     def continue_from_debugger(self, verbose=True):
