@@ -26,9 +26,12 @@ The [`read` syscall](docs/syscalls.md) defaults to readline behaviour. Reading "
 See the docs on [asembly](docs/assembly.md) for more detail on how to write assembly code for this emulator.
 See the [list of implemented syscalls](docs/syscalls.md) for more details on how to syscall.
 
-Currently, symbols (such as `main:`) are looked-up at runtime. This allows for better debugging, I believe.
+Currently, symbols (such as `main` or `loop`) are looked-up at runtime. This allows for better debugging, I believe.
 
 Basic IO should work, as open, read, write and close are supported for stdin/stdout/stderr and even aribtrary file paths (if enabled)
+
+When trying to run an assembly program, the emulator first tries to find a symbol named `_start`, then a symbol named `main`. if both
+symbols were not found in the file, it simply starts at the beginning of the `.text` segment.
 
 ## Using the CLI:
 *Current CLI is not final, options may change frequently until a stable version is reached*
