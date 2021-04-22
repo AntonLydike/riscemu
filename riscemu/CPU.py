@@ -11,13 +11,15 @@ from typing import Tuple, List, Dict, Callable, Type
 
 from .Tokenizer import RiscVTokenizer
 
-from .Syscall import SyscallInterface
+from .Syscall import SyscallInterface, get_syscall_symbols
 from .Exceptions import RiscemuBaseException, LaunchDebuggerException
 from .MMU import MMU
 from .Config import RunConfig
 from .Registers import Registers
 from .debug import launch_debug_session
 from .colors import FMT_CPU, FMT_NONE, FMT_ERROR
+
+import riscemu
 
 import typing
 
@@ -32,7 +34,7 @@ class CPU:
 
     It is initialized with a configuration and a list of instruction sets.
     """
-    def __init__(self, conf: RunConfig, instruction_sets: List[Type['InstructionSet']]):
+    def __init__(self, conf: RunConfig, instruction_sets: List[Type['riscemu.InstructionSet']]):
         """
         Creates a CPU instance.
 
@@ -53,7 +55,7 @@ class CPU:
         self.syscall_int = SyscallInterface()
 
         # load all instruction sets
-        self.instruction_sets: List['InstructionSet'] = list()
+        self.instruction_sets: List[riscemu.InstructionSet] = list()
         self.instructions: Dict[str, Callable[[LoadedInstruction], None]] = dict()
         for set_class in instruction_sets:
             ins_set = set_class(self)
@@ -72,13 +74,13 @@ class CPU:
         """
         return RiscVTokenizer(tokenizer_input, self.all_instructions())
 
-    def load(self, e: 'Executable'):
+    def load(self, e: riscemu.Executable):
         """
         Load an executable into Memory
         """
         return self.mmu.load_bin(e)
 
-    def run_loaded(self, le: 'LoadedExecutable'):
+    def run_loaded(self, le: 'riscemu.LoadedExecutable'):
         """
         Run a loaded executable
         """

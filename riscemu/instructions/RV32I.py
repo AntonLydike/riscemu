@@ -11,6 +11,7 @@ from ..colors import FMT_DEBUG, FMT_NONE
 from ..debug import launch_debug_session
 from ..Exceptions import LaunchDebuggerException
 from ..Syscall import Syscall
+from ..Executable import LoadedInstruction
 
 
 class RV32I(InstructionSet):

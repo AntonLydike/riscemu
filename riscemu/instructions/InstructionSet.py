@@ -9,6 +9,7 @@ from typing import Tuple, Callable, Dict
 from abc import ABC
 from ..CPU import CPU
 from ..helpers import ASSERT_LEN, ASSERT_IN, to_unsigned
+from ..Executable import LoadedInstruction
 
 
 class InstructionSet(ABC):

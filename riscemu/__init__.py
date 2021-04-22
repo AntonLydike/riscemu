@@ -17,6 +17,8 @@ from .Executable import Executable, LoadedExecutable
 
 from .ExecutableParser import ExecutableParser
 
+from .instructions import *
+
 from .MMU import MMU
 from .Registers import Registers
 from .Syscall import SyscallInterface, Syscall

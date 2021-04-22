@@ -4,8 +4,13 @@ RiscEmu (c) 2021 Anton Lydike
 SPDX-License-Identifier: BSD-2-Clause
 """
 
+import typing
+
 from abc import abstractmethod
 from .colors import *
+
+if typing.TYPE_CHECKING:
+    from .Executable import LoadedInstruction
 
 
 class RiscemuBaseException(BaseException):
@@ -92,6 +97,7 @@ class OutOfMemoryException(RiscemuBaseException):
 
 
 # CPU Exceptions
+
 
 class UnimplementedInstruction(RiscemuBaseException):
     def __init__(self, ins: 'LoadedInstruction'):
