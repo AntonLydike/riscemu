@@ -10,17 +10,22 @@ if ! command -v 'sphinx-apidoc'; then
 fi
 
 
-# delete old help folder
-rm -rf sphinx-docs/source/help
-cp -r docs sphinx-docs/source/help
 
 if [[ $1 == 'generate' ]]; then
+
+  # delete old help folder
+  rm -rf help
+  cp -r ../../docs help
+
   PYTHONPATH=../../ sphinx-apidoc -e -f -o . ../../riscemu ../../riscemu/colors.py ../../riscemu/__main__.py
   echo "only generating, not building..."
   rm ./modules.rst
   exit 0
 fi
 
+# delete old help folder
+rm -rf sphinx-docs/source/help
+cp -r docs sphinx-docs/source/help
 
 PYTHONPATH=. sphinx-apidoc -e -f -o sphinx-docs/source riscemu riscemu/colors.py riscemu/__main__.py
 
