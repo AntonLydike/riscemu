@@ -70,3 +70,14 @@ html_theme = 'alabaster'
 html_static_path = ['_static']
 
 sys.path.insert(0, os.path.abspath('../../'))
+
+
+if os.getenv('READTHEDOCS', False):
+    import sphinx_rtd_theme
+
+    extensions = [
+        ...
+        "sphinx_rtd_theme",
+    ]
+
+    html_theme = "sphinx_rtd_theme"
