@@ -15,7 +15,6 @@ PSEUDO_OPS = [
     '.double',
     '.extern',
     '.global',
-    '.stack',
     '.align',
     '.float',
     '.kdata',

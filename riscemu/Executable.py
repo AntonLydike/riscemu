@@ -75,16 +75,14 @@ class Executable:
     run_ptr: Tuple[str, int]
     sections: Dict[str, MemorySection]
     symbols: Dict[str, Tuple[str, int]]
-    stack_pref: Optional[int]
     exported_symbols: List[str]
     name: str
 
     def __repr__(self):
-        return "{}(sections = {}, symbols = {}, stack = {}, run_ptr = {}, globals={})".format(
+        return "{}(sections = {}, symbols = {}, run_ptr = {}, globals={})".format(
             self.__class__.__name__,
             " ".join(self.sections.keys()),
             " ".join(self.symbols.keys()),
-            self.stack_pref,
             self.run_ptr,
             ",".join(self.exported_symbols)
         )
@@ -257,7 +255,6 @@ class LoadedExecutable:
     sections: List[LoadedMemorySection]
     symbols: Dict[str, int]
     run_ptr: int
-    stack_heap: Tuple[int, int]  # pointers to stack and heap, are nullptr if no stack/heap is available
     exported_symbols: Dict[str, int]
     global_symbol_table: Dict[str, int]
 
@@ -283,20 +280,6 @@ class LoadedExecutable:
             self.sections.append(loaded_sec)
             self.sections_by_name[loaded_sec.name] = loaded_sec
             curr = align_addr(loaded_sec.size + curr)
-
-        # stack/heap if wanted
-        if exe.stack_pref is not None:
-            self.sections.append(LoadedMemorySection(
-                'stack',
-                curr,
-                exe.stack_pref,
-                bytearray(exe.stack_pref),
-                MemoryFlags(read_only=False, executable=False),
-                self.name
-            ))
-            self.stack_heap = (curr, curr + exe.stack_pref)
-        else:
-            self.stack_heap = (0, 0)
 
         for name, (sec_name, offset) in exe.symbols.items():
             if sec_name == '_static_':

@@ -5,7 +5,7 @@ SPDX-License-Identifier: BSD-2-Clause
 """
 
 from .Config import RunConfig
-from .Executable import Executable, LoadedExecutable, LoadedMemorySection, LoadedInstruction
+from .Executable import Executable, LoadedExecutable, LoadedMemorySection, LoadedInstruction, MemoryFlags
 from .helpers import align_addr
 from .Exceptions import OutOfMemoryException
 from .colors import *
@@ -48,38 +48,31 @@ class MMU:
 
         :param conf: The config to respect
         """
-        self.sections = list()
-        self.binaries = list()
-        self.last_bin = None
-        self.conf = conf
-        self.global_symbols = dict()
+        self.sections: List[LoadedMemorySection] = list()
+        self.binaries: List[LoadedExecutable] = list()
+        self.first_free_addr: int = 0x100
+        self.conf: RunConfig = conf
+        self.global_symbols: Dict[str, int] = dict()
 
-    def load_bin(self, bin: Executable) -> LoadedExecutable:
+    def load_bin(self, exe: Executable) -> LoadedExecutable:
         """
         Load an executable into memory
 
-        :param bin: the executable to load
+        :param exe: the executable to load
         :return: A LoadedExecutable
         :raises OutOfMemoryException: When all memory is used
         """
-        if self.last_bin is None:
-            addr = 0x100  # start at 0x100 instead of 0x00
-        else:
-            addr = self.last_bin.size + self.last_bin.base_addr
+
         # align to 8 byte word
-        addr = align_addr(addr)
+        addr = align_addr(self.first_free_addr)
 
-        # apply preferred stack size from config
-        if bin.stack_pref is None:
-            bin.stack_pref = self.conf.preffered_stack_size
-
-        loaded_bin = LoadedExecutable(bin, addr, self.global_symbols)
+        loaded_bin = LoadedExecutable(exe, addr, self.global_symbols)
 
         if loaded_bin.size + addr > self.max_size:
             raise OutOfMemoryException('load of executable')
 
         self.binaries.append(loaded_bin)
-        self.last_bin = loaded_bin
+        self.first_free_addr = loaded_bin.base_addr + loaded_bin.size
 
         # read sections into sec dict
         for sec in loaded_bin.sections:

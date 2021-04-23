@@ -28,7 +28,6 @@ class ExecutableParser:
         self.tokenizer = tokenizer
         self.active_section: Optional[str] = None
         self.implicit_sections = False
-        self.stack_pref: Optional[int] = None
         self.globals: List[str] = list()
 
     def parse(self) -> Executable:
@@ -52,7 +51,7 @@ class ExecutableParser:
             start_ptr = self.symbols['_start']
         elif 'main' in self.symbols:
             start_ptr = self.symbols['main']
-        return Executable(start_ptr, self.sections, self.symbols, self.stack_pref, self.globals, self.tokenizer.name)
+        return Executable(start_ptr, self.sections, self.symbols, self.globals, self.tokenizer.name)
 
     def parse_instruction(self, ins: 'RiscVInstructionToken') -> None:
         """
@@ -152,15 +151,6 @@ class ExecutableParser:
         str = op.args[0][1:-1].encode('ascii').decode('unicode_escape')
         self._curr_sec().add(bytearray(str + '\0', 'ascii'))
 
-    def op_stack(self, op: 'RiscVPseudoOpToken'):
-        """
-        handles a .stack token. Sets the stack size preferences
-        :param op: The token
-        """
-        ASSERT_LEN(op.args, 1)
-        size = parse_numeric_argument(op.args[0])
-        self.stack_pref = size
-
     def op_global(self, op: 'RiscVPseudoOpToken'):
         """
         handles a .global token. Marks the token as global
@@ -191,7 +181,6 @@ class ExecutableParser:
         ASSERT_LEN(op.args, 1)
         val = parse_numeric_argument(op.args[0])
         self._curr_sec().add(int_to_bytes(val, 4))
-
 
     ## Section handler code
     def _set_sec(self, name: str, flags: MemoryFlags, cls=MemorySection):

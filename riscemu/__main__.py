@@ -15,6 +15,7 @@ if __name__ == '__main__':
 
     all_ins_names = list(InstructionSetDict.keys())
 
+
     class OptionStringAction(argparse.Action):
         def __init__(self, option_strings, dest, keys=None, omit_empty=False, **kwargs):
             if keys is None:
@@ -57,8 +58,8 @@ if __name__ == '__main__':
     parser.add_argument('--syscall-opts', '-so', action=OptionStringAction,
                         keys=('fs_access', 'disable_input'))
 
-    parser.add_argument('--instruction-sets', '-is', action=OptionStringAction, help="Instruction sets to load, available are: {}. "
-                                                                        "All are enabled by default"
+    parser.add_argument('--instruction-sets', '-is', action=OptionStringAction,
+                        help="Instruction sets to load, available are: {}. All are enabled by default"
                         .format(", ".join(all_ins_names)), keys={k: True for k in all_ins_names}, omit_empty=True)
 
     parser.add_argument('--default_stack_size', type=int, help='Default stack size of loaded programs', default=None,
@@ -75,7 +76,6 @@ if __name__ == '__main__':
         scall_fs=args.syscall_opts['fs_access'],
         scall_input=not args.syscall_opts['disable_input']
     )
-
 
     if not hasattr(args, 'ins'):
         setattr(args, 'ins', {k: True for k in all_ins_names})
@@ -99,7 +99,6 @@ if __name__ == '__main__':
     except RiscemuBaseException as e:
         print("Error while parsing: {}".format(e.message()))
         import traceback
+
         traceback.print_exception(type(e), e, e.__traceback__)
         sys.exit(1)
-
-

@@ -35,10 +35,3 @@ Currently only these three sections are supported:
 * `data` read-write data (non-executable)
 * `rodata` read-only data (non-executable)
 * `text` executable data (read-only)
-
-
-## Allocating stack
-another pseudo-op is recognized: `.stack <len>`. This marks the executable as requesting at least `<len>` bytes of stack. 
-If the loader respects this wish, the sp is initialized pointing to the end of the stack.
-
- 

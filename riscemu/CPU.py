@@ -85,9 +85,6 @@ class CPU:
         Run a loaded executable
         """
         self.pc = le.run_ptr
-        sp, hp = le.stack_heap
-        self.regs.set('sp', sp)
-        self.regs.set('a0', hp)  # set a0 to point to the heap
         print(FMT_CPU + '[CPU] Started running from 0x{:08X} ({})'.format(le.run_ptr, le.name) + FMT_NONE)
         self.__run()
 
