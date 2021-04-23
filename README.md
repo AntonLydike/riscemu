@@ -1,6 +1,6 @@
 # RiscEmu - RISC-V (userspace) emulator in python
 
-Implementing a basic RISC-V emulator, aimed at being easily extendable. Check out the docs at [readthedocs](https://riscemu.datenvorr.at/index.html)
+Implementing a basic RISC-V emulator, aimed at being easily extendable. Check out the docs at [readthedocs](https://riscemu.readthedocs.io/en/latest/index.html)
 or [riscemu.datenvorr.at](https://riscemu.datenvorr.at/index.html).
 
 This emulator contains:
