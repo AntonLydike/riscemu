@@ -1,4 +1,7 @@
-import os, sys
+import os
+import sys
+import subprocess
+
 # Configuration file for the Sphinx documentation builder.
 #
 # This file only contains a selection of the most common options. For a full
@@ -14,6 +17,9 @@ import os, sys
 # import os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
+
+if os.getenv('READTHEDOCS', False) and not os.path.exists('riscemu.rst'):
+    subprocess.check_call(['../../generate-docs.sh', 'generate'])
 
 
 # -- Project information -----------------------------------------------------
