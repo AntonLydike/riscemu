@@ -3,19 +3,21 @@
 
 echo "Generating docs!"
 
-if command -v 'sphinx-apidoc' >/dev/null; then
+if ! command -v 'sphinx-apidoc'; then
   source venv/bin/activate
   pip install sphinx
 fi
 
 if [[ $1 == 'generate' ]]; then
-
   PYTHONPATH=../../ sphinx-apidoc -e -f -o . ../../riscemu ../../riscemu/colors.py ../../riscemu/__main__.py
   echo "only generating, not building..."
+  rm ./modules.rst
   exit 0
 fi
 
 PYTHONPATH=. sphinx-apidoc -e -f -o sphinx-docs/source riscemu riscemu/colors.py riscemu/__main__.py
+
+rm sphinx-docs/source/modules.rst
 
 cd sphinx-docs
 
