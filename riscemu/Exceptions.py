@@ -90,11 +90,27 @@ class OutOfMemoryException(RiscemuBaseException):
         self.action = action
 
     def message(self):
-        return + FMT_MEM + '{}(Ran out of memory during {})'.format(
+        return FMT_MEM + '{}(Ran out of memory during {})'.format(
             self.__class__.__name__,
             self.action
         ) + FMT_NONE
 
+
+class InvalidAllocationException(RiscemuBaseException):
+    def __init__(self, msg, name, size, flags):
+        self.msg = msg
+        self.name = name
+        self.size = size
+        self.flags = flags
+
+    def message(self):
+        return FMT_MEM + '{}[{}](name={}, size={}, flags={})'.format(
+            self.__class__.__name__,
+            self.msg,
+            self.name,
+            self.size,
+            self.flags
+        )
 
 # CPU Exceptions
 

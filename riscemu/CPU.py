@@ -10,7 +10,7 @@ import sys
 from typing import Tuple, List, Dict, Callable, Type
 
 from .Tokenizer import RiscVTokenizer
-
+from .Executable import MemoryFlags
 from .Syscall import SyscallInterface, get_syscall_symbols
 from .Exceptions import RiscemuBaseException, LaunchDebuggerException
 from .MMU import MMU
@@ -85,6 +85,12 @@ class CPU:
         Run a loaded executable
         """
         self.pc = le.run_ptr
+
+        if self.conf.stack_size > 0:
+            stack = self.mmu.allocate_section("stack", self.conf.stack_size, MemoryFlags(False, False))
+            self.regs.set('sp', stack.base + stack.size)
+            print(FMT_CPU + '[CPU] Allocated {} bytes of stack'.format(stack.size) + FMT_NONE)
+
         print(FMT_CPU + '[CPU] Started running from 0x{:08X} ({})'.format(le.run_ptr, le.name) + FMT_NONE)
         self.__run()
 

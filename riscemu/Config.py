@@ -10,7 +10,7 @@ from typing import Optional
 
 @dataclass(frozen=True, init=True)
 class RunConfig:
-    preffered_stack_size: Optional[int] = None
+    stack_size: int = 0     # 8 * 1024 * 1024 * 8 # for 8MB stack
     include_scall_symbols: bool = True
     add_accept_imm: bool = False
     # debugging

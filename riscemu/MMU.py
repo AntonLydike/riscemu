@@ -7,7 +7,7 @@ SPDX-License-Identifier: BSD-2-Clause
 from .Config import RunConfig
 from .Executable import Executable, LoadedExecutable, LoadedMemorySection, LoadedInstruction, MemoryFlags
 from .helpers import align_addr
-from .Exceptions import OutOfMemoryException
+from .Exceptions import OutOfMemoryException, InvalidAllocationException
 from .colors import *
 from typing import Dict, List, Tuple, Optional
 
@@ -20,6 +20,11 @@ class MMU:
     max_size = 0xFFFFFFFF
     """
     The maximum size of the memory in bytes
+    """
+
+    max_alloc_size = 8 * 1024 * 1024 * 64
+    """
+    No single allocation can be bigger than 64 MB
     """
 
     sections: List[LoadedMemorySection]
@@ -83,6 +88,32 @@ class MMU:
         print(FMT_MEM + "[MMU] Successfully loaded{}: {}".format(FMT_NONE, loaded_bin))
 
         return loaded_bin
+
+    def allocate_section(self, name: str, req_size: int, flag: MemoryFlags):
+        """
+        Used to allocate a memory region (data only). Use `load_bin` if you want to load a binary, this is used for
+        stack and maybe malloc in the future.
+
+        :param name: Name of the section to allocate
+        :param req_size: The requested size
+        :param flag: The flags protecting this memory section
+        :return: The LoadedMemorySection
+        """
+        if flag.executable:
+            raise InvalidAllocationException('cannot allocate executable section', name, req_size, flag)
+
+        if req_size < 0:
+            raise InvalidAllocationException('Invalid size request', name, req_size, flag)
+
+        if req_size > self.max_alloc_size:
+            raise InvalidAllocationException('Cannot allocate more than {} bytes at a time'.format(self.max_alloc_size), name, req_size, flag)
+
+        base = align_addr(self.first_free_addr)
+        size = align_addr(req_size)
+        sec = LoadedMemorySection(name, base, size, bytearray(size), flag, "<runtime>")
+        self.sections.append(sec)
+        self.first_free_addr = base + size
+        return sec
 
     def get_sec_containing(self, addr: int) -> Optional[LoadedMemorySection]:
         """

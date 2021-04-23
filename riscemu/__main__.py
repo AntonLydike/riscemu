@@ -62,13 +62,13 @@ if __name__ == '__main__':
                         help="Instruction sets to load, available are: {}. All are enabled by default"
                         .format(", ".join(all_ins_names)), keys={k: True for k in all_ins_names}, omit_empty=True)
 
-    parser.add_argument('--default_stack_size', type=int, help='Default stack size of loaded programs', default=None,
-                        metavar='default-stack-size', nargs='?')
+    parser.add_argument('--stack_size', type=int, help='Stack size of loaded programs, defaults to 8MB', nargs='?')
 
     args = parser.parse_args()
 
-    cfg = RunConfig(
-        preffered_stack_size=args.default_stack_size,
+    # create a RunConfig from the cli args
+    cfg_dict = dict(
+        stack_size=args.stack_size,
         debug_instruction=not args.options['disable_debug'],
         include_scall_symbols=not args.options['no_syscall_symbols'],
         debug_on_exception=not args.options['fail_on_ex'],
@@ -76,6 +76,11 @@ if __name__ == '__main__':
         scall_fs=args.syscall_opts['fs_access'],
         scall_input=not args.syscall_opts['disable_input']
     )
+    for k, v in dict(cfg_dict).items():
+        if v is None:
+            del cfg_dict[k]
+
+    cfg = RunConfig(**cfg_dict)
 
     if not hasattr(args, 'ins'):
         setattr(args, 'ins', {k: True for k in all_ins_names})
