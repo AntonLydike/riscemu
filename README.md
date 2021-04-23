@@ -71,6 +71,9 @@ See [docs/debugging.md](docs/debugging.md) for more info.
 ![debuggin the fibs program](docs/debug-session.png)
 
 
+## The source code:
+Check out the [documentation](https://riscemu.readthedocs.io/en/latest/riscemu.html).
+
 ## Resources:
   * Pseudo ops: https://www.codetd.com/article/8981522
   * detailed instruction definition: https://msyksphinz-self.github.io/riscv-isadoc/html/rvi.html#add
