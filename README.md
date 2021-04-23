@@ -1,4 +1,4 @@
-# RISC-V (userspace) emulator in python
+# RiscEmu - RISC-V (userspace) emulator in python
 
 Implementing a basic RISC-V emulator, aimed at being easily extendable.
 
@@ -75,6 +75,10 @@ See [docs/debugging.md](docs/debugging.md) for more info.
 
 ## The source code:
 Check out the [documentation](https://riscemu.readthedocs.io/en/latest/riscemu.html).
+
+## Accessing local documentation:
+To generate your local documentation, first install everything in `sphinx-docs/requirements.txt`. Then run `./generate-docs.sh`, which will 
+generate and make all doc files for you. Finally, you can open the docs locall by runnint `open sphinx-docs/build/html/index.html`.
 
 ## Resources:
   * Pseudo ops: https://www.codetd.com/article/8981522
