@@ -1,4 +1,4 @@
-# The internal structure of RISCemu
+# Internal Structure
 
 ## Loading assembly files:
 In order to load an assembly file, you need to instantiate a CPU with the capabilities you want. Loading an assembly 

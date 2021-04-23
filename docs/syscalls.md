@@ -1,4 +1,4 @@
-# Syscalls:
+# Syscalls
 
 Performing a syscall is quite simple:
 ```risc-v asm

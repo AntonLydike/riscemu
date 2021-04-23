@@ -14,3 +14,5 @@ sphinx:
 python:
    version: 3.7
    system_packages: true
+   install:
+      - requirements: sphinx-docs/requirements.txt

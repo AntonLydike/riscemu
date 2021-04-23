@@ -3,6 +3,7 @@
 
 echo "Generating docs!"
 
+
 if ! command -v 'sphinx-apidoc'; then
   source venv/bin/activate
   pip install sphinx
@@ -14,6 +15,10 @@ if [[ $1 == 'generate' ]]; then
   rm ./modules.rst
   exit 0
 fi
+
+# delete old help folder
+rm -rf sphinx-docs/source/help
+cp -r docs sphinx-docs/source/help
 
 PYTHONPATH=. sphinx-apidoc -e -f -o sphinx-docs/source riscemu riscemu/colors.py riscemu/__main__.py
 
