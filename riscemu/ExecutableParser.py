@@ -1,7 +1,7 @@
 """
 RiscEmu (c) 2021 Anton Lydike
 
-SPDX-License-Identifier: BSD-2-Clause
+SPDX-License-Identifier: MIT
 
 This file holds the parser that parses the tokenizer output.
 """

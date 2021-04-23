@@ -1,7 +1,7 @@
 """
 RiscEmu (c) 2021 Anton Lydike
 
-SPDX-License-Identifier: BSD-2-Clause
+SPDX-License-Identifier: MIT
 
 This file holds Executable and LoadedExecutable classes as well as loading and some linking code.
 

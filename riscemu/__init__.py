@@ -1,7 +1,7 @@
 """
 RiscEmu (c) 2021 Anton Lydike
 
-SPDX-License-Identifier: BSD-2-Clause
+SPDX-License-Identifier: MIT
 
 This package aims at providing an all-round usable RISC-V emulator and debugger
 

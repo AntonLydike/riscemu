@@ -1,7 +1,7 @@
 """
 RiscEmu (c) 2021 Anton Lydike
 
-SPDX-License-Identifier: BSD-2-Clause
+SPDX-License-Identifier: MIT
 
 This file contains the CPU logic (not the individual instruction sets). See instructions/InstructionSet.py for more info
 on them.

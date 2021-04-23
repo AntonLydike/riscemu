@@ -1,7 +1,7 @@
 """
 RiscEmu (c) 2021 Anton Lydike
 
-SPDX-License-Identifier: BSD-2-Clause
+SPDX-License-Identifier: MIT
 
 This package holds all instruction sets, available to the processor
 """
