@@ -42,7 +42,7 @@ symbols were not found in the file, it simply starts at the beginning of the `.t
 This is how the interface is used:
 
 ```
-usage: riscemu [-h] [--options OPTIONS] [--syscall-opts SYSCALL_OPTS] [--instruction-sets INSTRUCTION_SETS] [--default_stack_size [default-stack-size]] file.asm [file.asm ...]
+usage: riscemu [-h] [--options OPTIONS] [--syscall-opts SYSCALL_OPTS] [--instruction-sets INSTRUCTION_SETS] [--stack_size stack-size] file.asm [file.asm ...]
 
 
 
@@ -66,6 +66,9 @@ disable_io              Disallow reading/writing from stdin/stdout/stderr
 
 If multiple files are specified, all are loaded into memeory, but only the last one is executed. This might be improved 
 later, maybe the `_init` section of each binary is executed before the main loop starts? 
+
+If `stack_size` is greater than zero, a stack is allocated and initialized, with the `sp` register pointing to the end of the stack.
+
 
 ## Debugging
 Debugging is done using the `ebreak` (formerly `sbreak`) instruction, which will launch a debugging session if encountered.
@@ -91,6 +94,5 @@ generate and make all doc files for you. Finally, you can open the docs locall b
  * Correctly handle 12 and 20 bit immediate (currently not limited to bits at all)
  * Add a cycle limit to the options and CPU to catch infinite loops
  * Move away from `print` and use `logging.logger` instead
- * Properly support stack/heap
  * Writer proper tests
  
