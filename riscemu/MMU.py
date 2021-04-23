@@ -17,32 +17,37 @@ class MMU:
     The MemoryManagementUnit (handles loading binaries, and reading/writing data)
     """
 
+    max_size = 0xFFFFFFFF
     """
     The maximum size of the memory in bytes
     """
-    max_size = 0xFFFFFFFF
 
+    sections: List[LoadedMemorySection]
     """
     A list of all loaded memory sections
     """
-    sections: List[LoadedMemorySection]
 
+    binaries: List[LoadedExecutable]
     """
     A list of all loaded executables
     """
-    binaries: List[LoadedExecutable]
 
+    last_bin: Optional[LoadedExecutable] = None
     """
     The last loaded executable (the next executable is inserted directly after this one)
     """
-    last_bin: Optional[LoadedExecutable] = None
 
+    global_symbols: Dict[str, int]
     """
     The global symbol table
     """
-    global_symbols: Dict[str, int]
 
     def __init__(self, conf: RunConfig):
+        """
+        Create a new MMU, respeccting the active RunConfiguration
+
+        :param conf: The config to respect
+        """
         self.sections = list()
         self.binaries = list()
         self.last_bin = None
@@ -52,6 +57,7 @@ class MMU:
     def load_bin(self, bin: Executable) -> LoadedExecutable:
         """
         Load an executable into memory
+
         :param bin: the executable to load
         :return: A LoadedExecutable
         :raises OutOfMemoryException: When all memory is used
@@ -88,6 +94,7 @@ class MMU:
     def get_sec_containing(self, addr: int) -> Optional[LoadedMemorySection]:
         """
         Returns the section that contains the address addr
+
         :param addr: the Address to look for
         :return: The LoadedMemorySection or None
         """
@@ -99,6 +106,7 @@ class MMU:
     def read_ins(self, addr: int) -> LoadedInstruction:
         """
         Read a single instruction located at addr
+
         :param addr: The location
         :return: The Instruction
         """
@@ -108,6 +116,7 @@ class MMU:
     def read(self, addr: int, size: int) -> bytearray:
         """
         Read size bytes of memory at addr
+
         :param addr: The addres at which to start reading
         :param size: The number of bytes to read
         :return: The bytearray at addr
@@ -118,6 +127,7 @@ class MMU:
     def write(self, addr: int, size: int, data):
         """
         Write bytes into memory
+
         :param addr: The address at which to write
         :param size: The number of bytes to write
         :param data: The bytearray to write (only first size bytes are written)
@@ -138,9 +148,10 @@ class MMU:
             return
         sec.dump(addr, *args, **kwargs)
 
-    def symbol(self, symb:str):
+    def symbol(self, symb: str):
         """
         Look up the symbol symb in all local symbol tables (and the global one)
+
         :param symb: The symbol name to look up
         """
         print(FMT_MEM + "[MMU] Lookup for symbol {}:".format(symb) + FMT_NONE)

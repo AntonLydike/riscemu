@@ -8,14 +8,14 @@ from math import log10, ceil
 from .Exceptions import *
 
 
-def align_addr(addr: int, to_bytes: int = 8):
+def align_addr(addr: int, to_bytes: int = 8) -> int:
     """
     align an address to `to_bytes` (meaning addr & to_bytes = 0)
     """
     return addr + (-addr % to_bytes)
 
 
-def parse_numeric_argument(arg: str):
+def parse_numeric_argument(arg: str) -> int:
     """
     parse hex or int strings
     """
@@ -27,7 +27,7 @@ def parse_numeric_argument(arg: str):
         raise ParseException('Invalid immediate argument \"{}\", maybe missing symbol?'.format(arg), (arg, ex))
 
 
-def int_to_bytes(val, bytes=4, unsigned=False):
+def int_to_bytes(val, bytes=4, unsigned=False) -> bytearray:
     """
     int -> byte (two's complement)
     """
@@ -38,7 +38,7 @@ def int_to_bytes(val, bytes=4, unsigned=False):
     ])
 
 
-def int_from_bytes(bytes, unsigned=False):
+def int_from_bytes(bytes, unsigned=False) -> int:
     """
     byte -> int (two's complement)
     """
@@ -53,19 +53,20 @@ def int_from_bytes(bytes, unsigned=False):
     return to_signed(num)
 
 
-def to_unsigned(num: int, bytes=4):
+def to_unsigned(num: int, bytes=4) -> int:
     if num < 0:
         return 2 ** (bytes * 8) + num
     return num
 
 
-def to_signed(num: int, bytes=4):
+def to_signed(num: int, bytes=4) -> int:
     if num >> (bytes * 8 - 1):
         return num - 2 ** (8 * bytes)
     return num
 
 
 def create_chunks(my_list, chunk_size):
+    """Split a list like [a,b,c,d,e,f,g,h,i,j,k,l,m] into e.g. [[a,b,c,d],[e,f,g,h],[i,j,k,l],[m]]"""
     return [my_list[i:i + chunk_size] for i in range(0, len(my_list), chunk_size)]
 
 
@@ -83,6 +84,7 @@ def highlight_in_list(items, hi_ind):
 
 
 def format_bytes(byte_arr: bytearray, fmt: str, group: int = 1, highlight: int = -1):
+    """Format byte array as per fmt. Group into groups of size `group`, and highlight index `highlight`."""
     chunks = create_chunks(byte_arr, group)
     if fmt == 'hex':
         return highlight_in_list(['0x{}'.format(ch.hex()) for ch in chunks], highlight)

@@ -25,3 +25,6 @@ from .Syscall import SyscallInterface, Syscall
 from .CPU import CPU
 
 from .Config import RunConfig
+
+__author__ = "Anton Lydike <Anton@Lydike.com"
+__copyright__ = "Copyright 2021 Anton Lydike"

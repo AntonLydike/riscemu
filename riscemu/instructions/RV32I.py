@@ -293,7 +293,7 @@ class RV32I(InstructionSet):
 
     def instruction_scall(self, ins: 'LoadedInstruction'):
         ASSERT_LEN(ins.args, 0)
-        syscall = Syscall(self.regs.get('a7'), self.regs, self.cpu)
+        syscall = Syscall(self.regs.get('a7'), self.cpu)
         self.cpu.syscall_int.handle_syscall(syscall)
 
     def instruction_sbreak(self, ins: 'LoadedInstruction'):

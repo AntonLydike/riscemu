@@ -24,6 +24,9 @@ class InstructionSet(ABC):
     """
 
     def __init__(self, cpu: 'CPU'):
+        """Create a new instance of the Instruction set. This requires access to a CPU, and grabs vertain things
+        from it such as access to the MMU and registers.
+        """
         self.name = self.__class__.__name__
         self.cpu = cpu
         self.mmu = cpu.mmu
