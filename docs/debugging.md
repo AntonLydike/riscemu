@@ -34,8 +34,9 @@ uses the `ebreak` instruction to open the debugger. Let's run it and see what ha
 
 ```
 > python -m riscemu examples/fibs.asm
-Successfully loaded: LoadedExecutable[examples/fibs.asm](base=0x00000100, size=72bytes, sections=data text, run_ptr=0x00000138)
-Debug instruction encountered at 0x00000143
+[MMU] Successfully loaded: LoadedExecutable[examples/fibs.asm](base=0x00000100, size=72bytes, sections=data text, run_ptr=0x00000138)
+[CPU] Started running from 0x00000138 (examples/fibs.asm)
+Debug instruction encountered at 0x0000013C
 >>> 
 ```
 

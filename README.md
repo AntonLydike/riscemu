@@ -16,8 +16,10 @@ A couple of basic assembly programs are provided inside `examples/`, such as [`h
 
 You can run it by typing `python -m riscemu examples/hello-world.asm`. It will produce output similar to:
 ```
-Successfully loaded: LoadedExecutable[examples/hello-world.asm](base=0x00000100, size=24bytes, sections=data text, run_ptr=0x00000110)
+[MMU] Successfully loaded: LoadedExecutable[examples/hello-world.asm](base=0x00000100, size=24bytes, sections=data text, run_ptr=0x00000110)
+[CPU] Started running from 0x00000110 (examples/hello-world.asm)
 Hello world
+
 Program exited with code 0
 ```
 
@@ -85,5 +87,5 @@ Check out the [documentation](https://riscemu.readthedocs.io/en/latest/riscemu.h
  * Add a cycle limit to the options and CPU to catch infinite loops
  * Move away from `print` and use `logging.logger` instead
  * Properly support stack/heap
- 
+ * Writer proper tests
  
