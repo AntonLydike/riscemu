@@ -63,9 +63,10 @@ and most common tasks should have helper methods for them.
 **Available helpers are:**
 
 * `dump(regs | addr)` dumps either registers or memory address
-* `cont(verbose=True)` continue execution (verbose prints each executed instruction)
+* `cont(verbose=False)` continue execution (verbose prints each executed instruction)
 * `step()` run the next instruction
 * `ins()` get current instruction (this reference is mutable, if you want to edit your code on the fly)
+* `run_ins(name, *args)` Run an instruction in the current context. Symbols, jumping, etc are supported!
 
 
 Example:
