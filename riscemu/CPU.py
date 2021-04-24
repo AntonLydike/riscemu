@@ -49,6 +49,8 @@ class CPU:
         self.conf = conf
         self.active_debug = False  # if a debugging session is currently runnign
 
+        self.stack: typing.Optional['riscemu.LoadedMemorySection'] = None
+
         # setup MMU, registers and syscall handlers
         self.mmu = MMU(conf)
         self.regs = Registers(conf)
@@ -87,9 +89,9 @@ class CPU:
         self.pc = le.run_ptr
 
         if self.conf.stack_size > 0:
-            stack = self.mmu.allocate_section("stack", self.conf.stack_size, MemoryFlags(False, False))
-            self.regs.set('sp', stack.base + stack.size)
-            print(FMT_CPU + '[CPU] Allocated {} bytes of stack'.format(stack.size) + FMT_NONE)
+            self.stack = self.mmu.allocate_section("stack", self.conf.stack_size, MemoryFlags(False, False))
+            self.regs.set('sp', self.stack.base + self.stack.size)
+            print(FMT_CPU + '[CPU] Allocated {} bytes of stack'.format(self.stack.size) + FMT_NONE)
 
         print(FMT_CPU + '[CPU] Started running from 0x{:08X} ({})'.format(le.run_ptr, le.name) + FMT_NONE)
         self.__run()
