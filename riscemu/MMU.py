@@ -127,6 +127,12 @@ class MMU:
                 return sec
         return None
 
+    def get_bin_containing(self, addr: int) -> Optional[LoadedExecutable]:
+        for exe in self.binaries:
+            if exe.base_addr <= addr < exe.base_addr + exe.size:
+                return exe
+        return None
+
     def read_ins(self, addr: int) -> LoadedInstruction:
         """
         Read a single instruction located at addr
