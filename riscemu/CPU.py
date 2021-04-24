@@ -116,7 +116,7 @@ class CPU:
                 ins = self.mmu.read_ins(self.pc)
                 print(FMT_CPU + "   Running 0x{:08X}:{} {}".format(self.pc, FMT_NONE, ins))
                 self.pc += 1
-                self.__run_instruction(ins)
+                self.run_instruction(ins)
             except LaunchDebuggerException:
                 print(FMT_CPU + "[CPU] Returning to debugger!" + FMT_NONE)
             except RiscemuBaseException as ex:
@@ -134,7 +134,7 @@ class CPU:
                 if verbose:
                     print(FMT_CPU + "   Running 0x{:08X}:{} {}".format(self.pc, FMT_NONE, ins))
                 self.pc += 1
-                self.__run_instruction(ins)
+                self.run_instruction(ins)
         except RiscemuBaseException as ex:
             if not isinstance(ex, LaunchDebuggerException):
                 print(FMT_ERROR + "[CPU] excpetion caught at 0x{:08X}: {}:".format(self.pc - 1, ins) + FMT_NONE)
@@ -156,7 +156,12 @@ class CPU:
             print()
             print(FMT_CPU + "Program stopped without exiting - perhaps you stopped the debugger?" + FMT_NONE)
 
-    def __run_instruction(self, ins: 'LoadedInstruction'):
+    def run_instruction(self, ins: 'LoadedInstruction'):
+        """
+        Execute a single instruction
+
+        :param ins: The instruction to execute
+        """
         if ins.name in self.instructions:
             self.instructions[ins.name](ins)
         else:
