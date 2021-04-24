@@ -167,6 +167,10 @@ class MMU:
         :param data: The bytearray to write (only first size bytes are written)
         """
         sec = self.get_sec_containing(addr)
+        if sec is None:
+            print(FMT_MEM + '[MMU] Invalid write into non-initialized section at 0x{:08X}'.format(addr) + FMT_NONE)
+            raise RuntimeError("No write pls")
+
         return sec.write(addr - sec.base, size, data)
 
     def dump(self, addr, *args, **kwargs):
