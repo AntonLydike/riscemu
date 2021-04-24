@@ -15,15 +15,15 @@ The global symbols (e.g. `SCALL_READ`) are loaded by default. If you specify the
 
 ## Read (63) `SCALL_READ`
 * `a0`: source file descriptor
-* `a1`: addr in which to read
+* `a1`: addr at which to write the input
 * `a2`: number of bytes to read (at most)
-* `return: a0` number of bytes read or -1
+* `return in a0`: number of bytes read or -1
 
 ## Write (64) `SCALL_WRITE`
 * `a0`: target file descriptor
-* `a1`: addr from which to read
-* `a2`: number of bytes to read
-* `return: a0`: number of bytes written or -1
+* `a1`: addr at which the data to be written is located
+* `a2`: number of bytes to write
+* `return in a0`: number of bytes written or -1
 
 ## Exit (93) `SCALL_EXIT`
 * `a0`: exit code
@@ -37,11 +37,11 @@ The global symbols (e.g. `SCALL_READ`) are loaded by default. If you specify the
     - `4`: append
 * `a1`: addr where path is stored
 * `a2`: length of path
-* `return: a0`: file descriptor of opened file or -1
+* `return in a0`: file descriptor of opened file or -1
 
 Requires flag `--scall-fs` to be set to True
 
 ## Close (1025) `SCALL_CLOSE`
 * `a0`: file descriptor to close
-* `return: a0`: 0 if closed correctly or -1
+* `return in a0`: 0 if closed correctly or -1
 
