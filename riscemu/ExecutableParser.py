@@ -75,6 +75,7 @@ class ExecutableParser:
         :param token: the symbol token
         """
         ASSERT_NOT_IN(token.name, self.symbols)
+        ASSERT_NOT_NULL(self.active_section)
         sec_pos = self._curr_sec().size
         self.symbols[token.name] = (self.active_section, sec_pos)
 

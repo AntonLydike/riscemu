@@ -13,7 +13,7 @@ from .Exceptions import RiscemuBaseException, LaunchDebuggerException, InvalidSy
 
 from .Tokenizer import RiscVInput, RiscVTokenizer
 
-from .Executable import Executable, LoadedExecutable
+from .Executable import Executable, LoadedExecutable, LoadedMemorySection
 
 from .ExecutableParser import ExecutableParser
 

@@ -96,5 +96,4 @@ def format_bytes(byte_arr: bytearray, fmt: str, group: int = 1, highlight: int =
         return highlight_in_list([('{:0' + spc + 'd}').format(int_from_bytes(ch, unsigned=True)) for ch in chunks],
                                  highlight)
     if fmt == 'ascii':
-        print("printing ascii", "".join(chr(b) for b in byte_arr))
         return "".join(repr(chr(b))[1:-1] for b in byte_arr)

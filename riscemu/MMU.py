@@ -141,6 +141,10 @@ class MMU:
         :return: The Instruction
         """
         sec = self.get_sec_containing(addr)
+        if sec is None:
+            print(FMT_MEM + "[MMU] Trying to read instruction form invalid region! "
+                            "Have you forgotten an exit syscall or ret statement?" + FMT_NONE)
+            raise RuntimeError("No next instruction available!")
         return sec.read_instruction(addr - sec.base)
 
     def read(self, addr: int, size: int) -> bytearray:
@@ -175,6 +179,7 @@ class MMU:
         """
         sec = self.get_sec_containing(addr)
         if sec is None:
+            print(FMT_MEM + "[MMU] No section containing addr 0x{:08X}".format(addr) + FMT_NONE)
             return
         sec.dump(addr, *args, **kwargs)
 

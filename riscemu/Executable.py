@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Tuple, Union, Optional
 from .Exceptions import *
 from .helpers import *
+from math import log
 
 import typing
 
@@ -215,7 +216,7 @@ class LoadedMemorySection:
             print(FMT_MEM + "{}, viewing {} bytes:".format(
                 self, end - start
             ) + FMT_NONE)
-            for i in range(start, end, bytes_per_row):
+            for i in range(0, end - start, bytes_per_row):
                 data = self.content[start + i: min(start + i + bytes_per_row, end)]
                 if start + i <= highlight <= start + i + bytes_per_row:
                     # do hightlight here!
