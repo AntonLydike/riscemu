@@ -94,7 +94,7 @@ class CPU:
             print(FMT_CPU + '[CPU] Allocated {} bytes of stack'.format(self.stack.size) + FMT_NONE)
 
         print(FMT_CPU + '[CPU] Started running from 0x{:08X} ({})'.format(le.run_ptr, le.name) + FMT_NONE)
-        self.__run()
+        self._run()
 
     def continue_from_debugger(self, verbose=True):
         """
@@ -102,7 +102,7 @@ class CPU:
 
         :param verbose: If True, will print each executed instruction to STDOUT
         """
-        self.__run(verbose)
+        self._run(verbose)
 
     def step(self):
         """
@@ -123,7 +123,7 @@ class CPU:
                 self.pc -= 1
                 print(ex.message())
 
-    def __run(self, verbose=False):
+    def _run(self, verbose=False):
         if self.pc <= 0:
             return False
         ins = None
