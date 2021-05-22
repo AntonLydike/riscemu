@@ -178,7 +178,8 @@ class CPU:
         """
         Returns a representation of the CPU and some of its state.
         """
-        return "CPU(pc=0x{:08X}, cycle={}, exit={}, instructions={})".format(
+        return "{}(pc=0x{:08X}, cycle={}, exit={}, instructions={})".format(
+            self.__class__.__name__,
             self.pc,
             self.cycle,
             self.exit,
