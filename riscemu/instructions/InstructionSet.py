@@ -29,8 +29,6 @@ class InstructionSet(ABC):
         """
         self.name = self.__class__.__name__
         self.cpu = cpu
-        self.mmu = cpu.mmu
-        self.regs = cpu.regs
 
     def load(self) -> Dict[str, Callable[['LoadedInstruction'], None]]:
         """
@@ -131,6 +129,14 @@ class InstructionSet(ABC):
     @pc.setter
     def pc(self, val):
         self.cpu.pc = val
+
+    @property
+    def mmu(self):
+        return self.cpu.mmu
+
+    @property
+    def regs(self):
+        return self.cpu.regs
 
     def __repr__(self):
         return "InstructionSet[{}] with {} instructions".format(
