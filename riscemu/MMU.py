@@ -49,7 +49,7 @@ class MMU:
 
     def __init__(self, conf: RunConfig):
         """
-        Create a new MMU, respeccting the active RunConfiguration
+        Create a new MMU, respecting the active RunConfiguration
 
         :param conf: The config to respect
         """
