@@ -11,6 +11,9 @@ from .Exceptions import *
 from .CSR import CSR
 from .PrivRV32I import PrivRV32I
 from ..instructions.RV32M import RV32M
+from .PrivMMU import PrivMMU
+from .ElfLoader import ElfExecutable
+from .privmodes import PrivModes
 
 from collections import defaultdict
 
@@ -19,13 +22,6 @@ from typing import Union
 if typing.TYPE_CHECKING:
     from riscemu import Executable, LoadedExecutable, LoadedInstruction
     from riscemu.instructions.InstructionSet import InstructionSet
-
-
-class PrivModes(IntEnum):
-    USER = 0
-    SUPER = 1
-    MACHINE = 3
-
 
 class PrivCPU(CPU):
     """
@@ -38,7 +34,7 @@ class PrivCPU(CPU):
 
     csr: CSR
 
-    INS_XLEN = 1
+    INS_XLEN = 4
     """
     Size of an instruction in memory. Should be 4, but since our loading code is shit, instruction take up 
     the equivalent of "1 byte" (this is actually impossible)
@@ -48,12 +44,18 @@ class PrivCPU(CPU):
         super().__init__(conf, [PrivRV32I, RV32M])
         self.mode: PrivModes = PrivModes.MACHINE
 
+        exec = ElfExecutable('kernel')
+        self.mmu = PrivMMU(exec)
+        self.pc = exec.run_ptr
+        self.syscall_int = None
+
         # set up CSR
         self.csr = CSR()
         # TODO: Actually populate the CSR with real data (vendorID, heartID, machine implementation etc)
         self.csr.set('mhartid', 0)  # core id
         self.csr.set('mimpid', 1)  # implementation id
-        self.csr.set('misa', ())  # available ISA
+        # TODO: set correct misa
+        self.csr.set('misa', 1)  # available ISA
 
     def _run(self, verbose=False):
         if self.pc <= 0:
@@ -66,7 +68,7 @@ class PrivCPU(CPU):
                     ins = self.mmu.read_ins(self.pc)
                     if verbose:
                         print(FMT_CPU + "   Running 0x{:08X}:{} {}".format(self.pc, FMT_NONE, ins))
-                    self.pc += 1
+                    self.pc += self.INS_XLEN
                     self.run_instruction(ins)
                 except CpuTrap as trap:
                     mie = self.csr.get_mstatus('mie')
@@ -97,8 +99,6 @@ class PrivCPU(CPU):
                     else:
                         # standard mode
                         self.pc = (mtvec >> 2)
-
-
         except RiscemuBaseException as ex:
             if not isinstance(ex, LaunchDebuggerException):
                 print(FMT_ERROR + "[CPU] excpetion caught at 0x{:08X}: {}:".format(self.pc - 1, ins) + FMT_NONE)
@@ -119,3 +119,17 @@ class PrivCPU(CPU):
         else:
             print()
             print(FMT_CPU + "Program stopped without exiting - perhaps you stopped the debugger?" + FMT_NONE)
+
+    def load(self, e: riscemu.Executable):
+        raise NotImplementedError("Not supported!")
+
+    def run_loaded(self, le: 'riscemu.LoadedExecutable'):
+        raise NotImplementedError("Not supported!")
+
+    def get_tokenizer(self, tokenizer_input):
+        raise NotImplementedError("Not supported!")
+
+    def run(self):
+        print(FMT_CPU + '[CPU] Started running from 0x{:08X} ({})'.format(self.pc, "kernel") + FMT_NONE)
+        self._run(True)
+
