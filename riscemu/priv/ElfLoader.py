@@ -18,7 +18,7 @@ from ..decoder import decode
 
 # This requires pyelftools package!
 
-INCLUDE_SEC = ('.text', '.stack', '.bss')
+INCLUDE_SEC = ('.text', '.stack', '.bss', '.sdata', '.sbss')
 
 
 class ElfExecutable:
