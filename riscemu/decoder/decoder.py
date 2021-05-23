@@ -8,13 +8,13 @@ def print_ins(ins: int):
         f"0b{ins >> 25 :07b}_{(ins >> 20) & 0b11111:05b}_{(ins >> 15) & 0b11111:03b}_{(ins >> 12) & 0b111:03b}_{(ins >> 7) & 0b11111:05b}_{ins & 0b1111111:07b}");
 
 
-STATIC_INSN = {
-    0x00000013: ("nop", []),
-    0x00008067: ("ret", []),
-    0xfe010113: ("addi", ["sp", "sp", -32]),
-    0x02010113: ("addi", ["sp", "sp", 32]),
-    0x00100073: ("ebreak", []),
-    0x00000073: ("ecall", [])
+STATIC_INSN: Dict[int, Tuple[str, List[Union[str, int]], int]] = {
+    0x00000013: ("nop", [], 0x00000013),
+    0x00008067: ("ret", [], 0x00008067),
+    0xfe010113: ("addi", ["sp", "sp", -32], 0xfe010113),
+    0x02010113: ("addi", ["sp", "sp", 32], 0x02010113),
+    0x00100073: ("ebreak", [], 0x00100073),
+    0x00000073: ("ecall", [], 0x00000073),
 }
 
 
@@ -68,7 +68,7 @@ def name_from_insn(ins: int):
     raise RuntimeError(f"Invalid instruction: {ins:x}")
 
 
-def decode(ins: bytearray) -> Tuple[str, List[Union[str, int]]]:
+def decode(ins: bytearray) -> Tuple[str, List[Union[str, int]], int]:
     insn = int_from_ins(ins)
 
     if insn & 3 != 3:
@@ -83,4 +83,4 @@ def decode(ins: bytearray) -> Tuple[str, List[Union[str, int]]]:
         print_ins(insn)
         raise RuntimeError("No instruction decoder found for instruction")
 
-    return name_from_insn(insn), INSTRUCTION_ARGS_DECODER[opcode](insn)
+    return name_from_insn(insn), INSTRUCTION_ARGS_DECODER[opcode](insn), insn

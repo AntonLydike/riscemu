@@ -92,6 +92,7 @@ class InvalidElfException(RiscemuBaseException):
 class ElfInstruction:
     name: str
     args: List[Union[int, str]]
+    encoded: int
 
     def get_imm(self, num: int):
         return self.args[-1]

@@ -5,8 +5,7 @@ if __name__ == '__main__':
 
     from .decoder import *
     from .formats import *
-    from instruction_table import *
-    from regs import *
+    from .instruction_table import *
 
     sess_vars = globals()
     sess_vars.update(locals())
