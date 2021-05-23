@@ -96,8 +96,7 @@ def decode_j(ins: int) -> List[Union[str, int]]:
 def decode_i_shamt(ins: int) -> List[Union[str, int]]:
     if funct3(ins) in (1, 5):
         return [RISCV_REGS[rd(ins)], RISCV_REGS[rs1(ins)], rs2(ins)]
-    else:
-        return [RISCV_REGS[rd(ins)], RISCV_REGS[rs1(ins)], imm110(ins)]
+    return decode_i(ins)
 
 
 INSTRUCTION_ARGS_DECODER: Dict[int, Callable[[int], List[Union[str, int]]]] = {
