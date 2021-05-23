@@ -34,6 +34,9 @@ class CPU:
 
     It is initialized with a configuration and a list of instruction sets.
     """
+
+    INS_XLEN = 1
+
     def __init__(self, conf: RunConfig, instruction_sets: List[Type['riscemu.InstructionSet']]):
         """
         Creates a CPU instance.
@@ -115,12 +118,12 @@ class CPU:
                 self.cycle += 1
                 ins = self.mmu.read_ins(self.pc)
                 print(FMT_CPU + "   Running 0x{:08X}:{} {}".format(self.pc, FMT_NONE, ins))
-                self.pc += 1
+                self.pc += self.INS_XLEN
                 self.run_instruction(ins)
             except LaunchDebuggerException:
                 print(FMT_CPU + "[CPU] Returning to debugger!" + FMT_NONE)
             except RiscemuBaseException as ex:
-                self.pc -= 1
+                self.pc -= self.INS_XLEN
                 print(ex.message())
 
     def _run(self, verbose=False):
@@ -133,13 +136,13 @@ class CPU:
                 ins = self.mmu.read_ins(self.pc)
                 if verbose:
                     print(FMT_CPU + "   Running 0x{:08X}:{} {}".format(self.pc, FMT_NONE, ins))
-                self.pc += 1
+                self.pc += self.INS_XLEN
                 self.run_instruction(ins)
         except RiscemuBaseException as ex:
             if not isinstance(ex, LaunchDebuggerException):
                 print(FMT_ERROR + "[CPU] excpetion caught at 0x{:08X}: {}:".format(self.pc - 1, ins) + FMT_NONE)
                 print(ex.message())
-                self.pc -= 1
+                self.pc -= self.INS_XLEN
 
             if self.active_debug:
                 print(FMT_CPU + "[CPU] Returning to debugger!" + FMT_NONE)
