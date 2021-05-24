@@ -68,8 +68,8 @@ class PrivCPU(CPU):
                     ins = self.mmu.read_ins(self.pc)
                     if verbose:
                         print(FMT_CPU + "   Running 0x{:08X}:{} {}".format(self.pc, FMT_NONE, ins))
-                    self.pc += self.INS_XLEN
                     self.run_instruction(ins)
+                    self.pc += self.INS_XLEN
                 except CpuTrap as trap:
                     mie = self.csr.get_mstatus('mie')
                     if not mie:

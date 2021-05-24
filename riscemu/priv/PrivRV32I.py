@@ -76,12 +76,12 @@ class PrivRV32I(RV32I):
     def instruction_beq(self, ins: 'LoadedInstruction'):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins)
         if rs1 == rs2:
-            self.pc += dst
+            self.pc += dst - 4
 
     def instruction_bne(self, ins: 'LoadedInstruction'):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins)
         if rs1 != rs2:
-            self.pc += dst
+            self.pc += dst - 4
 
     def instruction_blt(self, ins: 'LoadedInstruction'):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins)
@@ -91,17 +91,17 @@ class PrivRV32I(RV32I):
     def instruction_bge(self, ins: 'LoadedInstruction'):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins)
         if rs1 >= rs2:
-            self.pc += dst
+            self.pc += dst - 4
 
     def instruction_bltu(self, ins: 'LoadedInstruction'):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins, signed=False)
         if rs1 < rs2:
-            self.pc += dst
+            self.pc += dst - 4
 
     def instruction_bgeu(self, ins: 'LoadedInstruction'):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins, signed=False)
         if rs1 >= rs2:
-            self.pc += dst
+            self.pc += dst - 4
 
     # technically deprecated
     def instruction_j(self, ins: 'LoadedInstruction'):
@@ -112,13 +112,13 @@ class PrivRV32I(RV32I):
         reg = ins.get_reg(0)
         addr = ins.get_imm(1)
         self.regs.set(reg, self.pc)
-        self.pc += addr
+        self.pc += addr - 4
 
     def instruction_jalr(self, ins: 'LoadedInstruction'):
         ASSERT_LEN(ins.args, 3)
         rd, rs, imm = self.parse_rd_rs_imm(ins)
         self.regs.set(rd, self.pc)
-        self.pc = rs + imm
+        self.pc = rs + imm - 4
 
     def parse_crs_ins(self, ins: 'LoadedInstruction'):
         ASSERT_LEN(ins.args, 3)
