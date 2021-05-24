@@ -1,4 +1,4 @@
-from typing import Dict, Union
+from typing import Dict, Union, Callable
 from collections import defaultdict
 
 MSTATUS_OFFSETS = {
@@ -59,14 +59,18 @@ class CSR:
     Translation for named registers
     """
 
+    listeners: Dict[int, Callable[[int, int], None]]
+
     def __init__(self):
         self.regs = defaultdict(lambda: 0)
+        self.listeners = defaultdict(lambda: (lambda x, y: ()))
 
     def set(self, addr: Union[str, int], val: int):
         if isinstance(addr, str):
             if not addr in self.name_to_addr:
                 print("Unknown CSR register {}".format(addr))
             addr = self.name_to_addr[addr]
+        self.listeners[addr](self.regs[addr], val)
         self.regs[addr] = val
 
     def get(self, addr: Union[str, int]):
@@ -75,6 +79,13 @@ class CSR:
                 print("Unknown CSR register {}".format(addr))
             addr = self.name_to_addr[addr]
         return self.regs[addr]
+
+    def set_listener(self, addr: Union[str, int], listener: Callable[[int, int], None]):
+        if isinstance(addr, str):
+            if not addr in self.name_to_addr:
+                print("Unknown CSR register {}".format(addr))
+            addr = self.name_to_addr[addr]
+        self.listeners[addr] = listener
 
     # mstatus properties
     def set_mstatus(self, name: str, val: int):
