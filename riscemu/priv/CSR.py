@@ -52,6 +52,8 @@ class CSR:
         'marchid': 0xF12,
         'mimpid': 0xF13,
         'mhartid': 0xF14,
+        'time': 0xc01,
+        'timeh': 0xc81,
     }
     """
     Translation for named registers
