@@ -109,10 +109,17 @@ class ElfInstruction:
         return self.args[num]
 
     def __repr__(self):
+        if self.name in ('sw', 'sh', 'sb', 'lb', 'lh', 'lb', 'lbu', 'lhu'):
+            args = "{}, {}({})".format(
+                self.args[1], self.args[2], self.args[0]
+            )
+        else:
+            args = ", ".join(map(str, self.args))
         return "{:<8} {}".format(
             self.name,
-            ", ".join(map(str, self.args))
+            args
         )
+
 
 class ElfLoadedMemorySection(LoadedMemorySection):
     def read_instruction(self, offset):
