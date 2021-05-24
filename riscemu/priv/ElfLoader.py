@@ -1,20 +1,17 @@
-from ..Executable import Executable, MemorySection, MemoryFlags, LoadedExecutable, LoadedMemorySection
-from ..Exceptions import RiscemuBaseException
-from ..helpers import FMT_PARSE, FMT_NONE
-from ..colors import FMT_GREEN, FMT_BOLD
-
-FMT_ELF = FMT_GREEN + FMT_BOLD
-
-from .Exceptions import *
-
 from dataclasses import dataclass
-
 from typing import List, Dict, Union
 
 from elftools.elf.elffile import ELFFile
 from elftools.elf.sections import Section, SymbolTableSection
 
+from .Exceptions import *
+from ..Exceptions import RiscemuBaseException
+from ..Executable import MemoryFlags, LoadedMemorySection
 from ..decoder import decode
+from ..helpers import FMT_PARSE, FMT_NONE, FMT_GREEN, FMT_BOLD
+
+FMT_ELF = FMT_GREEN + FMT_BOLD
+
 
 # This requires pyelftools package!
 
@@ -52,13 +49,11 @@ class ElfExecutable:
             if sec.name not in INCLUDE_SEC:
                 continue
 
-            sec_ = self._lms_from_elf_sec(sec, 'kernel')
-            self.sections.append(sec_)
-            self.sections_by_name[sec.name] = sec_
+            self.add_sec(self._lms_from_elf_sec(sec, 'kernel'))
 
     def _lms_from_elf_sec(self, sec: Section, owner: str):
         is_code = sec.name in ('.text',)
-        data = sec.data()
+        data = bytearray(sec.data())
         flags = MemoryFlags(is_code, is_code)
         print(FMT_ELF + "[ElfLoader] Section {} at: {:X}".format(sec.name, sec.header.sh_addr) + FMT_NONE)
         return ElfLoadedMemorySection(
@@ -75,8 +70,18 @@ class ElfExecutable:
             sym.name: sym.entry.st_value for sym in symtab.iter_symbols() if sym.name
         }
 
-    def load_user_elf(self, name: str):
-        pass
+    def add_sec(self, new_sec: 'ElfLoadedMemorySection'):
+        for sec in self.sections:
+            if sec.base < sec.end <= new_sec.base or sec.end > sec.base >= new_sec.end:
+                continue
+            else:
+                print(FMT_ELF + "[ElfLoader] Invalid elf layout: Two sections overlap: \n\t{}\n\t{}".format(
+                    sec, new_sec
+                ) + FMT_NONE)
+                raise RuntimeError("Cannot load elf with overlapping sections!")
+
+        self.sections.append(new_sec)
+        self.sections_by_name[new_sec.name] = new_sec
 
 
 class InvalidElfException(RiscemuBaseException):
@@ -117,3 +122,7 @@ class ElfLoadedMemorySection(LoadedMemorySection):
         if offset % 4 != 0:
             raise InstructionAddressMisalignedTrap(offset + self.base)
         return ElfInstruction(*decode(self.content[offset:offset + 4]))
+
+    @property
+    def end(self):
+        return self.size + self.base
