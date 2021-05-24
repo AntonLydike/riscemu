@@ -1,5 +1,6 @@
 from typing import Dict, Union, Callable
 from collections import defaultdict
+from functools import wraps
 
 MSTATUS_OFFSETS = {
     'uie': 0,
@@ -54,6 +55,7 @@ class CSR:
         'mhartid': 0xF14,
         'time': 0xc01,
         'timeh': 0xc81,
+        'halt': 0x789
     }
     """
     Translation for named registers
@@ -112,3 +114,9 @@ class CSR:
         off = MSTATUS_OFFSETS[name]
         mask = (2**size - 1) << off
         return (self.get('mstatus') & mask) >> off
+
+    def callback(self, addr: Union[str, int]):
+        def inner(func: Callable[[int, int], None]):
+            self.set_listener(addr, func)
+            return func
+        return inner

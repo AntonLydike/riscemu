@@ -49,13 +49,8 @@ class PrivCPU(CPU):
         self.pc = exec.run_ptr
         self.syscall_int = None
 
-        # set up CSR
-        self.csr = CSR()
-        # TODO: Actually populate the CSR with real data (vendorID, heartID, machine implementation etc)
-        self.csr.set('mhartid', 0)  # core id
-        self.csr.set('mimpid', 1)  # implementation id
-        # TODO: set correct misa
-        self.csr.set('misa', 1)  # available ISA
+        # init csr
+        self._init_csr()
 
     def _run(self, verbose=False):
         if self.pc <= 0:
@@ -133,3 +128,21 @@ class PrivCPU(CPU):
         print(FMT_CPU + '[CPU] Started running from 0x{:08X} ({})'.format(self.pc, "kernel") + FMT_NONE)
         self._run(True)
 
+    def _init_csr(self):
+        # set up CSR
+        self.csr = CSR()
+        # TODO: Actually populate the CSR with real data (vendorID, heartID, machine implementation etc)
+        self.csr.set('mhartid', 0)  # core id
+        self.csr.set('mimpid', 1)  # implementation id
+        # TODO: set correct misa
+        self.csr.set('misa', 1)  # available ISA
+
+        @self.csr.callback('halt')
+        def halt(old: int, new: int):
+            if new != 0:
+                self.exit = True
+                self.exit_code = new
+
+        @self.csr.callback('mstatus')
+        def mstatus(old: int, new: int):
+            pass

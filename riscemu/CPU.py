@@ -47,8 +47,8 @@ class CPU:
         # setup CPU states
         self.pc = 0
         self.cycle = 0
-        self.exit = False
-        self.exit_code = 0
+        self.exit: bool = False
+        self.exit_code: int = 0
         self.conf = conf
         self.active_debug = False  # if a debugging session is currently runnign
 
