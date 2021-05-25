@@ -65,20 +65,22 @@ class CSR:
 
     def __init__(self):
         self.regs = defaultdict(lambda: 0)
-        self.listeners = defaultdict(lambda: (lambda x, y: ()))
+        self.listeners = defaultdict(lambda: (lambda x, y: None))
 
     def set(self, addr: Union[str, int], val: int):
         if isinstance(addr, str):
-            if not addr in self.name_to_addr:
+            if addr not in self.name_to_addr:
                 print("Unknown CSR register {}".format(addr))
+                return
             addr = self.name_to_addr[addr]
         self.listeners[addr](self.regs[addr], val)
         self.regs[addr] = val
 
     def get(self, addr: Union[str, int]):
         if isinstance(addr, str):
-            if not addr in self.name_to_addr:
+            if addr not in self.name_to_addr:
                 print("Unknown CSR register {}".format(addr))
+                return
             addr = self.name_to_addr[addr]
         return self.regs[addr]
 
