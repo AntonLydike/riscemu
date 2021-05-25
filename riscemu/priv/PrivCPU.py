@@ -44,9 +44,9 @@ class PrivCPU(CPU):
         super().__init__(conf, [PrivRV32I, RV32M])
         self.mode: PrivModes = PrivModes.MACHINE
 
-        exec = ElfExecutable('kernel')
-        self.mmu = PrivMMU(exec)
-        self.pc = exec.run_ptr
+        kernel = ElfExecutable('kernel')
+        self.mmu = PrivMMU(kernel)
+        self.pc = kernel.run_ptr
         self.syscall_int = None
 
         # init csr
