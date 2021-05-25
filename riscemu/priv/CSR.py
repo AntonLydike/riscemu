@@ -1,6 +1,7 @@
-from typing import Dict, Union, Callable
+from typing import Dict, Union, Callable, Optional
 from collections import defaultdict
-from functools import wraps
+from .privmodes import PrivModes
+from .Exceptions import IllegalInstructionTrap
 
 MSTATUS_OFFSETS = {
     'uie': 0,
@@ -68,27 +69,22 @@ class CSR:
         self.listeners = defaultdict(lambda: (lambda x, y: None))
 
     def set(self, addr: Union[str, int], val: int):
-        if isinstance(addr, str):
-            if addr not in self.name_to_addr:
-                print("Unknown CSR register {}".format(addr))
-                return
-            addr = self.name_to_addr[addr]
+        addr = self._addr_to_name(addr)
+        if addr is None:
+            return
         self.listeners[addr](self.regs[addr], val)
         self.regs[addr] = val
 
     def get(self, addr: Union[str, int]):
-        if isinstance(addr, str):
-            if addr not in self.name_to_addr:
-                print("Unknown CSR register {}".format(addr))
-                return
-            addr = self.name_to_addr[addr]
+        addr = self._addr_to_name(addr)
+        if addr is None:
+            return
         return self.regs[addr]
 
     def set_listener(self, addr: Union[str, int], listener: Callable[[int, int], None]):
-        if isinstance(addr, str):
-            if not addr in self.name_to_addr:
-                print("Unknown CSR register {}".format(addr))
-            addr = self.name_to_addr[addr]
+        addr = self._addr_to_name(addr)
+        if addr is None:
+            return
         self.listeners[addr] = listener
 
     # mstatus properties
@@ -122,3 +118,19 @@ class CSR:
             self.set_listener(addr, func)
             return func
         return inner
+
+    def assert_can_read(self, mode: PrivModes, addr: int):
+        if (addr >> 8) & 3 > mode.value():
+            raise IllegalInstructionTrap()
+
+    def assert_can_write(self, mode: PrivModes, addr: int):
+        if (addr >> 8) & 3 > mode.value() or addr >> 10 == 11:
+            raise IllegalInstructionTrap()
+
+    def _addr_to_name(self, addr: Union[str, int]) -> Optional[int]:
+        if isinstance(addr, str):
+            if addr not in self.name_to_addr:
+                print("Unknown CSR register {}".format(addr))
+                return None
+            return self.name_to_addr[addr]
+        return addr

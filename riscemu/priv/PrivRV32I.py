@@ -21,11 +21,15 @@ class PrivRV32I(RV32I):
     """
 
     def instruction_csrrw(self, ins: 'LoadedInstruction'):
-        rd, rs, ind = self.parse_crs_ins(ins)
+        rd, rs, csr_addr = self.parse_crs_ins(ins)
         if rd != 'zero':
-            old_val = int_from_bytes(self.cpu.csr[ind])
+            self.cpu.csr.assert_can_read(self.cpu.mode, csr_addr)
+            old_val = self.cpu.csr.get(csr_addr)
             self.regs.set(rd, old_val)
-        self.cpu.csr.set(ind, rs)
+        if rs != 'zero':
+            new_val = self.regs.get(rs)
+            self.cpu.csr.assert_can_write(self.cpu.mode, csr_addr)
+            self.cpu.csr.set(csr_addr, new_val)
 
     def instruction_csrrs(self, ins: 'LoadedInstruction'):
         INS_NOT_IMPLEMENTED(ins)
@@ -122,7 +126,7 @@ class PrivRV32I(RV32I):
 
     def parse_crs_ins(self, ins: 'LoadedInstruction'):
         ASSERT_LEN(ins.args, 3)
-        return ins.get_reg(0), self.get_reg_content(ins, 1), ins.get_imm(2)
+        return ins.get_reg(0), ins.get_reg(1), ins.get_imm(2)
 
     def parse_mem_ins(self, ins: 'LoadedInstruction') -> Tuple[str, int]:
         ASSERT_LEN(ins.args, 3)
