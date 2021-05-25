@@ -131,11 +131,11 @@ class PrivCPU(CPU):
     def _init_csr(self):
         # set up CSR
         self.csr = CSR()
-        # TODO: Actually populate the CSR with real data (vendorID, heartID, machine implementation etc)
         self.csr.set('mhartid', 0)  # core id
+        # TODO: set correct value
         self.csr.set('mimpid', 1)  # implementation id
-        # TODO: set correct misa
-        self.csr.set('misa', 1)  # available ISA
+        # set mxl to 1 (32 bit) and set bits for i and m isa
+        self.csr.set('misa', (1 << 30) + (1 << 8) + (1 << 12))  # available ISA
 
         @self.csr.callback('halt')
         def halt(old: int, new: int):
