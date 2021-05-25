@@ -3,8 +3,17 @@ from typing import Optional
 
 class CpuTrap(BaseException):
     code: int
+    """
+    31-bit value encoding the exception code in the mstatus register
+    """
     interrupt: int
+    """
+    The isInterrupt bit in the mstatus register
+    """
     mtval: int
+    """
+    contents of the mtval register
+    """
 
     def __init__(self, interrupt: int, code: int, mtval=0):
         assert 0 <= interrupt <= 1
