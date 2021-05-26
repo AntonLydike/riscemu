@@ -2,6 +2,7 @@ from typing import Dict, Union, Callable, Optional
 from collections import defaultdict
 from .privmodes import PrivModes
 from .Exceptions import IllegalInstructionTrap
+from ..helpers import to_unsigned
 
 MSTATUS_OFFSETS = {
     'uie': 0,
@@ -74,12 +75,14 @@ class CSR:
     def __init__(self):
         self.regs = defaultdict(lambda: 0)
         self.listeners = defaultdict(lambda: (lambda x, y: None))
+        self.virtual_regs = dict()
         #TODO: implement write masks (bitmasks which control writeable bits in registers
 
     def set(self, addr: Union[str, int], val: int):
         addr = self._addr_to_name(addr)
         if addr is None:
             return
+        val = to_unsigned(val)
         self.listeners[addr](self.regs[addr], val)
         self.regs[addr] = val
 
@@ -135,7 +138,7 @@ class CSR:
             raise IllegalInstructionTrap()
 
     def assert_can_write(self, mode: PrivModes, addr: int):
-        if (addr >> 8) & 3 > mode.value() or addr >> 10 == 11:
+        if (addr >> 8) & 3 > mode.value or addr >> 10 == 11:
             raise IllegalInstructionTrap()
 
     def _addr_to_name(self, addr: Union[str, int]) -> Optional[int]:

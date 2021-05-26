@@ -130,5 +130,4 @@ class PrivRV32I(RV32I):
 
     def parse_mem_ins(self, ins: 'LoadedInstruction') -> Tuple[str, int]:
         ASSERT_LEN(ins.args, 3)
-        print("dop")
         return ins.get_reg(1), self.get_reg_content(ins, 0) + ins.get_imm(2)

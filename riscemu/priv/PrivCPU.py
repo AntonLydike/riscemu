@@ -69,10 +69,11 @@ class PrivCPU(CPU):
         ins = None
         try:
             while not self.exit:
-                self.step(verbose=False)
+                self.step(verbose)
         except RiscemuBaseException as ex:
             if isinstance(ex, LaunchDebuggerException):
                 self.launch_debug = True
+                self.pc += self.INS_XLEN
             else:
                 print(FMT_ERROR + "[CPU] excpetion caught at 0x{:08X}: {}:".format(self.pc - 1, ins) + FMT_NONE)
                 print(ex.message())
