@@ -79,7 +79,7 @@ class CSR:
         #TODO: implement write masks (bitmasks which control writeable bits in registers
 
     def set(self, addr: Union[str, int], val: int):
-        addr = self._addr_to_name(addr)
+        addr = self._name_to_addr(addr)
         if addr is None:
             return
         val = to_unsigned(val)
@@ -87,15 +87,15 @@ class CSR:
         self.regs[addr] = val
 
     def get(self, addr: Union[str, int]) -> int:
-        addr = self._addr_to_name(addr)
+        addr = self._name_to_addr(addr)
         if addr is None:
-            return
+            raise RuntimeError(f"Invalid CSR name: {addr}!")
         if addr in self.virtual_regs:
             return self.virtual_regs[addr]()
         return self.regs[addr]
 
     def set_listener(self, addr: Union[str, int], listener: Callable[[int, int], None]):
-        addr = self._addr_to_name(addr)
+        addr = self._name_to_addr(addr)
         if addr is None:
             print("unknown csr address name: {}".format(addr))
             return
@@ -135,13 +135,13 @@ class CSR:
 
     def assert_can_read(self, mode: PrivModes, addr: int):
         if (addr >> 8) & 3 > mode.value():
-            raise IllegalInstructionTrap()
+            raise InstructionAccessFault(addr)
 
     def assert_can_write(self, mode: PrivModes, addr: int):
         if (addr >> 8) & 3 > mode.value or addr >> 10 == 11:
-            raise IllegalInstructionTrap()
+            raise InstructionAccessFault(addr)
 
-    def _addr_to_name(self, addr: Union[str, int]) -> Optional[int]:
+    def _name_to_addr(self, addr: Union[str, int]) -> Optional[int]:
         if isinstance(addr, str):
             if addr not in self.name_to_addr:
                 print("Unknown CSR register {}".format(addr))
@@ -150,7 +150,7 @@ class CSR:
         return addr
 
     def virtual_register(self, addr: Union[str, int]):
-        addr = self._addr_to_name(addr)
+        addr = self._name_to_addr(addr)
         if addr is None:
             print("unknown csr address name: {}".format(addr))
 
