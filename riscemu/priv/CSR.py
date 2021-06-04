@@ -1,7 +1,7 @@
 from typing import Dict, Union, Callable, Optional
 from collections import defaultdict
 from .privmodes import PrivModes
-from .Exceptions import IllegalInstructionTrap
+from .Exceptions import InstructionAccessFault
 from ..helpers import to_unsigned
 
 MSTATUS_OFFSETS = {

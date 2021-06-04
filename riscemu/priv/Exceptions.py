@@ -1,5 +1,16 @@
-from typing import Optional
+from typing import Optional, NewType
+from enum import Enum
+from .privmodes import PrivModes
 
+import typing
+if typing.TYPE_CHECKING:
+    from .ElfLoader import ElfInstruction
+
+class CpuTrapType(Enum):
+    TIMER = 1
+    SOFTWARE = 2
+    EXTERNAL = 3
+    EXCEPTION = 4
 
 class CpuTrap(BaseException):
     code: int
@@ -10,17 +21,28 @@ class CpuTrap(BaseException):
     """
     The isInterrupt bit in the mstatus register
     """
+
     mtval: int
     """
     contents of the mtval register
     """
 
-    def __init__(self, interrupt: int, code: int, mtval=0):
-        assert 0 <= interrupt <= 1
+    type: CpuTrapType
+    """
+    The type (timer, external, software) of the trap
+    """
 
-        self.interrupt = interrupt
+    priv: PrivModes
+    """
+    The privilege level this trap targets 
+    """
+
+    def __init__(self, code: int, mtval, type: CpuTrapType, priv: PrivModes = PrivModes.MACHINE):
+        self.interrupt = 0 if type == CpuTrapType.EXCEPTION else 1
         self.code = code
         self.mtval = mtval
+        self.priv = priv
+        self.type = type
 
     @property
     def mcause(self):
@@ -28,17 +50,20 @@ class CpuTrap(BaseException):
 
 
 class IllegalInstructionTrap(CpuTrap):
-    def __init__(self):
-        super().__init__(0, 2, 0)
+    def __init__(self, ins: 'ElfInstruction'):
+        super().__init__(2, ins.encoded, CpuTrapType.EXCEPTION)
 
 
 class InstructionAddressMisalignedTrap(CpuTrap):
     def __init__(self, addr: int):
-        super().__init__(0, 0, addr)
+        super().__init__(0, addr, CpuTrapType.EXCEPTION)
 
 
 class InstructionAccessFault(CpuTrap):
     def __init__(self, addr: int):
-        super().__init__(0, 1, addr)
+        super().__init__(1, addr, CpuTrapType.EXCEPTION)
 
 
+class TimerInterrupt(CpuTrap):
+    def __init(self):
+        super().__init__(7, 0, CpuTrapType.TIMER)

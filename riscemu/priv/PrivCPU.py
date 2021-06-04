@@ -169,7 +169,7 @@ class PrivCPU(CPU):
         if not self._time_interrupt_enabled:
             return
         if self._time_timecmp < (time.perf_counter_ns() // self.TIME_RESOLUTION_NS) - self._time_start:
-            self.pending_traps.append(CpuTrap(1, 7, 0))
+            self.pending_traps.append(TimerInterrupt())
             self._time_interrupt_enabled = False
 
     def _check_interrupt(self):

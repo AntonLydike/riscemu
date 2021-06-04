@@ -49,7 +49,7 @@ class PrivRV32I(RV32I):
     def instruction_mret(self, ins: 'LoadedInstruction'):
         if self.cpu.mode != PrivModes.MACHINE:
             print("MRET not inside machine level code!")
-            raise IllegalInstructionTrap()
+            raise IllegalInstructionTrap(ins)
         # retore mie
         mpie = self.cpu.csr.get_mstatus('mpie')
         self.cpu.csr.set_mstatus('mie', mpie)
@@ -61,21 +61,21 @@ class PrivRV32I(RV32I):
         self.cpu.pc = mepc
 
     def instruction_uret(self, ins: 'LoadedInstruction'):
-        raise IllegalInstructionTrap()
+        raise IllegalInstructionTrap(ins)
 
     def instruction_sret(self, ins: 'LoadedInstruction'):
-        raise IllegalInstructionTrap()
+        raise IllegalInstructionTrap(ins)
 
     def instruction_scall(self, ins: 'LoadedInstruction'):
         """
         Overwrite the scall from userspace RV32I
         """
         if self.cpu.mode == PrivModes.USER:
-            raise CpuTrap(0, 8)  # ecall from U mode
+            raise CpuTrap(8, 0, CpuTrapType.SOFTWARE, self.cpu.mode)  # ecall from U mode
         elif self.cpu.mode == PrivModes.SUPER:
-            raise CpuTrap(0, 9)  # ecall from S mode - should not happen
+            raise CpuTrap(9, 0, CpuTrapType.SOFTWARE, self.cpu.mode)  # ecall from S mode - should not happen
         elif self.cpu.mode == PrivModes.MACHINE:
-            raise CpuTrap(0, 11)  # ecall from M mode
+            raise CpuTrap(11, 0, CpuTrapType.SOFTWARE, self.cpu.mode)  # ecall from M mode
 
     def instruction_beq(self, ins: 'LoadedInstruction'):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins)
