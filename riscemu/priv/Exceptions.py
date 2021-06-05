@@ -62,6 +62,9 @@ class CpuTrap(BaseException):
             name, self.priv.name, self.type.name, self.mtval
         )
 
+    def __str__(self):
+        return self.__repr__()
+
 
 class IllegalInstructionTrap(CpuTrap):
     def __init__(self, ins: 'ElfInstruction'):
