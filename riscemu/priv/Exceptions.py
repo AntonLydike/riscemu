@@ -79,5 +79,5 @@ class InstructionAccessFault(CpuTrap):
 
 
 class TimerInterrupt(CpuTrap):
-    def __init(self):
+    def __init__(self):
         super().__init__(7, 0, CpuTrapType.TIMER)
