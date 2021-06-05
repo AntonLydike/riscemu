@@ -39,16 +39,16 @@ def name_from_insn(ins: int):
     if isinstance(dec, str):
         return dec
 
-    fun = funct3(ins)
-    if fun not in dec:
+    fun3 = funct3(ins)
+    if fun3 not in dec:
         print_ins(ins)
-        raise RuntimeError(f"Invalid funct3: {fun:0x} in insn {ins:x}")
+        raise RuntimeError(f"Invalid funct3: {fun3:0x} in insn {ins:x}")
 
-    dec = dec[fun]
+    dec = dec[fun3]
     if isinstance(dec, str):
         return dec
 
-    if opcode == 0x1c and fun == 0:
+    if opcode == 0x1c and fun3 == 0:
         # we have ecall/ebreak
         token = imm110(ins)
         if token in dec:
@@ -56,17 +56,13 @@ def name_from_insn(ins: int):
         print_ins(ins)
         raise RuntimeError(f"Invalid instruction in ebreak/ecall region: {ins:x}")
 
-    fun = funct7(ins)
-    if fun in dec:
-        if opcode == 0x0C or (opcode == 0x04 and fun == 5):
-            mode = imm110(ins)
-            dec = dec[fun]
-            if mode in dec:
-                return dec[mode]
-            print_ins(ins)
-            raise RuntimeError("Unknown instruction!")
-
-        return dec[fun]
+    fun7 = funct7(ins)
+    if fun7 in dec:
+        if opcode == 0x0C or (opcode == 0x04 and fun3 == 5):
+            dec = dec[fun7]
+            return dec
+        print("unknown instruction?!")
+        return dec[fun7]
 
     print_ins(ins)
     raise RuntimeError(f"Invalid instruction: {ins:x}")
