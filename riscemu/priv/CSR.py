@@ -3,35 +3,7 @@ from collections import defaultdict
 from .privmodes import PrivModes
 from .Exceptions import InstructionAccessFault
 from ..helpers import to_unsigned
-
-MSTATUS_OFFSETS = {
-    'uie': 0,
-    'sie': 1,
-    'mie': 3,
-    'upie': 4,
-    'spie': 5,
-    'mpie': 7,
-    'spp': 8,
-    'mpp': 11,
-    'fs': 13,
-    'xs': 15,
-    'mpriv': 17,
-    'sum': 18,
-    'mxr': 19,
-    'tvm': 20,
-    'tw': 21,
-    'tsr': 22,
-    'sd': 31
-}
-"""
-Offsets for all mstatus bits
-"""
-
-MSTATUS_LEN_2 = ('mpp', 'fs', 'xs')
-"""
-All mstatus parts that have length 2. All other mstatus parts have length 1
-"""
-
+from .CSRConsts import CSR_NAME_TO_ADDR, MSTATUS_LEN_2, MSTATUS_OFFSETS
 
 class CSR:
     """
@@ -47,28 +19,6 @@ class CSR:
     list of virtual CSR registers, with values computed on read
     """
 
-    name_to_addr: Dict[str, int] = {
-        'mstatus': 0x300,
-        'misa': 0x301,
-        'mie': 0x304,
-        'mtvec': 0x305,
-        'mepc': 0x341,
-        'mcause': 0x342,
-        'mtval': 0x343,
-        'mip': 0x344,
-        'mvendorid': 0xF11,
-        'marchid': 0xF12,
-        'mimpid': 0xF13,
-        'mhartid': 0xF14,
-        'time': 0xc01,
-        'timeh': 0xc81,
-        'halt': 0x789,
-        'mtimecmp': 0x780,
-        'mtimecmph': 0x781,
-    }
-    """
-    Translation for named registers
-    """
 
     listeners: Dict[int, Callable[[int, int], None]]
 
@@ -143,10 +93,10 @@ class CSR:
 
     def _name_to_addr(self, addr: Union[str, int]) -> Optional[int]:
         if isinstance(addr, str):
-            if addr not in self.name_to_addr:
+            if addr not in CSR_NAME_TO_ADDR:
                 print("Unknown CSR register {}".format(addr))
                 return None
-            return self.name_to_addr[addr]
+            return CSR_NAME_TO_ADDR[addr]
         return addr
 
     def virtual_register(self, addr: Union[str, int]):
