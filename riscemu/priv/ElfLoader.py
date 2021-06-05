@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Dict, Union
+from typing import List, Dict, Tuple
 
 from elftools.elf.elffile import ELFFile
 from elftools.elf.sections import Section, SymbolTableSection
@@ -108,10 +108,12 @@ class ElfInstruction:
     def get_reg(self, num: int) -> str:
         return RISCV_REGS[self.args[num]]
 
-    def __repr__(self):
-        if self.name in ('sw', 'sh', 'sb', 'lb', 'lh', 'lb', 'lbu', 'lhu'):
+    def __repr__(self) -> str:
+        if self.name == 'jal' and self.args[0] == 0:
+            return "j        {}".format(self.args[1])
+        elif self.name in ('lw', 'lh', 'lb', 'lbu', 'lhu', 'sw', 'sh', 'sb'):
             args = "{}, {}({})".format(
-                self.args[1], self.args[2], self.args[0]
+                RISCV_REGS[self.args[0]], self.args[2], RISCV_REGS[self.args[1]]
             )
         else:
             args = ", ".join(map(str, self.args))
