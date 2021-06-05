@@ -41,7 +41,15 @@ class PrivRV32I(RV32I):
         INS_NOT_IMPLEMENTED(ins)
 
     def instruction_csrrwi(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        ASSERT_LEN(ins.args, 3)
+        rd, imm, addr = ins.get_reg(0), ins.get_imm(1), ins.get_imm(2)
+        if rd != 'zero':
+            self.cpu.csr.assert_can_read(self.cpu.mode, addr)
+            old_val = self.cpu.csr.get(addr)
+            self.regs.set(rd, old_val)
+        self.cpu.csr.assert_can_write(self.cpu.mode, addr)
+        self.cpu.csr.set(addr, imm)
+
 
     def instruction_csrrci(self, ins: 'LoadedInstruction'):
         INS_NOT_IMPLEMENTED(ins)
