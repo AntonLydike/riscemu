@@ -69,37 +69,37 @@ def sign_extend(num, bits):
     return (num & (sign_mask - 1)) - (num & sign_mask)
 
 
-def decode_i(ins: int) -> List[Union[str, int]]:
-    return [RISCV_REGS[rd(ins)], RISCV_REGS[rs1(ins)], imm_i(ins)]
+def decode_i(ins: int) -> List[int]:
+    return [rd(ins), rs1(ins), imm_i(ins)]
 
 
-def decode_b(ins: int) -> List[Union[str, int]]:
-    return [RISCV_REGS[rs1(ins)], RISCV_REGS[rs2(ins)], imm_b(ins)]
+def decode_b(ins: int) -> List[int]:
+    return [rs1(ins), rs2(ins), imm_b(ins)]
 
 
-def decode_u(ins: int) -> List[Union[str, int]]:
-    return [RISCV_REGS[rd(ins)], imm_u(ins)]
+def decode_u(ins: int) -> List[int]:
+    return [rd(ins), imm_u(ins)]
 
 
-def decode_r(ins: int) -> List[Union[str, int]]:
-    return [RISCV_REGS[rd(ins)], RISCV_REGS[rs1(ins)], RISCV_REGS[rs2(ins)]]
+def decode_r(ins: int) -> List[int]:
+    return [rd(ins), rs1(ins), rs2(ins)]
 
 
-def decode_s(ins: int) -> List[Union[str, int]]:
-    return [RISCV_REGS[rs1(ins)], RISCV_REGS[rs2(ins)], imm_s(ins)]
+def decode_s(ins: int) -> List[int]:
+    return [rs2(ins), rs1(ins), imm_s(ins)]
 
 
-def decode_j(ins: int) -> List[Union[str, int]]:
-    return [RISCV_REGS[rd(ins)], imm_j(ins)]
+def decode_j(ins: int) -> List[int]:
+    return [rd(ins), imm_j(ins)]
 
 
-def decode_i_shamt(ins: int) -> List[Union[str, int]]:
+def decode_i_shamt(ins: int) -> List[int]:
     if funct3(ins) in (1, 5):
-        return [RISCV_REGS[rd(ins)], RISCV_REGS[rs1(ins)], rs2(ins)]
+        return [rd(ins), rs1(ins), rs2(ins)]
     return decode_i(ins)
 
 
-INSTRUCTION_ARGS_DECODER: Dict[int, Callable[[int], List[Union[str, int]]]] = {
+INSTRUCTION_ARGS_DECODER: Dict[int, Callable[[int], List[int]]] = {
     0x00: decode_i,
     0x04: decode_i_shamt,
     0x05: decode_u,

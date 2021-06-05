@@ -1,1 +1,1 @@
-from .decoder import decode
+from .decoder import decode, RISCV_REGS

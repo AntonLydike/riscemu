@@ -7,7 +7,7 @@ from elftools.elf.sections import Section, SymbolTableSection
 from .Exceptions import *
 from ..Exceptions import RiscemuBaseException
 from ..Executable import MemoryFlags, LoadedMemorySection
-from ..decoder import decode
+from ..decoder import decode, RISCV_REGS
 from ..helpers import FMT_PARSE, FMT_NONE, FMT_GREEN, FMT_BOLD
 
 FMT_ELF = FMT_GREEN + FMT_BOLD
@@ -96,17 +96,17 @@ class InvalidElfException(RiscemuBaseException):
 @dataclass(frozen=True)
 class ElfInstruction:
     name: str
-    args: List[Union[int, str]]
+    args: List[int]
     encoded: int
 
-    def get_imm(self, num: int):
-        return self.args[-1]
+    def get_imm(self, num: int) -> int:
+        return self.args[num]
 
-    def get_imm_reg(self, num: int):
+    def get_imm_reg(self, num: int) -> Tuple[int, int]:
         return self.args[-1], self.args[-2]
 
-    def get_reg(self, num: int):
-        return self.args[num]
+    def get_reg(self, num: int) -> str:
+        return RISCV_REGS[self.args[num]]
 
     def __repr__(self):
         if self.name in ('sw', 'sh', 'sb', 'lb', 'lh', 'lb', 'lbu', 'lhu'):
