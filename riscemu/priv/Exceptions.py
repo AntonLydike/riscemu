@@ -1,16 +1,20 @@
 from typing import Optional, NewType
 from enum import Enum
 from .privmodes import PrivModes
+from .CSRConsts import MCAUSE_TRANSLATION
 
 import typing
+
 if typing.TYPE_CHECKING:
     from .ElfLoader import ElfInstruction
+
 
 class CpuTrapType(Enum):
     TIMER = 1
     SOFTWARE = 2
     EXTERNAL = 3
     EXCEPTION = 4
+
 
 class CpuTrap(BaseException):
     code: int
@@ -47,6 +51,16 @@ class CpuTrap(BaseException):
     @property
     def mcause(self):
         return (self.code << 31) + self.interrupt
+
+    def __repr__(self):
+        name = "Reserved interrupt({}, {})".format(self.interrupt, self.code)
+
+        if (self.interrupt, self.code) in MCAUSE_TRANSLATION:
+            name = MCAUSE_TRANSLATION[(self.interrupt, self.code)] + "({}, {})".format(self.interrupt, self.code)
+
+        return "{} {{priv={}, type={}, mtval={}}}".format(
+            name, self.priv.name, self.type.name, self.mtval
+        )
 
 
 class IllegalInstructionTrap(CpuTrap):
