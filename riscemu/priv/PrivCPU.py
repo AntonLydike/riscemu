@@ -18,6 +18,7 @@ if typing.TYPE_CHECKING:
     from riscemu import Executable, LoadedExecutable, LoadedInstruction
     from riscemu.instructions.InstructionSet import InstructionSet
 
+
 class PrivCPU(CPU):
     """
     This is a CPU that has different modes, instruction sets and registers.
@@ -84,6 +85,7 @@ class PrivCPU(CPU):
             print(FMT_CPU + "Program exited with code {}".format(self.exit_code) + FMT_NONE)
             sys.exit(self.exit_code)
         elif self.launch_debug:
+            self.launch_debug = False
             launch_debug_session(self, self.mmu, self.regs,
                                  "Launching debugger:")
             self._run(verbose)
@@ -152,7 +154,7 @@ class PrivCPU(CPU):
         # implement trap handling!
         self.pending_traps.append(trap)
 
-    def step(self, verbose = True):
+    def step(self, verbose=True):
         try:
             self.cycle += 1
             self._timer_step()

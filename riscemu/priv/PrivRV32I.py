@@ -132,6 +132,9 @@ class PrivRV32I(RV32I):
         self.regs.set(rd, self.pc)
         self.pc = rs + imm - 4
 
+    def instruction_sbreak(self, ins: 'LoadedInstruction'):
+        raise LaunchDebuggerException()
+
     def parse_crs_ins(self, ins: 'LoadedInstruction'):
         ASSERT_LEN(ins.args, 3)
         return ins.get_reg(0), ins.get_reg(1), ins.get_imm(2)
