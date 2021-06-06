@@ -98,7 +98,7 @@ class PrivRV32I(RV32I):
     def instruction_blt(self, ins: 'LoadedInstruction'):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins)
         if rs1 < rs2:
-            self.pc += dst
+            self.pc += dst - 4
 
     def instruction_bge(self, ins: 'LoadedInstruction'):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins)
