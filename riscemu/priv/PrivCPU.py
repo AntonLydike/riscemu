@@ -173,6 +173,36 @@ class PrivCPU(CPU):
         if self._time_timecmp < (time.perf_counter_ns() // self.TIME_RESOLUTION_NS) - self._time_start:
             self.pending_traps.append(TimerInterrupt())
             self._time_interrupt_enabled = False
+            print(FMT_CPU + "[CPU] raising timer interrupt: tartegt: {}, current: {}".format(self._time_timecmp, (time.perf_counter_ns() // self.TIME_RESOLUTION_NS) - self._time_start) + FMT_NONE)
 
     def _check_interrupt(self):
-        pass
+        if not (len(self.pending_traps) > 0 and self.csr.get_mstatus('mie')):
+            return
+        # select best interrupt
+        # TODO: actually select based on the official ranking
+        trap = self.pending_traps.pop()  # use the most recent trap
+        print(FMT_CPU + "[CPU] taking trap {}!".format(trap) + FMT_NONE)
+
+        if trap.priv != PrivModes.MACHINE:
+            print(FMT_CPU + "[CPU] Trap not targeting machine mode encountered! - undefined behaviour!" + FMT_NONE)
+
+        if self.mode != PrivModes.USER:
+            print(FMT_CPU + "[CPU] Trap triggered outside of user mode?!" + FMT_NONE)
+
+        self.csr.set_mstatus('mpie', self.csr.get_mstatus('mie'))
+        self.csr.set_mstatus('mpp', self.mode.value)
+        self.csr.set_mstatus('mie', 0)
+        self.csr.set('mcause', trap.mcause)
+        self.csr.set('mepc', self.pc)
+        self.csr.set('mtval', trap.mtval)
+        self.mode = trap.priv
+        mtvec = self.csr.get('mtvec')
+        if mtvec & 0b11 == 0:
+            self.pc = mtvec
+        if mtvec & 0b11 == 1:
+            self.pc = (mtvec & 0b11111111111111111111111111111100) + (trap.code * 4)
+
+
+
+
+
