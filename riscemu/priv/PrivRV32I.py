@@ -32,7 +32,15 @@ class PrivRV32I(RV32I):
             self.cpu.csr.set(csr_addr, new_val)
 
     def instruction_csrrs(self, ins: 'LoadedInstruction'):
-        INS_NOT_IMPLEMENTED(ins)
+        rd, rs, csr_addr = self.parse_crs_ins(ins)
+        if rs != 'zero':
+            # oh no, this should not happen!
+            INS_NOT_IMPLEMENTED(ins)
+        if rd != 'zero':
+            self.cpu.csr.assert_can_read(self.cpu.mode, csr_addr)
+            old_val = self.cpu.csr.get(csr_addr)
+            self.regs.set(rd, old_val)
+
 
     def instruction_csrrc(self, ins: 'LoadedInstruction'):
         INS_NOT_IMPLEMENTED(ins)
