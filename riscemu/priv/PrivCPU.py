@@ -134,7 +134,7 @@ class PrivCPU(CPU):
             self._time_interrupt_enabled = True
 
         @self.csr.callback('mtimecmph')
-        def mtimecmp(old, new):
+        def mtimecmph(old, new):
             self._time_timecmp = (new << 32) + self.csr.get('mtimecmp')
             self._time_interrupt_enabled = True
 
