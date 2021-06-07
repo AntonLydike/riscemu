@@ -5,7 +5,7 @@ from typing import Tuple, List
 def print_ins(ins: int):
     print("  f7      rs2   rs1   f3  rd    op")
     print(
-        f"0b{ins >> 25 :07b}_{(ins >> 20) & 0b11111:05b}_{(ins >> 15) & 0b11111:03b}_{(ins >> 12) & 0b111:03b}_{(ins >> 7) & 0b11111:05b}_{ins & 0b1111111:07b}");
+        f"0b{ins >> 25 :07b}_{(ins >> 20) & 0b11111:05b}_{(ins >> 15) & 0b11111:05b}_{(ins >> 12) & 0b111:03b}_{(ins >> 7) & 0b11111:05b}_{ins & 0b1111111:07b}");
 
 
 STATIC_INSN: Dict[int, Tuple[str, List[int], int]] = {
