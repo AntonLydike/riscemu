@@ -142,11 +142,11 @@ class PrivCPU(CPU):
 
         @self.csr.virtual_register('time')
         def get_time():
-            return (time.perf_counter_ns() // self.TIME_RESOLUTION_NS) & (2 ** 32 - 1)
+            return (time.perf_counter_ns() // self.TIME_RESOLUTION_NS - self._time_start) & (2 ** 32 - 1)
 
         @self.csr.virtual_register('timeh')
         def get_timeh():
-            return (time.perf_counter_ns() // self.TIME_RESOLUTION_NS) >> 32
+            return (time.perf_counter_ns() // self.TIME_RESOLUTION_NS - self._time_start) >> 32
 
         # add minstret and mcycle counters
 
