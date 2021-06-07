@@ -95,7 +95,6 @@ class Registers:
         :return: If the operation was successful
         """
         if reg == 'zero':
-            print("[Registers.set] trying to set read-only register: {}".format(reg))
             return False
         if reg not in Registers.all_registers():
             raise InvalidRegisterException(reg)
