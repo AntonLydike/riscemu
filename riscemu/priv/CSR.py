@@ -84,7 +84,7 @@ class CSR:
         return inner
 
     def assert_can_read(self, mode: PrivModes, addr: int):
-        if (addr >> 8) & 3 > mode.value():
+        if (addr >> 8) & 3 > mode.value:
             raise InstructionAccessFault(addr)
 
     def assert_can_write(self, mode: PrivModes, addr: int):
