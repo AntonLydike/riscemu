@@ -160,10 +160,9 @@ class PrivCPU(CPU):
 
     def step(self, verbose=True):
         try:
-            if self.cycle % 1000 == 0:
-                self._perf_counters.append((time.perf_counter_ns(), self.cycle))
             self.cycle += 1
-            self._timer_step()
+            if self.cycle % 10 == 0:
+                self._timer_step()
             self._check_interrupt()
             ins = self.mmu.read_ins(self.pc)
             if verbose:
@@ -207,6 +206,9 @@ class PrivCPU(CPU):
             self.pc = mtvec
         if mtvec & 0b11 == 1:
             self.pc = (mtvec & 0b11111111111111111111111111111100) + (trap.code * 4)
+        self.record_perf_profile()
+        if len(self._perf_counters) % 100 == 0:
+            self.show_perf()
 
     def show_perf(self):
         timed = 0
@@ -214,19 +216,23 @@ class PrivCPU(CPU):
         cps_list = list()
 
         print(FMT_CPU + "[CPU] Performance overview:")
-        for time_ns, cycle in self._perf_counters[-11:]:
+        for time_ns, cycle in self._perf_counters:
             if cycled == 0:
                 cycled = cycle
                 timed = time_ns
                 continue
             cps = (cycle - cycled) / (time_ns - timed) * 1000000000
 
-            print("    {:03d} cycles in {:08d}ns ({:.2f} cycles/s)".format(
-                cycle - cycled,
-                time_ns - timed,
-                cps
-            ))
+            #print("    {:03d} cycles in {:08d}ns ({:.2f} cycles/s)".format(
+            #    cycle - cycled,
+            #    time_ns - timed,
+            #    cps
+            #))
             cycled = cycle
             timed = time_ns
             cps_list.append(cps)
         print("    on average {:.0f} cycles/s".format(sum(cps_list) / len(cps_list)) + FMT_NONE)
+        self._perf_counters = list()
+
+    def record_perf_profile(self):
+        self._perf_counters.append((time.perf_counter_ns(), self.cycle))
