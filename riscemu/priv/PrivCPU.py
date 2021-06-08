@@ -61,6 +61,9 @@ class PrivCPU(CPU):
         self._time_timecmp = 0
         self._time_interrupt_enabled = False
 
+        # performance counters
+        self._perf_counters = list()
+
         # init csr
         self._init_csr()
 
@@ -156,6 +159,8 @@ class PrivCPU(CPU):
 
     def step(self, verbose=True):
         try:
+            if self.cycle % 1000 == 0:
+                self._perf_counters.append((time.perf_counter_ns(), self.cycle))
             self.cycle += 1
             self._timer_step()
             self._check_interrupt()
@@ -202,7 +207,25 @@ class PrivCPU(CPU):
         if mtvec & 0b11 == 1:
             self.pc = (mtvec & 0b11111111111111111111111111111100) + (trap.code * 4)
 
+    def show_perf(self):
+        timed = 0
+        cycled = 0
+        cps_list = list()
 
+        print(FMT_CPU + "[CPU] Performance overview:")
+        for time_ns, cycle in self._perf_counters[-11:]:
+            if cycled == 0:
+                cycled = cycle
+                timed = time_ns
+                continue
+            cps = (cycle - cycled) / (time_ns - timed) * 1000000000
 
-
-
+            print("    {:03d} cycles in {:08d}ns ({:.2f} cycles/s)".format(
+                cycle - cycled,
+                time_ns - timed,
+                cps
+            ))
+            cycled = cycle
+            timed = time_ns
+            cps_list.append(cps)
+        print("    on average {:.0f} cycles/s".format(sum(cps_list) / len(cps_list)) + FMT_NONE)
