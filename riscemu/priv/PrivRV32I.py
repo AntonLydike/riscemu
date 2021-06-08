@@ -22,14 +22,16 @@ class PrivRV32I(RV32I):
 
     def instruction_csrrw(self, ins: 'LoadedInstruction'):
         rd, rs, csr_addr = self.parse_crs_ins(ins)
+        old_val = None
         if rd != 'zero':
             self.cpu.csr.assert_can_read(self.cpu.mode, csr_addr)
             old_val = self.cpu.csr.get(csr_addr)
-            self.regs.set(rd, old_val)
         if rs != 'zero':
             new_val = self.regs.get(rs)
             self.cpu.csr.assert_can_write(self.cpu.mode, csr_addr)
             self.cpu.csr.set(csr_addr, new_val)
+        if old_val is not None:
+            self.regs.set(rd, old_val)
 
     def instruction_csrrs(self, ins: 'LoadedInstruction'):
         rd, rs, csr_addr = self.parse_crs_ins(ins)
