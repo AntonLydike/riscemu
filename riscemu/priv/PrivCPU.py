@@ -175,7 +175,7 @@ class PrivCPU(CPU):
     def _timer_step(self):
         if not self._time_interrupt_enabled:
             return
-        if self._time_timecmp < (time.perf_counter_ns() // self.TIME_RESOLUTION_NS) - self._time_start:
+        if self._time_timecmp <= (time.perf_counter_ns() // self.TIME_RESOLUTION_NS) - self._time_start:
             self.pending_traps.append(TimerInterrupt())
             self._time_interrupt_enabled = False
             print(FMT_CPU + "[CPU] raising timer interrupt: tartegt: {}, current: {}".format(self._time_timecmp, (time.perf_counter_ns() // self.TIME_RESOLUTION_NS) - self._time_start) + FMT_NONE)
