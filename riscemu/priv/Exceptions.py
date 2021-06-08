@@ -50,7 +50,7 @@ class CpuTrap(BaseException):
 
     @property
     def mcause(self):
-        return (self.code << 31) + self.interrupt
+        return (self.interrupt << 31) + self.code
 
     def __repr__(self):
         name = "Reserved interrupt({}, {})".format(self.interrupt, self.code)
