@@ -7,6 +7,7 @@ from ..colors import FMT_CSR, FMT_NONE
 
 from .CSRConsts import CSR_NAME_TO_ADDR, MSTATUS_LEN_2, MSTATUS_OFFSETS
 
+
 class CSR:
     """
     This holds all Control and Status Registers (CSR)
@@ -21,14 +22,17 @@ class CSR:
     list of virtual CSR registers, with values computed on read
     """
 
-
     listeners: Dict[int, Callable[[int, int], None]]
+
+    mstatus_cache: Dict[str, int]
+    mstatus_cache_dirty = True
 
     def __init__(self):
         self.regs = defaultdict(lambda: 0)
         self.listeners = defaultdict(lambda: (lambda x, y: None))
         self.virtual_regs = dict()
-        #TODO: implement write masks (bitmasks which control writeable bits in registers
+        self.mstatus_cache = dict()
+        # TODO: implement write masks (bitmasks which control writeable bits in registers
 
     def set(self, addr: Union[str, int], val: int):
         addr = self._name_to_addr(addr)
@@ -36,6 +40,8 @@ class CSR:
             return
         val = to_unsigned(val)
         self.listeners[addr](self.regs[addr], val)
+        if addr == 0x300:
+            self.mstatus_cache_dirty = True
         self.regs[addr] = val
 
     def get(self, addr: Union[str, int]) -> int:
@@ -67,22 +73,31 @@ class CSR:
         """
         size = 2 if name in MSTATUS_LEN_2 else 1
         off = MSTATUS_OFFSETS[name]
-        mask = (2**size - 1) << off
+        mask = (2 ** size - 1) << off
         old_val = self.get('mstatus')
         erased = old_val & (~mask)
         new_val = erased | (val << off)
         self.set('mstatus', new_val)
 
     def get_mstatus(self, name) -> int:
+        if not self.mstatus_cache_dirty and name in self.mstatus_cache:
+            return self.mstatus_cache[name]
+
         size = 2 if name in MSTATUS_LEN_2 else 1
         off = MSTATUS_OFFSETS[name]
-        mask = (2**size - 1) << off
-        return (self.get('mstatus') & mask) >> off
+        mask = (2 ** size - 1) << off
+        val = (self.get('mstatus') & mask) >> off
+        if self.mstatus_cache_dirty:
+            self.mstatus_cache = dict(name=val)
+        else:
+            self.mstatus_cache[name] = val
+        return val
 
     def callback(self, addr: Union[str, int]):
         def inner(func: Callable[[int, int], None]):
             self.set_listener(addr, func)
             return func
+
         return inner
 
     def assert_can_read(self, mode: PrivModes, addr: int):
