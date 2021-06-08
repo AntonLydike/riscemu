@@ -3,6 +3,8 @@ from collections import defaultdict
 from .privmodes import PrivModes
 from .Exceptions import InstructionAccessFault
 from ..helpers import to_unsigned
+from ..colors import FMT_CSR, FMT_NONE
+
 from .CSRConsts import CSR_NAME_TO_ADDR, MSTATUS_LEN_2, MSTATUS_OFFSETS
 
 class CSR:
@@ -109,3 +111,13 @@ class CSR:
             return func
 
         return inner
+
+    def dump_mstatus(self):
+        print(FMT_CSR + "[CSR] dumping mstatus:")
+        i = 0
+        for name in MSTATUS_OFFSETS:
+            print("   {:<5} {}".format(name, self.get_mstatus(name)), end="")
+            if i % 6 == 5:
+                print()
+            i += 1
+        print(FMT_NONE)
