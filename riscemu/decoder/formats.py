@@ -98,6 +98,10 @@ def decode_i_shamt(ins: int) -> List[int]:
     return decode_i(ins)
 
 
+def decode_i_unsigned(ins: int) -> List[int]:
+    return [rd(ins), rs1(ins), imm110(ins)]
+
+
 INSTRUCTION_ARGS_DECODER: Dict[int, Callable[[int], List[int]]] = {
     0x00: decode_i,
     0x04: decode_i_shamt,
@@ -108,5 +112,5 @@ INSTRUCTION_ARGS_DECODER: Dict[int, Callable[[int], List[int]]] = {
     0x18: decode_b,
     0x19: decode_i,
     0x1b: decode_j,
-    0x1c: decode_i
+    0x1c: decode_i_unsigned
 }
