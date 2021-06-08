@@ -47,6 +47,8 @@ class MMU:
     The global symbol table
     """
 
+    last_ins_sec: Optional[LoadedMemorySection]
+
     def __init__(self, conf: RunConfig):
         """
         Create a new MMU, respecting the active RunConfiguration
@@ -58,6 +60,7 @@ class MMU:
         self.first_free_addr: int = 0x100
         self.conf: RunConfig = conf
         self.global_symbols: Dict[str, int] = dict()
+        self.last_ins_sec = None
 
     def load_bin(self, exe: Executable) -> LoadedExecutable:
         """
@@ -140,7 +143,11 @@ class MMU:
         :param addr: The location
         :return: The Instruction
         """
+        sec = self.last_ins_sec
+        if sec is not None and sec.base <= addr < sec.base + sec.size:
+            return sec.read_instruction(addr - sec.base)
         sec = self.get_sec_containing(addr)
+        self.last_ins_sec = sec
         if sec is None:
             print(FMT_MEM + "[MMU] Trying to read instruction form invalid region! "
                             "Have you forgotten an exit syscall or ret statement?" + FMT_NONE)
