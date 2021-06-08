@@ -91,7 +91,8 @@ class PrivCPU(CPU):
             self.launch_debug = False
             launch_debug_session(self, self.mmu, self.regs,
                                  "Launching debugger:")
-            self._run(verbose)
+            if not self.active_debug:
+                self._run(verbose)
         else:
             print()
             print(FMT_CPU + "Program stopped without exiting - perhaps you stopped the debugger?" + FMT_NONE)
