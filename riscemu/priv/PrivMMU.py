@@ -4,6 +4,7 @@ import typing
 
 from .ElfLoader import ElfExecutable
 
+
 class PrivMMU(MMU):
     def __init__(self, elf: ElfExecutable):
         super(PrivMMU, self).__init__(conf=RunConfig())
@@ -17,9 +18,3 @@ class PrivMMU(MMU):
 
     def allocate_section(self, name: str, req_size: int, flag: MemoryFlags):
         raise NotImplementedError("Not supported!")
-
-
-
-
-
-
