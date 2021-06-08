@@ -124,13 +124,26 @@ class ElfInstruction:
 
 
 class ElfLoadedMemorySection(LoadedMemorySection):
+    ins_cache: List[Optional[ElfInstruction]]
+    """
+    A fast cache for accessing pre-decoded instructions
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__setattr__('ins_cache', [None] * (self.size // 4))
+
     def read_instruction(self, offset):
+        if self.ins_cache[offset//4] is not None:
+            return self.ins_cache[offset//4]
         if not self.flags.executable:
             print(FMT_PARSE + "Reading instruction from non-executable memory!" + FMT_NONE)
             raise InstructionAccessFault(offset + self.base)
         if offset % 4 != 0:
             raise InstructionAddressMisalignedTrap(offset + self.base)
-        return ElfInstruction(*decode(self.content[offset:offset + 4]))
+        ins = ElfInstruction(*decode(self.content[offset:offset + 4]))
+        self.ins_cache[offset // 4] = ins
+        return ins
 
     @property
     def end(self):
