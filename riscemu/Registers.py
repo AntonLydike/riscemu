@@ -103,7 +103,7 @@ class Registers:
             reg = 's1'
         if mark_set:
             self.last_set = reg
-        self.vals[reg] = val
+        self.vals[reg] = val & (2**32 - 1)
         return True
 
     def get(self, reg, mark_read=True):
