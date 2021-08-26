@@ -23,10 +23,7 @@ STATIC_INSN: Dict[int, Tuple[str, List[int], int]] = {
 
 
 def int_from_ins(insn: bytearray):
-    return (insn[3] << (8 * 3)) + \
-           (insn[2] << (8 * 2)) + \
-           (insn[1] << 8) + \
-           insn[0]
+    return int.from_bytes(insn, 'little')
 
 
 def name_from_insn(ins: int):
@@ -68,7 +65,7 @@ def name_from_insn(ins: int):
     raise RuntimeError(f"Invalid instruction: {ins:x}")
 
 
-def decode(ins: bytearray) -> Tuple[str, List[int], int]:
+def decode(ins: Union[bytearray, bytes]) -> Tuple[str, List[int], int]:
     insn = int_from_ins(ins)
 
     if insn & 3 != 3:

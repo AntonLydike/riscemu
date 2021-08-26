@@ -8,11 +8,14 @@ import time
 from riscemu.CPU import *
 from .CSR import CSR
 from .ElfLoader import ElfExecutable
+from .ImageLoader import ContinuousMMU
 from .Exceptions import *
 from .PrivMMU import PrivMMU
+from ..IO import TextIO
 from .PrivRV32I import PrivRV32I
 from .privmodes import PrivModes
 from ..instructions.RV32M import RV32M
+import json
 
 if typing.TYPE_CHECKING:
     from riscemu import Executable, LoadedExecutable, LoadedInstruction
@@ -48,9 +51,14 @@ class PrivCPU(CPU):
         super().__init__(conf, [PrivRV32I, RV32M])
         self.mode: PrivModes = PrivModes.MACHINE
 
-        kernel = ElfExecutable('kernel')
-        self.mmu = PrivMMU(kernel)
-        self.pc = kernel.run_ptr
+        with open('mem.img', 'rb') as memf:
+            data = memf.read()
+        with open('mem.img.dbg', 'r') as dbgf:
+            debug_info = json.load(dbgf)
+
+        self.mmu = ContinuousMMU(data, debug_info, self)
+        self.pc = 0x100
+        self.mmu.add_io(TextIO.TextIO(0xff0000, 64))
         self.syscall_int = None
 
         self.launch_debug = False
@@ -109,7 +117,7 @@ class PrivCPU(CPU):
     def run(self):
         print(FMT_CPU + '[CPU] Started running from 0x{:08X} ({})'.format(self.pc, "kernel") + FMT_NONE)
         self._time_start = time.perf_counter_ns() // self.TIME_RESOLUTION_NS
-        self._run(True)
+        self._run()
 
     def _init_csr(self):
         # set up CSR
@@ -161,7 +169,7 @@ class PrivCPU(CPU):
     def step(self, verbose=True):
         try:
             self.cycle += 1
-            if self.cycle % 10 == 0:
+            if self.cycle % 20 == 0:
                 self._timer_step()
             self._check_interrupt()
             ins = self.mmu.read_ins(self.pc)
@@ -178,7 +186,6 @@ class PrivCPU(CPU):
         if self._time_timecmp <= (time.perf_counter_ns() // self.TIME_RESOLUTION_NS) - self._time_start:
             self.pending_traps.append(TimerInterrupt())
             self._time_interrupt_enabled = False
-            print(FMT_CPU + "[CPU] raising timer interrupt: tartegt: {}, current: {}".format(self._time_timecmp, (time.perf_counter_ns() // self.TIME_RESOLUTION_NS) - self._time_start) + FMT_NONE)
 
     def _check_interrupt(self):
         if not (len(self.pending_traps) > 0 and self.csr.get_mstatus('mie')):
@@ -186,10 +193,12 @@ class PrivCPU(CPU):
         # select best interrupt
         # TODO: actually select based on the official ranking
         trap = self.pending_traps.pop()  # use the most recent trap
-        print(FMT_CPU + "[CPU] taking trap {}!".format(trap) + FMT_NONE)
+        if not isinstance(trap, TimerInterrupt):
+            print(FMT_CPU + "[CPU] taking trap {}!".format(trap) + FMT_NONE)
 
         if trap.priv != PrivModes.MACHINE:
             print(FMT_CPU + "[CPU] Trap not targeting machine mode encountered! - undefined behaviour!" + FMT_NONE)
+            raise Exception("Undefined behaviour!")
 
         if self.mode != PrivModes.USER:
             print(FMT_CPU + "[CPU] Trap triggered outside of user mode?!" + FMT_NONE)
@@ -198,7 +207,7 @@ class PrivCPU(CPU):
         self.csr.set_mstatus('mpp', self.mode.value)
         self.csr.set_mstatus('mie', 0)
         self.csr.set('mcause', trap.mcause)
-        self.csr.set('mepc', self.pc)
+        self.csr.set('mepc', self.pc-self.INS_XLEN)
         self.csr.set('mtval', trap.mtval)
         self.mode = trap.priv
         mtvec = self.csr.get('mtvec')
@@ -223,15 +232,15 @@ class PrivCPU(CPU):
                 continue
             cps = (cycle - cycled) / (time_ns - timed) * 1000000000
 
-            #print("    {:03d} cycles in {:08d}ns ({:.2f} cycles/s)".format(
+            # print("    {:03d} cycles in {:08d}ns ({:.2f} cycles/s)".format(
             #    cycle - cycled,
             #    time_ns - timed,
             #    cps
-            #))
+            # ))
             cycled = cycle
             timed = time_ns
             cps_list.append(cps)
-        print("    on average {:.0f} cycles/s".format(sum(cps_list) / len(cps_list)) + FMT_NONE)
+        print("    on average {:.0f} instructions/s".format(sum(cps_list) / len(cps_list)) + FMT_NONE)
         self._perf_counters = list()
 
     def record_perf_profile(self):

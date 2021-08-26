@@ -45,9 +45,7 @@ def launch_debug_session(cpu: 'CPU', mmu: 'MMU', reg: 'Registers', prompt=""):
             print("Invalid arg count!")
             return
         bin = mmu.get_bin_containing(cpu.pc)
-        if bin is None:
-            print(FMT_DEBUG + '[Debugger] Not in a section, can\'t execute instructions!' + FMT_NONE)
-            return
+
         ins = LoadedInstruction(name, list(args), bin)
         print(FMT_DEBUG + "Running instruction " + ins + FMT_NONE)
         cpu.run_instruction(ins)

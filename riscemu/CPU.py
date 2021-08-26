@@ -148,8 +148,7 @@ class CPU:
                 print(FMT_CPU + "[CPU] Returning to debugger!" + FMT_NONE)
                 return
             if self.conf.debug_on_exception:
-                launch_debug_session(self, self.mmu, self.regs,
-                                     "Exception encountered, launching debug:")
+                launch_debug_session(self, self.mmu, self.regs, "Exception encountered, launching debug:")
 
         if self.exit:
             print()

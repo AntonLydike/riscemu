@@ -88,12 +88,7 @@ class PrivRV32I(RV32I):
         """
         Overwrite the scall from userspace RV32I
         """
-        if self.cpu.mode == PrivModes.USER:
-            raise CpuTrap(8, 0, CpuTrapType.SOFTWARE, self.cpu.mode)  # ecall from U mode
-        elif self.cpu.mode == PrivModes.SUPER:
-            raise CpuTrap(9, 0, CpuTrapType.SOFTWARE, self.cpu.mode)  # ecall from S mode - should not happen
-        elif self.cpu.mode == PrivModes.MACHINE:
-            raise CpuTrap(11, 0, CpuTrapType.SOFTWARE, self.cpu.mode)  # ecall from M mode
+        raise EcallTrap(self.cpu.mode)
 
     def instruction_beq(self, ins: 'LoadedInstruction'):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins)

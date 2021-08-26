@@ -39,7 +39,7 @@ class ElfExecutable:
         if not elf.header.e_ident.EI_CLASS == 'ELFCLASS32':
             raise InvalidElfException("Only 32bit executables are supported!")
 
-        self.run_ptr = elf.header.e_entry;
+        self.run_ptr = elf.header.e_entry
 
         for sec in elf.iter_sections():
             if isinstance(sec, SymbolTableSection):

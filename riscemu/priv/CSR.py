@@ -2,7 +2,7 @@ from typing import Dict, Union, Callable, Optional
 from collections import defaultdict
 from .privmodes import PrivModes
 from .Exceptions import InstructionAccessFault
-from ..helpers import to_unsigned
+from ..helpers import to_signed
 from ..colors import FMT_CSR, FMT_NONE
 
 from .CSRConsts import CSR_NAME_TO_ADDR, MSTATUS_LEN_2, MSTATUS_OFFSETS
@@ -38,7 +38,7 @@ class CSR:
         addr = self._name_to_addr(addr)
         if addr is None:
             return
-        val = to_unsigned(val)
+        val = to_signed(val)
         self.listeners[addr](self.regs[addr], val)
         if addr == 0x300:
             self.mstatus_cache_dirty = True

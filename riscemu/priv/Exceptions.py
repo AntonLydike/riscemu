@@ -58,7 +58,7 @@ class CpuTrap(BaseException):
         if (self.interrupt, self.code) in MCAUSE_TRANSLATION:
             name = MCAUSE_TRANSLATION[(self.interrupt, self.code)] + "({}, {})".format(self.interrupt, self.code)
 
-        return "{} {{priv={}, type={}, mtval={}}}".format(
+        return "{} {{priv={}, type={}, mtval={:x}}}".format(
             name, self.priv.name, self.type.name, self.mtval
         )
 
@@ -84,3 +84,8 @@ class InstructionAccessFault(CpuTrap):
 class TimerInterrupt(CpuTrap):
     def __init__(self):
         super().__init__(7, 0, CpuTrapType.TIMER)
+
+
+class EcallTrap(CpuTrap):
+    def __init__(self, mode: PrivModes):
+        super().__init__(mode.value + 8, 0, CpuTrapType.SOFTWARE)
