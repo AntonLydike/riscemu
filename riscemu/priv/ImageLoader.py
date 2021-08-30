@@ -2,7 +2,7 @@
 Laods a memory image with debug information into memory
 """
 
-from ..MMU import MMU
+from .PrivMMU import PrivMMU
 from ..Config import RunConfig
 from ..Executable import Executable, LoadedExecutable, LoadedMemorySection, LoadedInstruction, MemoryFlags
 from .ElfLoader import ElfInstruction, ElfLoadedMemorySection, InstructionAccessFault, InstructionAddressMisalignedTrap
@@ -10,6 +10,7 @@ from ..decoder import decode
 from ..IO.IOModule import IOModule
 from .privmodes import PrivModes
 from ..colors import FMT_ERROR, FMT_NONE
+import json
 
 from functools import lru_cache
 from typing import Dict, List, Tuple, Optional, TYPE_CHECKING
@@ -18,26 +19,37 @@ if TYPE_CHECKING:
     from .PrivCPU import PrivCPU
 
 
-class ContinuousMMU(MMU):
+class MemoryImageMMU(PrivMMU):
     io: List[IOModule]
     data: bytearray
     io_start: int
-    debug_info: Dict[str, Dict[str, str]]
+    debug_info: Dict[str, Dict[str, Dict[str, str]]]
 
-    def __init__(self, data: bytes, debug_info: Dict, cpu, io_start: int = 0xFF0000):
-        super(ContinuousMMU, self).__init__(conf=RunConfig())
-        self.cpu: 'PrivCPU' = cpu
+    def __init__(self, file_name: str, io_start: int = 0xFF0000):
+        super(MemoryImageMMU, self).__init__(conf=RunConfig())
+
+        with open(file_name, 'rb') as memf:
+            data = memf.read()
+        with open(file_name + '.dbg', 'r') as dbgf:
+            debug_info: Dict = json.load(dbgf)
+
         self.data = bytearray(data)
+        # TODO: super wasteful memory allocation happening here
         if len(data) < io_start:
             self.data += bytearray(io_start - len(data))
         self.debug_info = debug_info
         self.io_start = io_start
         self.io = list()
-        self.kernel_end = 0
-        for start, name in debug_info['sections'].items():
-            if name.startswith('programs'):
-                self.kernel_end = int(start)
-                break
+
+    def get_entrypoint(self):
+        try:
+            start = self.debug_info['symbols']['kernel'].get('_start', None)
+            if start is not None:
+                return start
+            return self.debug_info['symbols']['kernel'].get('_ftext')
+        except KeyError:
+            print(FMT_ERROR + '[MMU] cannot find kernel entry in debug information! Falling back to 0x100' + FMT_NONE)
+            return 0x100
 
     @lru_cache(maxsize=2048)
     def read_ins(self, addr: int) -> ElfInstruction:
@@ -66,13 +78,6 @@ class ContinuousMMU(MMU):
             print(FMT_ERROR + "[MMU] possible null dereference (write {:x}) from (pc={:x},sec={},rel={:x})".format(
                 addr, pc, text_sec.owner + ':' + text_sec.name, pc - text_sec.base
             ) + FMT_NONE)
-        if addr < self.kernel_end:
-            if self.cpu.mode != PrivModes.MACHINE:
-                pc = self.cpu.pc
-                text_sec = self.get_sec_containing(pc)
-                print(FMT_ERROR + "[MMU] kernel access to {:x} from outside kernel mode! (pc={:x},sec={},rel={:x})".format(
-                    addr, pc, text_sec.owner + ':' + text_sec.name, pc - text_sec.base
-                ) + FMT_NONE)
 
         if addr >= self.io_start:
             return self.io_at(addr).write(addr, data, size)
@@ -88,7 +93,7 @@ class ContinuousMMU(MMU):
         self.io.append(io)
 
     def __repr__(self):
-        return "ImageMMU()"
+        return "MemoryImageMMU()"
 
     @lru_cache(maxsize=32)
     def get_sec_containing(self, addr: int) -> Optional[LoadedMemorySection]:

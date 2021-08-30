@@ -8,7 +8,7 @@ import time
 from riscemu.CPU import *
 from .CSR import CSR
 from .ElfLoader import ElfExecutable
-from .ImageLoader import ContinuousMMU
+from .ImageLoader import MemoryImageMMU
 from .Exceptions import *
 from .PrivMMU import PrivMMU
 from ..IO import TextIO
@@ -47,22 +47,19 @@ class PrivCPU(CPU):
     the equivalent of "1 byte" (this is actually impossible)
     """
 
-    def __init__(self, conf):
+    def __init__(self, conf, mmu: PrivMMU):
         super().__init__(conf, [PrivRV32I, RV32M])
         self.mode: PrivModes = PrivModes.MACHINE
 
-        with open('mem.img', 'rb') as memf:
-            data = memf.read()
-        with open('mem.img.dbg', 'r') as dbgf:
-            debug_info = json.load(dbgf)
+        mmu.set_cpu(self)
+        self.pc = mmu.get_entrypoint()
+        self.mmu = mmu
 
-        self.mmu = ContinuousMMU(data, debug_info, self)
-        self.pc = 0x100
-        self.mmu.add_io(TextIO.TextIO(0xff0000, 64))
+        if hasattr(self.mmu, 'add_io'):
+            self.mmu.add_io(TextIO.TextIO(0xff0000, 64))
+
         self.syscall_int = None
-
         self.launch_debug = False
-
         self.pending_traps: List[CpuTrap] = list()
 
         self._time_start = 0
@@ -87,7 +84,7 @@ class PrivCPU(CPU):
                 self.launch_debug = True
                 self.pc += self.INS_XLEN
             else:
-                print(FMT_ERROR + "[CPU] excpetion caught at 0x{:08X}: {}:".format(self.pc - 1, ins) + FMT_NONE)
+                print(FMT_ERROR + "[CPU] exception caught at 0x{:08X}: {}:".format(self.pc - 1, ins) + FMT_NONE)
                 print(ex.message())
                 if self.conf.debug_on_exception:
                     self.launch_debug = True
