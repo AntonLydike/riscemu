@@ -31,6 +31,7 @@ def _window_loop(textIO: 'TextIO'):
 
     except ImportError:
         print("[TextIO] module works best with PySimpleGui!")
+        textIO.set_sg_window(None)
 
 
 class TextIO(IOModule):

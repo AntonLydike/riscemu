@@ -111,10 +111,10 @@ class PrivCPU(CPU):
     def get_tokenizer(self, tokenizer_input):
         raise NotImplementedError("Not supported!")
 
-    def run(self):
+    def run(self, verbose: bool = False):
         print(FMT_CPU + '[CPU] Started running from 0x{:08X} ({})'.format(self.pc, "kernel") + FMT_NONE)
         self._time_start = time.perf_counter_ns() // self.TIME_RESOLUTION_NS
-        self._run()
+        self._run(verbose)
 
     def _init_csr(self):
         # set up CSR
@@ -170,7 +170,7 @@ class PrivCPU(CPU):
                 self._timer_step()
             self._check_interrupt()
             ins = self.mmu.read_ins(self.pc)
-            if verbose:
+            if verbose and self.mode == PrivModes.USER:
                 print(FMT_CPU + "   Running 0x{:08X}:{} {}".format(self.pc, FMT_NONE, ins))
             self.run_instruction(ins)
             self.pc += self.INS_XLEN
@@ -190,8 +190,8 @@ class PrivCPU(CPU):
         # select best interrupt
         # TODO: actually select based on the official ranking
         trap = self.pending_traps.pop()  # use the most recent trap
-        if not isinstance(trap, TimerInterrupt):
-            print(FMT_CPU + "[CPU] taking trap {}!".format(trap) + FMT_NONE)
+        if not isinstance(trap, TimerInterrupt) or True:
+            print(FMT_CPU + "[CPU] [{}] taking trap {}!".format(self.cycle, trap) + FMT_NONE)
 
         if trap.priv != PrivModes.MACHINE:
             print(FMT_CPU + "[CPU] Trap not targeting machine mode encountered! - undefined behaviour!" + FMT_NONE)

@@ -8,6 +8,7 @@ from ..instructions.RV32I import *
 from ..Exceptions import INS_NOT_IMPLEMENTED
 from .Exceptions import *
 from .privmodes import PrivModes
+from ..colors import FMT_CPU, FMT_NONE
 import typing
 
 if typing.TYPE_CHECKING:
@@ -77,6 +78,16 @@ class PrivRV32I(RV32I):
         # restore pc
         mepc = self.cpu.csr.get('mepc')
         self.cpu.pc = mepc
+
+        sec = self.mmu.get_sec_containing(mepc)
+        if sec is not None:
+            print(FMT_CPU + "[CPU] [{}] returning to mode: {} in binary {}, section {}, addr 0x{:x}".format(
+                self.cpu.cycle,
+                PrivModes(mpp),
+                sec.owner,
+                sec.name,
+                mepc
+            ) + FMT_NONE)
 
     def instruction_uret(self, ins: 'LoadedInstruction'):
         raise IllegalInstructionTrap(ins)
