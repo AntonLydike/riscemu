@@ -88,4 +88,4 @@ class TimerInterrupt(CpuTrap):
 
 class EcallTrap(CpuTrap):
     def __init__(self, mode: PrivModes):
-        super().__init__(mode.value + 8, 0, CpuTrapType.SOFTWARE)
+        super().__init__(mode.value + 8, 0, CpuTrapType.EXCEPTION)

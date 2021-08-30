@@ -12,7 +12,7 @@ def _window_loop(textIO: 'TextIO'):
         import PySimpleGUI as sg
 
         logs = sg.Text(font="monospace")
-        col = sg.Column([[logs]], size=(1920, 1080), scrollable=True)
+        col = sg.Column([[logs]], size=(640, 400), scrollable=True)
         window = sg.Window("TextIO:{:x}".format(textIO.addr), [[col]])
         lines = list()
 
