@@ -19,6 +19,8 @@ class PrivMMU(MMU):
     def set_cpu(self, cpu: 'PrivCPU'):
         self.cpu = cpu
 
+    def translate_address(self, addr: int):
+        return ""
 
 class LoadedElfMMU(PrivMMU):
     def __init__(self, elf: ElfExecutable):

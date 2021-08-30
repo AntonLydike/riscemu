@@ -81,12 +81,10 @@ class PrivRV32I(RV32I):
 
         sec = self.mmu.get_sec_containing(mepc)
         if sec is not None:
-            print(FMT_CPU + "[CPU] [{}] returning to mode: {} in binary {}, section {}, addr 0x{:x}".format(
+            print(FMT_CPU + "[CPU] [{}] returning to mode {} in {}".format(
                 self.cpu.cycle,
-                PrivModes(mpp),
-                sec.owner,
-                sec.name,
-                mepc
+                PrivModes(mpp).name,
+                self.mmu.translate_address(mepc)
             ) + FMT_NONE)
 
     def instruction_uret(self, ins: 'LoadedInstruction'):

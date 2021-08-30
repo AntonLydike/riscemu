@@ -98,7 +98,7 @@ class MemoryImageMMU(PrivMMU):
     @lru_cache(maxsize=32)
     def get_sec_containing(self, addr: int) -> Optional[LoadedMemorySection]:
         next_sec = len(self.data)
-        for sec_addr, name in sorted(self.debug_info['sections'].items(), key=lambda x: int(x[0]), reverse=True):
+        for sec_addr, name in reversed(self.debug_info['sections'].items()):
             if addr >= int(sec_addr):
                 owner, name = name.split(':')
                 base = int(sec_addr)
@@ -107,3 +107,13 @@ class MemoryImageMMU(PrivMMU):
                 return ElfLoadedMemorySection(name, base, size, self.data[base:next_sec], flags, owner)
             else:
                 next_sec = int(sec_addr)
+
+    def translate_address(self, addr: int):
+        sec = self.get_sec_containing(addr)
+        if sec.name == '.empty':
+            return "<empty>"
+        symbs = self.debug_info['symbols'][sec.owner]
+        for sym, val in reversed(symbs.items()):
+            if addr >= val:
+                return "{}{:+x} ({}:{})".format(sym, addr - val, sec.owner, sec.name)
+        return "{}:{}{:+x}".format(sec.owner, sec.name, addr - sec.base)
