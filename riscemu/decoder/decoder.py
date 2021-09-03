@@ -54,6 +54,11 @@ def name_from_insn(ins: int):
         raise RuntimeError(f"Invalid instruction in ebreak/ecall region: {ins:x}")
 
     fun7 = funct7(ins)
+    if opcode == 0b1011 and fun3 == 0b10:
+        # ignore the two aq/lr bits located in the fun7 block
+        # riscemu has no memory reordering, therefore we don't need to look at these bits ever
+        fun7 = fun7 >> 2
+
     if fun7 in dec:
         if opcode == 0x0C or (opcode == 0x04 and fun3 == 5):
             dec = dec[fun7]

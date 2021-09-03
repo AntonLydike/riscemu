@@ -112,5 +112,6 @@ INSTRUCTION_ARGS_DECODER: Dict[int, Callable[[int], List[int]]] = {
     0x18: decode_b,
     0x19: decode_i,
     0x1b: decode_j,
-    0x1c: decode_i_unsigned
+    0x1c: decode_i_unsigned,
+    0b1011: decode_r
 }

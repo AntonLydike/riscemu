@@ -14,7 +14,7 @@ from .PrivMMU import PrivMMU
 from ..IO import TextIO
 from .PrivRV32I import PrivRV32I
 from .privmodes import PrivModes
-from ..instructions.RV32M import RV32M
+from ..instructions import RV32A, RV32M
 import json
 
 if typing.TYPE_CHECKING:
@@ -48,7 +48,7 @@ class PrivCPU(CPU):
     """
 
     def __init__(self, conf, mmu: PrivMMU):
-        super().__init__(conf, [PrivRV32I, RV32M])
+        super().__init__(conf, [PrivRV32I, RV32M, RV32A])
         self.mode: PrivModes = PrivModes.MACHINE
 
         mmu.set_cpu(self)
