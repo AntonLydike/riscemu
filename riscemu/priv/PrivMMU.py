@@ -22,6 +22,7 @@ class PrivMMU(MMU):
     def translate_address(self, addr: int):
         return ""
 
+
 class LoadedElfMMU(PrivMMU):
     def __init__(self, elf: ElfExecutable):
         super().__init__(conf=RunConfig())

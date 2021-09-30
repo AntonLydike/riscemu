@@ -79,15 +79,16 @@ class PrivRV32I(RV32I):
         mepc = self.cpu.csr.get('mepc')
         self.cpu.pc = mepc - self.cpu.INS_XLEN
 
-        sec = self.mmu.get_sec_containing(mepc)
-        if sec is not None:
-            print(FMT_CPU + "[CPU] [{}] returning to mode {} in {} (0x{:x})".format(
-                self.cpu.cycle,
-                PrivModes(mpp).name,
-                self.mmu.translate_address(mepc),
-                mepc
-            ) + FMT_NONE)
-            self.regs.dump_reg_a()
+        if self.cpu.conf.verbosity > 0:
+            sec = self.mmu.get_sec_containing(mepc)
+            if sec is not None:
+                print(FMT_CPU + "[CPU] returning to mode {} in {} (0x{:x})".format(
+                    PrivModes(mpp).name,
+                    self.mmu.translate_address(mepc),
+                    mepc
+                ) + FMT_NONE)
+                if self.cpu.conf.verbosity > 1:
+                    self.regs.dump_reg_a()
 
     def instruction_uret(self, ins: 'LoadedInstruction'):
         raise IllegalInstructionTrap(ins)
@@ -139,7 +140,7 @@ class PrivRV32I(RV32I):
         ASSERT_LEN(ins.args, 2)
         reg = ins.get_reg(0)
         addr = ins.get_imm(1)
-        if reg == 'ra' and self.cpu.mode == PrivModes.USER:
+        if reg == 'ra' and self.cpu.mode == PrivModes.USER and self.cpu.conf.verbosity > 1:
             print(FMT_CPU + 'Jumping to {} (0x{:x})'.format(
                 self.mmu.translate_address(self.pc + addr),
                 self.pc + addr

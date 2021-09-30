@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 from .Config import RunConfig
 from .Executable import Executable, LoadedExecutable, LoadedMemorySection, LoadedInstruction, MemoryFlags
-from .helpers import align_addr
+from .helpers import align_addr, int_from_bytes
 from .Exceptions import OutOfMemoryException, InvalidAllocationException
 from .colors import *
 from typing import Dict, List, Tuple, Optional
@@ -109,7 +109,8 @@ class MMU:
             raise InvalidAllocationException('Invalid size request', name, req_size, flag)
 
         if req_size > self.max_alloc_size:
-            raise InvalidAllocationException('Cannot allocate more than {} bytes at a time'.format(self.max_alloc_size), name, req_size, flag)
+            raise InvalidAllocationException('Cannot allocate more than {} bytes at a time'.format(self.max_alloc_size),
+                                             name, req_size, flag)
 
         base = align_addr(self.first_free_addr)
         size = align_addr(req_size)
@@ -202,6 +203,9 @@ class MMU:
         for b in self.binaries:
             if symb in b.symbols:
                 print("   Found local symbol {}: 0x{:X} in {}".format(symb, b.symbols[symb], b.name))
+
+    def read_int(self, addr: int) -> int:
+        return int_from_bytes(self.read(addr, 4))
 
     def __repr__(self):
         return "MMU(\n\t{}\n)".format(

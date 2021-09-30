@@ -8,6 +8,7 @@ import typing
 from .Registers import Registers
 from .colors import FMT_DEBUG, FMT_NONE
 from .Executable import LoadedInstruction
+from .helpers import *
 
 if typing.TYPE_CHECKING:
     from . import *
@@ -35,6 +36,9 @@ def launch_debug_session(cpu: 'CPU', mmu: 'MMU', reg: 'Registers', prompt=""):
             regs.dump(*args, **kwargs)
         else:
             mmu.dump(what, *args, **kwargs)
+
+    def dump_stack(*args, **kwargs):
+        mmu.dump(regs.get('sp'), *args, **kwargs)
 
     def ins():
         print("Current instruction at 0x{:08X}:".format(cpu.pc))

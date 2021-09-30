@@ -83,11 +83,7 @@ class PrivCPU(CPU):
             if isinstance(ex, LaunchDebuggerException):
                 self.launch_debug = True
                 self.pc += self.INS_XLEN
-            else:
-                print(FMT_ERROR + "[CPU] exception caught at 0x{:08X}: {}:".format(self.pc - 1, ins) + FMT_NONE)
-                print(ex.message())
-                if self.conf.debug_on_exception:
-                    self.launch_debug = True
+
         if self.exit:
             print()
             print(FMT_CPU + "Program exited with code {}".format(self.exit_code) + FMT_NONE)
@@ -114,7 +110,7 @@ class PrivCPU(CPU):
     def run(self, verbose: bool = False):
         print(FMT_CPU + '[CPU] Started running from 0x{:08X} ({})'.format(self.pc, "kernel") + FMT_NONE)
         self._time_start = time.perf_counter_ns() // self.TIME_RESOLUTION_NS
-        self._run(verbose)
+        self._run(self.conf.verbosity > 1)
 
     def _init_csr(self):
         # set up CSR
@@ -162,8 +158,6 @@ class PrivCPU(CPU):
     def _handle_trap(self, trap: CpuTrap):
         # implement trap handling!
         self.pending_traps.append(trap)
-        print(FMT_CPU + "Trap {} encountered at {} (0x{:x})".format(trap, self.mmu.translate_address(self.pc), self.pc) + FMT_NONE)
-
 
     def step(self, verbose=True):
         try:
@@ -178,6 +172,15 @@ class PrivCPU(CPU):
             self.pc += self.INS_XLEN
         except CpuTrap as trap:
             self._handle_trap(trap)
+            if trap.interrupt == 0 and not isinstance(trap, EcallTrap):
+                print(FMT_CPU + "[CPU] Trap {} encountered at {} (0x{:x})".format(
+                    trap,
+                    self.mmu.translate_address(self.pc),
+                    self.pc
+                ) + FMT_NONE)
+                if self.conf.debug_on_exception:
+                    raise LaunchDebuggerException()
+            self.pc += self.INS_XLEN
 
     def _timer_step(self):
         if not self._time_interrupt_enabled:
@@ -193,7 +196,7 @@ class PrivCPU(CPU):
         # TODO: actually select based on the official ranking
         trap = self.pending_traps.pop()  # use the most recent trap
         if not isinstance(trap, TimerInterrupt) or True:
-            print(FMT_CPU + "[CPU] [{}] taking trap {}!".format(self.cycle, trap) + FMT_NONE)
+            print(FMT_CPU + "[CPU] taking trap {}!".format(trap) + FMT_NONE)
 
         if trap.priv != PrivModes.MACHINE:
             print(FMT_CPU + "[CPU] Trap not targeting machine mode encountered! - undefined behaviour!" + FMT_NONE)
@@ -206,7 +209,7 @@ class PrivCPU(CPU):
         self.csr.set_mstatus('mpp', self.mode.value)
         self.csr.set_mstatus('mie', 0)
         self.csr.set('mcause', trap.mcause)
-        self.csr.set('mepc', self.pc)
+        self.csr.set('mepc', self.pc - self.INS_XLEN)
         self.csr.set('mtval', trap.mtval)
         self.mode = trap.priv
         mtvec = self.csr.get('mtvec')
@@ -244,4 +247,3 @@ class PrivCPU(CPU):
 
     def record_perf_profile(self):
         self._perf_counters.append((time.perf_counter_ns(), self.cycle))
-

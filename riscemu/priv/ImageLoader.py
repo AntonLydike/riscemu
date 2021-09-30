@@ -9,7 +9,7 @@ from .ElfLoader import ElfInstruction, ElfLoadedMemorySection, InstructionAccess
 from ..decoder import decode
 from ..IO.IOModule import IOModule
 from .privmodes import PrivModes
-from ..colors import FMT_ERROR, FMT_NONE
+from ..colors import FMT_ERROR, FMT_NONE, FMT_MEM
 import json
 
 from functools import lru_cache
@@ -117,3 +117,10 @@ class MemoryImageMMU(PrivMMU):
             if addr >= val:
                 return "{}{:+x} ({}:{})".format(sym, addr - val, sec.owner, sec.name)
         return "{}:{}{:+x}".format(sec.owner, sec.name, addr - sec.base)
+
+    def symbol(self, symb: str):
+        print(FMT_MEM + "Looking up symbol {}".format(symb))
+        for owner, symbs in self.debug_info['symbols'].items():
+            if symb in symbs:
+                print("  Hit in {}: {} = {}".format(owner, symb, symbs[symb]))
+        print(FMT_NONE, end="")

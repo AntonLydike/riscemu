@@ -6,8 +6,6 @@ import time
 
 
 def _window_loop(textIO: 'TextIO'):
-    #textIO.set_sg_window(None)
-    #return
     try:
         import PySimpleGUI as sg
 
@@ -30,9 +28,8 @@ def _window_loop(textIO: 'TextIO'):
                 col.contents_changed()
 
     except ImportError:
-        print("[TextIO] module works best with PySimpleGui!")
+        print("[TextIO] window disabled - please install PySimpleGui!")
         textIO.set_sg_window(None)
-
 
 class TextIO(IOModule):
     def __init__(self, addr: int, buflen: int = 128):

@@ -3,9 +3,6 @@ from .ImageLoader import MemoryImageMMU
 from .PrivMMU import LoadedElfMMU
 from .ElfLoader import ElfExecutable
 
-from ..Tokenizer import RiscVInput
-from ..ExecutableParser import ExecutableParser
-
 import sys
 
 if __name__ == '__main__':
@@ -15,8 +12,9 @@ if __name__ == '__main__':
 
     parser.add_argument('--kernel', type=str, help='Kernel elf loaded with user programs', nargs='?')
     parser.add_argument('--image', type=str, help='Memory image containing kernel', nargs='?')
+    parser.add_argument('--debug-exceptions', help='Launch the interactive debugger when an exception is generated', action='store_true')
 
-    parser.add_argument('-v', '--verbose', help="Verbose output", action='store_true')
+    parser.add_argument('-v', '--verbose', help="Verbosity level (can be used multiple times)", action='count', default=0)
 
     args = parser.parse_args()
     mmu = None
@@ -30,8 +28,8 @@ if __name__ == '__main__':
         print("You must specify one of --kernel or --image for running in privilege mode!")
         sys.exit(1)
 
-    cpu = PrivCPU(RunConfig(), mmu)
-    cpu.run(args.verbose)
+    cpu = PrivCPU(RunConfig(verbosity=args.verbose, debug_on_exception=args.debug_exceptions), mmu)
+    cpu.run()
 
 
 
