@@ -26,5 +26,5 @@ from .CPU import CPU
 
 from .Config import RunConfig
 
-__author__ = "Anton Lydike <Anton@Lydike.com"
+__author__ = "Anton Lydike <Anton@Lydike.com>"
 __copyright__ = "Copyright 2021 Anton Lydike"

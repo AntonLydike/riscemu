@@ -2,21 +2,20 @@
 Laods a memory image with debug information into memory
 """
 
+import json
+from functools import lru_cache
+from typing import Dict, List, Optional, TYPE_CHECKING
+
+from .ElfLoader import ElfInstruction, ElfLoadedMemorySection, InstructionAccessFault, InstructionAddressMisalignedTrap
 from .PrivMMU import PrivMMU
 from ..Config import RunConfig
-from ..Executable import Executable, LoadedExecutable, LoadedMemorySection, LoadedInstruction, MemoryFlags
-from .ElfLoader import ElfInstruction, ElfLoadedMemorySection, InstructionAccessFault, InstructionAddressMisalignedTrap
-from ..decoder import decode
+from ..Executable import LoadedMemorySection, MemoryFlags
 from ..IO.IOModule import IOModule
-from .privmodes import PrivModes
 from ..colors import FMT_ERROR, FMT_NONE, FMT_MEM
-import json
-
-from functools import lru_cache
-from typing import Dict, List, Tuple, Optional, TYPE_CHECKING
+from ..decoder import decode
 
 if TYPE_CHECKING:
-    from .PrivCPU import PrivCPU
+    pass
 
 
 class MemoryImageMMU(PrivMMU):

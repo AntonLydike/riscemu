@@ -7,15 +7,12 @@ import time
 
 from riscemu.CPU import *
 from .CSR import CSR
-from .ElfLoader import ElfExecutable
-from .ImageLoader import MemoryImageMMU
 from .Exceptions import *
 from .PrivMMU import PrivMMU
-from ..IO import TextIO
 from .PrivRV32I import PrivRV32I
 from .privmodes import PrivModes
+from ..IO import TextIO
 from ..instructions import RV32A, RV32M
-import json
 
 if typing.TYPE_CHECKING:
     from riscemu import Executable, LoadedExecutable, LoadedInstruction
@@ -195,7 +192,7 @@ class PrivCPU(CPU):
         # select best interrupt
         # TODO: actually select based on the official ranking
         trap = self.pending_traps.pop()  # use the most recent trap
-        if not isinstance(trap, TimerInterrupt) or True:
+        if self.conf.verbosity > 0:
             print(FMT_CPU + "[CPU] taking trap {}!".format(trap) + FMT_NONE)
 
         if trap.priv != PrivModes.MACHINE:
