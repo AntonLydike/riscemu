@@ -36,7 +36,7 @@ class PrivCPU(CPU):
     Reference to the control and status registers
     """
 
-    TIME_RESOLUTION_NS: int = 1000000
+    TIME_RESOLUTION_NS: int = 10000000
     """
     controls the resolution of the time csr register (in nanoseconds)
     """
@@ -162,6 +162,8 @@ class PrivCPU(CPU):
     def _handle_trap(self, trap: CpuTrap):
         # implement trap handling!
         self.pending_traps.append(trap)
+        print(FMT_CPU + "Trap {} encountered at {} (0x{:x})".format(trap, self.mmu.translate_address(self.pc), self.pc) + FMT_NONE)
+
 
     def step(self, verbose=True):
         try:
@@ -204,7 +206,7 @@ class PrivCPU(CPU):
         self.csr.set_mstatus('mpp', self.mode.value)
         self.csr.set_mstatus('mie', 0)
         self.csr.set('mcause', trap.mcause)
-        self.csr.set('mepc', self.pc-self.INS_XLEN)
+        self.csr.set('mepc', self.pc)
         self.csr.set('mtval', trap.mtval)
         self.mode = trap.priv
         mtvec = self.csr.get('mtvec')
@@ -242,3 +244,4 @@ class PrivCPU(CPU):
 
     def record_perf_profile(self):
         self._perf_counters.append((time.perf_counter_ns(), self.cycle))
+
