@@ -33,19 +33,14 @@ def int_to_bytes(val, bytes=4, unsigned=False) -> bytearray:
     """
     if unsigned and val < 0:
         raise NumberFormatException("unsigned negative number!")
-    return bytearray([
-        (val >> ((bytes - i - 1) * 8)) & 0xFF for i in range(bytes)
-    ])
+    return bytearray(to_unsigned(val, bytes).to_bytes(bytes, 'little'))
 
 
 def int_from_bytes(bytes, unsigned=False) -> int:
     """
     byte -> int (two's complement)
     """
-    num = 0
-    for b in bytes:
-        num = num << 8
-        num += b
+    num = int.from_bytes(bytes, 'little')
 
     if unsigned:
         return num
@@ -55,7 +50,7 @@ def int_from_bytes(bytes, unsigned=False) -> int:
 
 def to_unsigned(num: int, bytes=4) -> int:
     if num < 0:
-        return 2 ** (bytes * 8) + num
+        return (2 ** (bytes * 8)) + num
     return num
 
 

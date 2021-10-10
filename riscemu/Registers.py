@@ -95,15 +95,19 @@ class Registers:
         :return: If the operation was successful
         """
         if reg == 'zero':
-            print("[Registers.set] trying to set read-only register: {}".format(reg))
             return False
-        if reg not in Registers.all_registers():
-            raise InvalidRegisterException(reg)
+        #if reg not in Registers.all_registers():
+        #    raise InvalidRegisterException(reg)
         # replace fp register with s1, as these are the same register
         if reg == 'fp':
             reg = 's1'
         if mark_set:
             self.last_set = reg
+        # check 32 bit signed bounds
+        if val < -2147483648:
+            val = -2147483648
+        elif val > 2147483647:
+            val = 2147483647
         self.vals[reg] = val
         return True
 
@@ -114,8 +118,8 @@ class Registers:
         :param mark_read: If the register should be markes as "last read" (only used internally)
         :return: The contents of register reg
         """
-        if reg not in Registers.all_registers():
-            raise InvalidRegisterException(reg)
+        #if reg not in Registers.all_registers():
+        #    raise InvalidRegisterException(reg)
         if reg == 'fp':
             reg = 's0'
         if mark_read:

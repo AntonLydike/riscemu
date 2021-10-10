@@ -8,6 +8,7 @@ import typing
 from .Registers import Registers
 from .colors import FMT_DEBUG, FMT_NONE
 from .Executable import LoadedInstruction
+from .helpers import *
 
 if typing.TYPE_CHECKING:
     from . import *
@@ -36,6 +37,9 @@ def launch_debug_session(cpu: 'CPU', mmu: 'MMU', reg: 'Registers', prompt=""):
         else:
             mmu.dump(what, *args, **kwargs)
 
+    def dump_stack(*args, **kwargs):
+        mmu.dump(regs.get('sp'), *args, **kwargs)
+
     def ins():
         print("Current instruction at 0x{:08X}:".format(cpu.pc))
         return mmu.read_ins(cpu.pc)
@@ -45,9 +49,7 @@ def launch_debug_session(cpu: 'CPU', mmu: 'MMU', reg: 'Registers', prompt=""):
             print("Invalid arg count!")
             return
         bin = mmu.get_bin_containing(cpu.pc)
-        if bin is None:
-            print(FMT_DEBUG + '[Debugger] Not in a section, can\'t execute instructions!' + FMT_NONE)
-            return
+
         ins = LoadedInstruction(name, list(args), bin)
         print(FMT_DEBUG + "Running instruction " + ins + FMT_NONE)
         cpu.run_instruction(ins)

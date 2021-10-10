@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 from .Config import RunConfig
 from .Executable import Executable, LoadedExecutable, LoadedMemorySection, LoadedInstruction, MemoryFlags
-from .helpers import align_addr
+from .helpers import align_addr, int_from_bytes
 from .Exceptions import OutOfMemoryException, InvalidAllocationException
 from .colors import *
 from typing import Dict, List, Tuple, Optional
@@ -47,9 +47,11 @@ class MMU:
     The global symbol table
     """
 
+    last_ins_sec: Optional[LoadedMemorySection]
+
     def __init__(self, conf: RunConfig):
         """
-        Create a new MMU, respeccting the active RunConfiguration
+        Create a new MMU, respecting the active RunConfiguration
 
         :param conf: The config to respect
         """
@@ -58,6 +60,7 @@ class MMU:
         self.first_free_addr: int = 0x100
         self.conf: RunConfig = conf
         self.global_symbols: Dict[str, int] = dict()
+        self.last_ins_sec = None
 
     def load_bin(self, exe: Executable) -> LoadedExecutable:
         """
@@ -106,7 +109,8 @@ class MMU:
             raise InvalidAllocationException('Invalid size request', name, req_size, flag)
 
         if req_size > self.max_alloc_size:
-            raise InvalidAllocationException('Cannot allocate more than {} bytes at a time'.format(self.max_alloc_size), name, req_size, flag)
+            raise InvalidAllocationException('Cannot allocate more than {} bytes at a time'.format(self.max_alloc_size),
+                                             name, req_size, flag)
 
         base = align_addr(self.first_free_addr)
         size = align_addr(req_size)
@@ -140,7 +144,11 @@ class MMU:
         :param addr: The location
         :return: The Instruction
         """
+        sec = self.last_ins_sec
+        if sec is not None and sec.base <= addr < sec.base + sec.size:
+            return sec.read_instruction(addr - sec.base)
         sec = self.get_sec_containing(addr)
+        self.last_ins_sec = sec
         if sec is None:
             print(FMT_MEM + "[MMU] Trying to read instruction form invalid region! "
                             "Have you forgotten an exit syscall or ret statement?" + FMT_NONE)
@@ -199,6 +207,9 @@ class MMU:
         for b in self.binaries:
             if symb in b.symbols:
                 print("   Found local symbol {}: 0x{:X} in {}".format(symb, b.symbols[symb], b.name))
+
+    def read_int(self, addr: int) -> int:
+        return int_from_bytes(self.read(addr, 4))
 
     def __repr__(self):
         return "MMU(\n\t{}\n)".format(

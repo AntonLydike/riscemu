@@ -19,4 +19,5 @@ class RunConfig:
     # allowed syscalls
     scall_input: bool = True
     scall_fs: bool = False
+    verbosity: int = 0
 

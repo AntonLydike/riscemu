@@ -154,8 +154,7 @@ class RV32I(InstructionSet):
         ASSERT_LEN(ins.args, 2)
         reg = ins.get_reg(0)
         imm = to_unsigned(ins.get_imm(1))
-        self.pc += (imm << 12)
-        self.regs.set(reg, self.pc)
+        self.regs.set(reg, self.pc + (imm << 12))
 
     def instruction_xor(self, ins: 'LoadedInstruction'):
         rd, rs1, rs2 = self.parse_rd_rs_rs(ins)
