@@ -4,7 +4,7 @@ from typing import List, Dict, Tuple
 from .Exceptions import *
 from ..Exceptions import RiscemuBaseException
 from ..Executable import MemoryFlags, LoadedMemorySection
-from ..decoder import decode, RISCV_REGS
+from ..decoder import decode, RISCV_REGS, format_ins
 from ..helpers import FMT_PARSE, FMT_NONE, FMT_GREEN, FMT_BOLD
 
 FMT_ELF = FMT_GREEN + FMT_BOLD
@@ -118,17 +118,24 @@ class ElfInstruction:
 
     def __repr__(self) -> str:
         if self.name == 'jal' and self.args[0] == 0:
-            return "j        {}".format(self.args[1])
-        elif self.name in ('lw', 'lh', 'lb', 'lbu', 'lhu', 'sw', 'sh', 'sb'):
-            args = "{}, {}({})".format(
-                RISCV_REGS[self.args[0]], self.args[2], RISCV_REGS[self.args[1]]
-            )
-        else:
-            args = ", ".join(map(str, self.args))
-        return "{:<8} {}".format(
-            self.name,
-            args
-        )
+            return "j       {}".format(self.args[1])
+        if self.name == 'addi' and self.args[2] == 0:
+            return "mv      {}, {}".format(self.get_reg(0), self.get_reg(1))
+        if self.name == 'addi' and self.args[1] == 0:
+            return "li      {}, {}".format(self.get_reg(0), self.args[2])
+        if self.name == 'ret' and len(self.args) == 0:
+            return "ret"
+        return format_ins(self.encoded, self.name)
+        # if self.name in ('lw', 'lh', 'lb', 'lbu', 'lhu', 'sw', 'sh', 'sb'):
+        #     args = "{}, {}({})".format(
+        #         RISCV_REGS[self.args[0]], self.args[2], RISCV_REGS[self.args[1]]
+        #     )
+        # else:
+        #     args = ", ".join(map(str, self.args))
+        # return "{:<8} {}".format(
+        #     self.name,
+        #     args
+        # )
 
 
 class ElfLoadedMemorySection(LoadedMemorySection):
