@@ -13,6 +13,11 @@ This emulator contains:
 * Basic implementation of some syscalls 
 * A debugging environment
 
+## Installation:
+
+```bash
+$ pip install riscemu
+```
 
 ## Running simple Assembly:
 A couple of basic assembly programs are provided inside `examples/`, such as [`hello-world.asm`](examples/hello-world.asm).

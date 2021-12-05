@@ -28,3 +28,4 @@ from .Config import RunConfig
 
 __author__ = "Anton Lydike <Anton@Lydike.com>"
 __copyright__ = "Copyright 2021 Anton Lydike"
+__version__ = '1.0.0'
