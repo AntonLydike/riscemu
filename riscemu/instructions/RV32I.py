@@ -310,3 +310,22 @@ class RV32I(InstructionSet):
     def instruction_nop(self, ins: 'LoadedInstruction'):
         ASSERT_LEN(ins.args, 0)
         pass
+
+    def instruction_li(self, ins: 'LoadedInstruction'):
+        ASSERT_LEN(ins.args, 2)
+        reg = ins.get_reg(0)
+        immediate = ins.get_imm(1)
+        self.regs.set(reg, immediate)
+
+    def instruction_la(self, ins: 'LoadedInstruction'):
+        ASSERT_LEN(ins.args, 2)
+        reg = ins.get_reg(0)
+        immediate = ins.get_imm(1)
+        self.regs.set(reg, immediate)
+
+    def instruction_mv(self, ins: 'LoadedInstruction'):
+        ASSERT_LEN(ins.args, 2)
+        rd, rs = ins.get_reg(0), ins.get_reg(1)
+        self.regs.set(rd, self.regs.get(rs))
+
+
