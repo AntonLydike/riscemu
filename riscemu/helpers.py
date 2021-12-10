@@ -92,3 +92,16 @@ def format_bytes(byte_arr: bytearray, fmt: str, group: int = 1, highlight: int =
                                  highlight)
     if fmt == 'ascii':
         return "".join(repr(chr(b))[1:-1] for b in byte_arr)
+
+
+def bind_twos_complement(val):
+    """
+    does over/underflows for 32 bit two's complement numbers
+    :param val:
+    :return:
+    """
+    if val < -2147483648:
+        return val + 4294967296
+    elif val > 2147483647:
+        return val - 4294967296
+    return val

@@ -104,11 +104,7 @@ class Registers:
         if mark_set:
             self.last_set = reg
         # check 32 bit signed bounds
-        if val < -2147483648:
-            val = -2147483648
-        elif val > 2147483647:
-            val = 2147483647
-        self.vals[reg] = val
+        self.vals[reg] = bind_twos_complement(val)
         return True
 
     def get(self, reg, mark_read=True):
