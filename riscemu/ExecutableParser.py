@@ -10,7 +10,7 @@ from .helpers import parse_numeric_argument, int_to_bytes
 from .Executable import Executable, InstructionMemorySection, MemorySection, MemoryFlags
 from .Exceptions import *
 
-from .Tokenizer import RiscVTokenizer, RiscVInstructionToken, RiscVSymbolToken, RiscVPseudoOpToken
+from .Tokenizer import tokenize, TokenType, Token, COMMA, NEWLINE
 
 from typing import Dict, Tuple, List, Optional
 
@@ -22,7 +22,7 @@ class ExecutableParser:
     tokenizer: 'RiscVTokenizer'
 
     def __init__(self, tokenizer: 'RiscVTokenizer'):
-        self.instructions: List[RiscVInstructionToken] = list()
+        self.instructions: List['RiscVInstructionToken'] = list()
         self.symbols: Dict[str, Tuple[str, int]] = dict()
         self.sections: Dict[str, MemorySection] = dict()
         self.tokenizer = tokenizer
@@ -37,11 +37,11 @@ class ExecutableParser:
         :raise ParseException: Raises a ParseException when invalid input is read
         """
         for token in self.tokenizer.tokens:
-            if isinstance(token, RiscVInstructionToken):
+            if isinstance(token, 'RiscVInstructionToken'):
                 self.parse_instruction(token)
-            elif isinstance(token, RiscVSymbolToken):
+            elif isinstance(token, 'RiscVSymbolToken'):
                 self.handle_symbol(token)
-            elif isinstance(token, RiscVPseudoOpToken):
+            elif isinstance(token, 'RiscVPseudoOpToken'):
                 self.handle_pseudo_op(token)
         return self._get_execuable()
 

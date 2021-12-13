@@ -11,8 +11,6 @@ It contains everything needed to run assembly files, so you don't need any custo
 from .Exceptions import RiscemuBaseException, LaunchDebuggerException, InvalidSyscallException, LinkerException, \
     ParseException, NumberFormatException, InvalidRegisterException, MemoryAccessException, OutOfMemoryException
 
-from .Tokenizer import RiscVInput, RiscVTokenizer
-
 from .Executable import Executable, LoadedExecutable, LoadedMemorySection
 
 from .ExecutableParser import ExecutableParser

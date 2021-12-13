@@ -9,7 +9,6 @@ on them.
 import sys
 from typing import Tuple, List, Dict, Callable, Type
 
-from .Tokenizer import RiscVTokenizer
 from .Executable import MemoryFlags
 from .Syscall import SyscallInterface, get_syscall_symbols
 from .Exceptions import RiscemuBaseException, LaunchDebuggerException
