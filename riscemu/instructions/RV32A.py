@@ -1,5 +1,5 @@
 from .InstructionSet import InstructionSet, LoadedInstruction
-from ..Exceptions import INS_NOT_IMPLEMENTED
+from ..exceptions import INS_NOT_IMPLEMENTED
 from ..helpers import int_from_bytes, int_to_bytes, to_unsigned, to_signed
 
 

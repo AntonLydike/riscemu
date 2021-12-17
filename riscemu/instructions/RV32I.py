@@ -9,9 +9,9 @@ from .InstructionSet import *
 from ..helpers import int_from_bytes, int_to_bytes, to_unsigned, to_signed
 from ..colors import FMT_DEBUG, FMT_NONE
 from ..debug import launch_debug_session
-from ..Exceptions import LaunchDebuggerException
-from ..Syscall import Syscall
-from ..Executable import LoadedInstruction
+from ..exceptions import LaunchDebuggerException
+from ..syscall import Syscall
+from ..base_types import LoadedInstruction
 
 
 class RV32I(InstructionSet):

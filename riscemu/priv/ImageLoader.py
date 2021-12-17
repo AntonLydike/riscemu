@@ -8,8 +8,8 @@ from typing import Dict, List, Optional, TYPE_CHECKING
 
 from .ElfLoader import ElfInstruction, ElfLoadedMemorySection, InstructionAccessFault, InstructionAddressMisalignedTrap
 from .PrivMMU import PrivMMU
-from ..Config import RunConfig
-from ..Executable import LoadedMemorySection, MemoryFlags
+from ..config import RunConfig
+from ..base_types import LoadedMemorySection, MemoryFlags
 from ..IO.IOModule import IOModule
 from ..colors import FMT_ERROR, FMT_NONE, FMT_MEM
 from ..decoder import decode
@@ -117,7 +117,7 @@ class MemoryImageMMU(PrivMMU):
                 return "{}{:+x} ({}:{})".format(sym, addr - val, sec.owner, sec.name)
         return "{}:{}{:+x}".format(sec.owner, sec.name, addr - sec.base)
 
-    def symbol(self, symb: str):
+    def label(self, symb: str):
         print(FMT_MEM + "Looking up symbol {}".format(symb))
         for owner, symbs in self.debug_info['symbols'].items():
             if symb in symbs:

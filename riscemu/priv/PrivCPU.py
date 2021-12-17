@@ -15,7 +15,7 @@ from ..IO import TextIO
 from ..instructions import RV32A, RV32M
 
 if typing.TYPE_CHECKING:
-    from riscemu import Executable, LoadedExecutable, LoadedInstruction
+    from riscemu import base_types, LoadedExecutable, LoadedInstruction
     from riscemu.instructions.InstructionSet import InstructionSet
 
 
@@ -95,7 +95,7 @@ class PrivCPU(CPU):
             print()
             print(FMT_CPU + "Program stopped without exiting - perhaps you stopped the debugger?" + FMT_NONE)
 
-    def load(self, e: riscemu.Executable):
+    def load(self, e: riscemu.base_types):
         raise NotImplementedError("Not supported!")
 
     def run_loaded(self, le: 'riscemu.LoadedExecutable'):

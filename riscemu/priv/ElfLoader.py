@@ -2,8 +2,8 @@ from dataclasses import dataclass
 from typing import List, Dict, Tuple
 
 from .Exceptions import *
-from ..Exceptions import RiscemuBaseException
-from ..Executable import MemoryFlags, LoadedMemorySection
+from ..exceptions import RiscemuBaseException
+from ..base_types import MemoryFlags, LoadedMemorySection
 from ..decoder import decode, RISCV_REGS, format_ins
 from ..helpers import FMT_PARSE, FMT_NONE, FMT_GREEN, FMT_BOLD
 

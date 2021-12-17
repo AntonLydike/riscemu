@@ -7,10 +7,8 @@ SPDX-License-Identifier: MIT
 import typing
 
 from abc import abstractmethod
+from .base_types import Instruction
 from .colors import *
-
-if typing.TYPE_CHECKING:
-    from .Executable import LoadedInstruction
 
 
 class RiscemuBaseException(BaseException):
@@ -116,7 +114,7 @@ class InvalidAllocationException(RiscemuBaseException):
 
 
 class UnimplementedInstruction(RiscemuBaseException):
-    def __init__(self, ins: 'LoadedInstruction'):
+    def __init__(self, ins: Instruction):
         self.ins = ins
 
     def message(self):

@@ -5,7 +5,7 @@ SPDX-License-Identifier: MIT
 """
 
 from .InstructionSet import *
-from ..Exceptions import INS_NOT_IMPLEMENTED
+from ..exceptions import INS_NOT_IMPLEMENTED
 
 
 class RV32M(InstructionSet):

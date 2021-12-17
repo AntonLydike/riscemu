@@ -9,12 +9,12 @@ on them.
 import sys
 from typing import Tuple, List, Dict, Callable, Type
 
-from .Executable import MemoryFlags
-from .Syscall import SyscallInterface, get_syscall_symbols
-from .Exceptions import RiscemuBaseException, LaunchDebuggerException
+from .base_types import MemoryFlags
+from .syscall import SyscallInterface, get_syscall_symbols
+from .exceptions import RiscemuBaseException, LaunchDebuggerException
 from .MMU import MMU
-from .Config import RunConfig
-from .Registers import Registers
+from .config import RunConfig
+from .registers import Registers
 from .debug import launch_debug_session
 from .colors import FMT_CPU, FMT_NONE, FMT_ERROR
 
@@ -23,7 +23,7 @@ import riscemu
 import typing
 
 if typing.TYPE_CHECKING:
-    from . import Executable, LoadedExecutable, LoadedInstruction
+    from . import base_types, LoadedExecutable, LoadedInstruction
     from .instructions.InstructionSet import InstructionSet
 
 
@@ -78,7 +78,7 @@ class CPU:
         """
         return RiscVTokenizer(tokenizer_input, self.all_instructions())
 
-    def load(self, e: riscemu.Executable):
+    def load(self, e: riscemu.base_types):
         """
         Load an executable into Memory
         """

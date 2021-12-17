@@ -5,7 +5,7 @@ SPDX-License-Identifier: MIT
 """
 
 from ..instructions.RV32I import *
-from ..Exceptions import INS_NOT_IMPLEMENTED
+from ..exceptions import INS_NOT_IMPLEMENTED
 from .Exceptions import *
 from .privmodes import PrivModes
 from ..colors import FMT_CPU, FMT_NONE

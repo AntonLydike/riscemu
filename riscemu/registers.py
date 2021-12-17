@@ -4,10 +4,10 @@ RiscEmu (c) 2021 Anton Lydike
 SPDX-License-Identifier: MIT
 """
 
-from .Config import RunConfig
+from .config import RunConfig
 from .helpers import *
 from collections import defaultdict
-from .Exceptions import InvalidRegisterException
+from .exceptions import InvalidRegisterException
 
 class Registers:
     """

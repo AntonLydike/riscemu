@@ -5,7 +5,8 @@ SPDX-License-Identifier: MIT
 """
 
 from math import log10, ceil
-from .Exceptions import *
+from .exceptions import *
+from typing import Iterable, Iterator, TypeVar, Generic, List
 
 
 def align_addr(addr: int, to_bytes: int = 8) -> int:
@@ -105,3 +106,36 @@ def bind_twos_complement(val):
     elif val > 2147483647:
         return val - 4294967296
     return val
+
+
+T = TypeVar('T')
+
+
+class Peekable(Generic[T], Iterator[T]):
+    def __init__(self, iterable: Iterable[T]):
+        self.iterable = iter(iterable)
+        self.cache: List[T] = list()
+
+    def __iter__(self) -> Iterator[T]:
+        return self
+
+    def __next__(self) -> T:
+        if self.cache:
+            return self.cache.pop()
+        return next(self.iterable)
+
+    def peek(self) -> T:
+        try:
+            if self.cache:
+                return self.cache[0]
+            pop = next(self.iterable)
+            self.cache.append(pop)
+            return pop
+        except StopIteration:
+            return None
+
+    def push_back(self, item: T):
+        self.cache = [item] + self.cache
+
+    def is_empty(self) -> bool:
+        return self.peek() is None

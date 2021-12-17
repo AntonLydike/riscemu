@@ -8,21 +8,19 @@ This package aims at providing an all-round usable RISC-V emulator and debugger
 It contains everything needed to run assembly files, so you don't need any custom compilers or toolchains
 """
 
-from .Exceptions import RiscemuBaseException, LaunchDebuggerException, InvalidSyscallException, LinkerException, \
+from .exceptions import RiscemuBaseException, LaunchDebuggerException, InvalidSyscallException, LinkerException, \
     ParseException, NumberFormatException, InvalidRegisterException, MemoryAccessException, OutOfMemoryException
 
-from .Executable import Executable, LoadedExecutable, LoadedMemorySection
-
-from .ExecutableParser import ExecutableParser
+from .base_types import Executable, LoadedExecutable, LoadedMemorySection
 
 from .instructions import *
 
 from .MMU import MMU
-from .Registers import Registers
-from .Syscall import SyscallInterface, Syscall
+from .registers import Registers
+from .syscall import SyscallInterface, Syscall
 from .CPU import CPU
 
-from .Config import RunConfig
+from .config import RunConfig
 
 __author__ = "Anton Lydike <Anton@Lydike.com>"
 __copyright__ = "Copyright 2021 Anton Lydike"

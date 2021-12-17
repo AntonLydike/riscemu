@@ -5,9 +5,9 @@ SPDX-License-Identifier: MIT
 """
 
 import typing
-from .Registers import Registers
+from .registers import Registers
 from .colors import FMT_DEBUG, FMT_NONE
-from .Executable import LoadedInstruction
+from .base_types import Instruction
 from .helpers import *
 
 if typing.TYPE_CHECKING:
@@ -50,7 +50,7 @@ def launch_debug_session(cpu: 'CPU', mmu: 'MMU', reg: 'Registers', prompt=""):
             return
         bin = mmu.get_bin_containing(cpu.pc)
 
-        ins = LoadedInstruction(name, list(args), bin)
+        ins = Instruction(name, list(args), bin)
         print(FMT_DEBUG + "Running instruction " + ins + FMT_NONE)
         cpu.run_instruction(ins)
 

@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from riscemu.Tokenizer import tokenize, print_tokens, Token, TokenType, NEWLINE, COMMA
+from riscemu.tokenizer import tokenize, print_tokens, Token, TokenType, NEWLINE, COMMA
 
 
 def ins(name: str) -> Token:

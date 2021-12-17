@@ -10,14 +10,15 @@ from enum import Enum, auto
 from typing import List, Iterable
 from riscemu.decoder import RISCV_REGS
 
-from .Exceptions import ParseException
+from .exceptions import ParseException
 
 LINE_COMMENT_STARTERS = ('#', ';', '//')
 WHITESPACE_PATTERN = re.compile(r'\s+')
-MEMORY_ADDRESS_PATTERN = re.compile('^(0[xX][A-f0-9]+|\d+|0b[0-1]+)\(([A-z]+[0-9]{0,2})\)$')
+MEMORY_ADDRESS_PATTERN = re.compile(r'^(0[xX][A-f0-9]+|\d+|0b[0-1]+)\(([A-z]+[0-9]{0,2})\)$')
 REGISTER_NAMES = RISCV_REGS
 
 I = lambda x: x
+
 
 class TokenType(Enum):
     COMMA = auto()
@@ -39,6 +40,7 @@ class Token:
         if self.type == TokenType.COMMA:
             return ', '
         return '{}({}) '.format(self.type.name[0:3], self.value)
+
 
 NEWLINE = Token(TokenType.NEWLINE, '\n')
 COMMA = Token(TokenType.COMMA, ',')
