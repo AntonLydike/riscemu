@@ -11,7 +11,7 @@ It contains everything needed to run assembly files, so you don't need any custo
 from .exceptions import RiscemuBaseException, LaunchDebuggerException, InvalidSyscallException, LinkerException, \
     ParseException, NumberFormatException, InvalidRegisterException, MemoryAccessException, OutOfMemoryException
 
-from .base_types import Executable, LoadedExecutable, LoadedMemorySection
+#from .base_types import Executable, LoadedExecutable, LoadedMemorySection
 
 from .instructions import *
 
@@ -21,6 +21,8 @@ from .syscall import SyscallInterface, Syscall
 from .CPU import CPU
 
 from .config import RunConfig
+
+from .parser import tokenize, parse_tokens, parse_program_from_file
 
 __author__ = "Anton Lydike <Anton@Lydike.com>"
 __copyright__ = "Copyright 2021 Anton Lydike"

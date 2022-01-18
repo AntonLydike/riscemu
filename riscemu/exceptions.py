@@ -4,8 +4,6 @@ RiscEmu (c) 2021 Anton Lydike
 SPDX-License-Identifier: MIT
 """
 
-import typing
-
 from abc import abstractmethod
 from .base_types import Instruction
 from .colors import *
@@ -21,7 +19,7 @@ class RiscemuBaseException(BaseException):
 
 class ParseException(RiscemuBaseException):
     def __init__(self, msg, data=None):
-        super().__init__()
+        super().__init__(msg, data)
         self.msg = msg
         self.data = data
 

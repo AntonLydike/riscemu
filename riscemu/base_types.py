@@ -7,12 +7,14 @@ This file contains base classes which represent loaded programs
 """
 
 import re
-from abc import ABC
+from abc import ABC, abstractmethod
+from collections import defaultdict
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple, Set
-from collections import defaultdict
 
-from .helpers import *
+from .colors import FMT_MEM, FMT_NONE, FMT_UNDERLINE, FMT_ORANGE
+from .exceptions import ParseException
+from .helpers import format_bytes
 
 T_RelativeAddress = int
 T_AbsoluteAddress = int

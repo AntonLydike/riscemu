@@ -2,7 +2,7 @@ from typing import List, Tuple
 from .exceptions import MemoryAccessException
 from .helpers import parse_numeric_argument
 from .base_types import Instruction, MemorySection, MemoryFlags, InstructionContext, T_RelativeAddress, \
-    T_AbsoluteAddress
+    T_AbsoluteAddress, Program
 
 
 class SimpleInstruction(Instruction):
@@ -26,13 +26,14 @@ class SimpleInstruction(Instruction):
 
 
 class InstructionMemorySection(MemorySection):
-    def __init__(self, instructions: List[Instruction], name: str, context: InstructionContext, base: int = 0):
+    def __init__(self, instructions: List[Instruction], name: str, context: InstructionContext, owner: Program, base: int = 0):
         self.name = name
         self.base = base
         self.context = context
         self.size = len(instructions) * 4
         self.flags = MemoryFlags(True, True)
         self.instructions = instructions
+        self.owner = owner.name
 
     def read(self, offset: T_RelativeAddress, size: int) -> bytearray:
         raise MemoryAccessException("Cannot read raw bytes from instruction section", self.base + offset, size, 'read')
@@ -47,13 +48,14 @@ class InstructionMemorySection(MemorySection):
 
 
 class BinaryDataMemorySection(MemorySection):
-    def __init__(self, data: bytearray, name: str, context: InstructionContext, base: int = 0):
+    def __init__(self, data: bytearray, name: str, context: InstructionContext, owner: Program, base: int = 0):
         self.name = name
         self.base = base
         self.context = context
         self.size = len(data)
         self.flags = MemoryFlags(False, False)
         self.data = data
+        self.owner = owner.name
 
     def read(self, offset: T_RelativeAddress, size: int) -> bytearray:
         if offset + size > self.size:

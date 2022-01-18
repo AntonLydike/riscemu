@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 import re
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import List, Iterable
+from typing import List, Iterable, Optional
 from riscemu.decoder import RISCV_REGS
 
 from .exceptions import ParseException
@@ -16,8 +16,6 @@ LINE_COMMENT_STARTERS = ('#', ';', '//')
 WHITESPACE_PATTERN = re.compile(r'\s+')
 MEMORY_ADDRESS_PATTERN = re.compile(r'^(0[xX][A-f0-9]+|\d+|0b[0-1]+)\(([A-z]+[0-9]{0,2})\)$')
 REGISTER_NAMES = RISCV_REGS
-
-I = lambda x: x
 
 
 class TokenType(Enum):
@@ -39,7 +37,7 @@ class Token:
             return '\\n'
         if self.type == TokenType.COMMA:
             return ', '
-        return '{}({}) '.format(self.type.name[0:3], self.value)
+        return '{}({})'.format(self.type.name[0:3], self.value)
 
 
 NEWLINE = Token(TokenType.NEWLINE, '\n')
@@ -55,7 +53,7 @@ def tokenize(input: Iterable[str]) -> Iterable[Token]:
         if not line:
             continue
 
-        parts = list(part for part in re.split(WHITESPACE_PATTERN, line) if part)
+        parts = list(part for part in split_whitespace_respecting_quotes(line) if part)
 
         yield from parse_line(parts)
         yield NEWLINE
@@ -70,6 +68,8 @@ def parse_line(parts: List[str]) -> Iterable[Token]:
         yield Token(TokenType.PSEUDO_OP, first_token)
     elif first_token[-1] == ':':
         yield Token(TokenType.LABEL, first_token)
+        yield from parse_line(parts[1:])
+        return
     else:
         yield Token(TokenType.INSTRUCTION_NAME, first_token)
 
@@ -100,3 +100,40 @@ def print_tokens(tokens: Iterable[Token]):
     for token in tokens:
         print(token, end='\n' if token == NEWLINE else '')
     print("", flush=True, end="")
+
+
+def split_whitespace_respecting_quotes(line: str) -> Iterable[str]:
+    quote = ""
+    part = ""
+    for c in line:
+        if c == quote:
+            yield part
+            part = ""
+            quote = ""
+            continue
+
+        if quote != "":
+            part += c
+            continue
+
+        if c in "\"'":
+            if part:
+                yield part
+            quote = c
+            part = ""
+            continue
+
+        if c in ' \t\n':
+            if part:
+                yield part
+            part = ""
+            continue
+
+        part += c
+
+    if part:
+        yield part
+
+
+
+

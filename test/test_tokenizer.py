@@ -1,6 +1,7 @@
 from unittest import TestCase
 
-from riscemu.tokenizer import tokenize, print_tokens, Token, TokenType, NEWLINE, COMMA
+from riscemu.tokenizer import tokenize, print_tokens, Token, TokenType, NEWLINE, COMMA, \
+    split_whitespace_respecting_quotes
 
 
 def ins(name: str) -> Token:
@@ -19,7 +20,7 @@ def lbl(name: str) -> Token:
     return Token(TokenType.LABEL, name)
 
 
-class Test(TestCase):
+class TestTokenizer(TestCase):
 
     def test_instructions(self):
         program = [
@@ -79,3 +80,47 @@ section:
 
         self.assertEqual(list(tokenize(program.splitlines())), tokens)
 
+    def test_split_whitespace_respecting_quotes_single(self):
+        self.assertEqual(
+            list(split_whitespace_respecting_quotes("test")), ["test"]
+        )
+
+    def test_split_whitespace_respecting_quotes_empty(self):
+        self.assertEqual(
+            list(split_whitespace_respecting_quotes("")), []
+        )
+
+    def test_split_whitespace_respecting_quotes_two_parts(self):
+        self.assertEqual(
+            list(split_whitespace_respecting_quotes("test 123")), ["test", "123"]
+        )
+
+    def test_split_whitespace_respecting_quotes_whole_quoted(self):
+        self.assertEqual(
+            list(split_whitespace_respecting_quotes("'test 123'")), ["test 123"]
+        )
+
+    def test_split_whitespace_respecting_quotes_double_quotes(self):
+        self.assertEqual(
+            list(split_whitespace_respecting_quotes('"test 123"')), ["test 123"]
+        )
+
+    def test_split_whitespace_respecting_quotes_quoted_then_normal(self):
+        self.assertEqual(
+            list(split_whitespace_respecting_quotes('"test 123" abc')), ["test 123", "abc"]
+        )
+
+    def test_split_whitespace_respecting_quotes_quoted_sorrounded(self):
+        self.assertEqual(
+            list(split_whitespace_respecting_quotes('hello "test 123" abc')), ["hello", "test 123", "abc"]
+        )
+
+    def test_split_whitespace_respecting_quotes_weird_spaces(self):
+        self.assertEqual(
+            list(split_whitespace_respecting_quotes('hello  "test 123"\tabc')), ["hello", "test 123", "abc"]
+        )
+
+    def test_split_whitespace_respecting_quotes_quotes_no_spaces(self):
+        self.assertEqual(
+            list(split_whitespace_respecting_quotes('hello"test 123"abc')), ["hello", "test 123", "abc"]
+        )

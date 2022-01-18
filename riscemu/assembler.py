@@ -1,15 +1,13 @@
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple, Union, List
 from enum import Enum, auto
 from typing import Optional, Tuple, Union
 
-from helpers import parse_numeric_argument
-from .base_types import Program, T_RelativeAddress, InstructionContext
+from .helpers import parse_numeric_argument, align_addr, int_to_bytes
+from .base_types import Program, T_RelativeAddress, InstructionContext, Instruction
 from .colors import FMT_PARSE, FMT_NONE
-from .exceptions import ParseException
-from .helpers import ASSERT_LEN
+from .exceptions import ParseException, ASSERT_LEN, ASSERT_NOT_NULL
 from .tokenizer import Token
 from .types import BinaryDataMemorySection, InstructionMemorySection
-
 
 INSTRUCTION_SECTION_NAMES = ('.text', '.init', '.fini')
 
@@ -21,13 +19,25 @@ class MemorySectionType(Enum):
 
 class CurrentSection:
     name: str
-    data: Union[list, bytearray]
+    data: Union[List[Instruction], bytearray]
     type: MemorySectionType
+    base: int
+
+    def __init__(self, name: str, type: MemorySectionType, base: int = 0):
+        self.name = name
+        self.type = type
+        self.base = base
+        if self.type == MemorySectionType.Data:
+            self.data = bytearray()
+        elif self.type == MemorySectionType.Instructions:
+            self.data = list()
+        else:
+            raise ParseException("Unknown section type: {}".format(type))
 
     def current_address(self) -> T_RelativeAddress:
         if self.type == MemorySectionType.Data:
-            return len(self.data)
-        return len(self.data) * 4
+            return len(self.data) + self.base
+        return len(self.data) * 4 + self.base
 
     def __repr__(self):
         return "{}(name={},data={},type={})".format(
@@ -47,18 +57,27 @@ class ParseContext:
         self.section = None
 
     def finalize(self) -> Program:
-        self.finalize_section()
+        self._finalize_section()
         return self.program
 
-    def finalize_section(self):
+    def _finalize_section(self):
         if self.section is None:
             return
         if self.section.type == MemorySectionType.Data:
-            section = BinaryDataMemorySection(self.section.data, self.section.name, self.context)
+            section = BinaryDataMemorySection(self.section.data, self.section.name, self.context, self.program)
             self.program.add_section(section)
         elif self.section.type == MemorySectionType.Instructions:
-            section = InstructionMemorySection(self.section.data, self.section.name, self.context)
+            section = InstructionMemorySection(self.section.data, self.section.name, self.context, self.program)
             self.program.add_section(section)
+        self.section = None
+
+    def new_section(self, name: str, type: MemorySectionType):
+        base = 0
+        if self.section is not None:
+            base = align_addr(self.section.current_address(), 4)
+            print("base at {}".format(base))
+        self._finalize_section()
+        self.section = CurrentSection(name, type, base)
 
     def __repr__(self):
         return "{}(\n\tsetion={},\n\tprogram={}\n)".format(
@@ -100,20 +119,19 @@ class AssemblerDirectives:
     @classmethod
     def op_section(cls, token: Token, args: Tuple[str], context: ParseContext):
         ASSERT_LEN(args, 1)
-        context.finalize_section()
-
         if get_section_base_name(args[0]) in INSTRUCTION_SECTION_NAMES:
-            context.section.type = MemorySectionType.Instructions
-            context.section.data = list()
+            context.new_section(args[0], MemorySectionType.Instructions)
         else:
-            context.section.type = MemorySectionType.Data
-            context.section.data = bytearray()
-        context.section.name = args[0]
+            context.new_section(args[0], MemorySectionType.Data)
 
     @classmethod
     def op_globl(cls, token: Token, args: Tuple[str], context: ParseContext):
         ASSERT_LEN(args, 1)
         context.program.global_labels.add(args[0])
+
+    @classmethod
+    def op_global(cls, token: Token, args: Tuple[str], context: ParseContext):
+        cls.op_globl(token, args, context)
 
     @classmethod
     def op_equ(cls, token: Token, args: Tuple[str], context: ParseContext):
@@ -123,6 +141,14 @@ class AssemblerDirectives:
         context.context.labels[name] = value
 
     @classmethod
+    def op_space(cls, token: Token, args: Tuple[str], context: ParseContext):
+        ASSERT_LEN(args, 1)
+        ASSERT_IN_SECTION_TYPE(context, MemorySectionType.Data)
+
+        size = parse_numeric_argument(args[0])
+        cls.add_bytes(size, None, context)
+
+    @classmethod
     def op_zero(cls, token: Token, args: Tuple[str], context: ParseContext):
         ASSERT_LEN(args, 1)
         ASSERT_IN_SECTION_TYPE(context, MemorySectionType.Data)
@@ -130,11 +156,14 @@ class AssemblerDirectives:
         cls.add_bytes(size, bytearray(size), context)
 
     @classmethod
-    def add_bytes(cls, size: int, content: Union[None, int, bytearray], context: ParseContext):
+    def add_bytes(cls, size: int, content: Union[None, int, bytearray], context: ParseContext, unsigned=False):
         ASSERT_IN_SECTION_TYPE(context, MemorySectionType.Data)
 
         if content is None:
             content = bytearray(size)
+        if isinstance(context, int):
+            content = int_to_bytes(content, size, unsigned)
+        context.section.data += content
 
     @classmethod
     def add_text(cls, text: str, context: ParseContext, zero_terminate: bool = True):

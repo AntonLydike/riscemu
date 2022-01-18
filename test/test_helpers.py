@@ -3,7 +3,7 @@ from unittest import TestCase
 from riscemu.helpers import *
 
 
-class Test(TestCase):
+class TestHelpers(TestCase):
     def test_int_to_bytes(self):
         self.assertEqual(int_to_bytes(-1), bytearray([0xff] * 4), "-1")
         self.assertEqual(int_to_bytes(1), bytearray([0, 0, 0, 1]), "1")

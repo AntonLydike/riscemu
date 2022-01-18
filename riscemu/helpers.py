@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 from math import log10, ceil
 from .exceptions import *
-from typing import Iterable, Iterator, TypeVar, Generic, List
+from typing import Iterable, Iterator, TypeVar, Generic, List, Optional
 
 
 def align_addr(addr: int, to_bytes: int = 8) -> int:
@@ -124,7 +124,7 @@ class Peekable(Generic[T], Iterator[T]):
             return self.cache.pop()
         return next(self.iterable)
 
-    def peek(self) -> T:
+    def peek(self) -> Optional[T]:
         try:
             if self.cache:
                 return self.cache[0]
