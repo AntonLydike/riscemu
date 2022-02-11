@@ -17,6 +17,7 @@ if __name__ == '__main__':
 
     all_ins_names = list(InstructionSetDict.keys())
 
+
     class OptionStringAction(argparse.Action):
         def __init__(self, option_strings, dest, keys=None, omit_empty=False, **kwargs):
             if keys is None:
@@ -65,6 +66,9 @@ if __name__ == '__main__':
 
     parser.add_argument('--stack_size', type=int, help='Stack size of loaded programs, defaults to 8MB', nargs='?')
 
+    parser.add_argument('-v', '--verbose', help="Verbosity level (can be used multiple times)", action='count',
+                        default=0)
+
     args = parser.parse_args()
 
     # create a RunConfig from the cli args
@@ -75,7 +79,8 @@ if __name__ == '__main__':
         debug_on_exception=not args.options['fail_on_ex'],
         add_accept_imm=args.options['add_accept_imm'],
         scall_fs=args.syscall_opts['fs_access'],
-        scall_input=not args.syscall_opts['disable_input']
+        scall_input=not args.syscall_opts['disable_input'],
+        verbosity=args.verbose
     )
     for k, v in dict(cfg_dict).items():
         if v is None:
@@ -106,7 +111,7 @@ if __name__ == '__main__':
         cpu.setup_stack(cfg.stack_size)
 
         # launch the last loaded program
-        cpu.launch(cpu.mmu.programs[-1])
+        cpu.launch(cpu.mmu.programs[-1], verbose=cfg.verbosity > 1)
     except RiscemuBaseException as e:
         print("Error: {}".format(e.message()))
         e.print_stacktrace()

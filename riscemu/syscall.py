@@ -4,15 +4,11 @@ RiscEmu (c) 2021 Anton Lydike
 SPDX-License-Identifier: MIT
 """
 
+import sys
 from dataclasses import dataclass
 from typing import Dict, IO
-import sys
 
 from .helpers import *
-
-import riscemu
-
-import typing
 
 if typing.TYPE_CHECKING:
     from riscemu.CPU import UserModeCPU
