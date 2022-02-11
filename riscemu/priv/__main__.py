@@ -1,7 +1,6 @@
-from .PrivCPU import PrivCPU, RunConfig
-from .ImageLoader import MemoryImageMMU
-from .PrivMMU import LoadedElfMMU
-from .ElfLoader import ElfExecutable
+from .PrivCPU import PrivCPU
+from .ElfLoader import ElfBinaryFileLoader
+from .ImageLoader import MemoryImageLoader
 
 import sys
 

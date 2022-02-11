@@ -15,6 +15,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple, Set, Union, Iterator, Callable, Type
 
+from . import RunConfig
 from .colors import FMT_MEM, FMT_NONE, FMT_UNDERLINE, FMT_ORANGE, FMT_RED, FMT_BOLD
 from .exceptions import ParseException
 from .helpers import format_bytes, get_section_base_name
@@ -371,9 +372,13 @@ class CPU(ABC):
     instructions: Dict[str, Callable[[Instruction], None]]
     instruction_sets: Set['InstructionSet']
 
-    def __init__(self, mmu: 'MMU', instruction_sets: List[Type['InstructionSet']]):
+    # configuration
+    conf: RunConfig
+
+    def __init__(self, mmu: 'MMU', instruction_sets: List[Type['InstructionSet']], conf: RunConfig):
         self.mmu = mmu
         self.regs = Registers()
+        self.conf = conf
 
         self.instruction_sets = set()
         self.instructions = dict()
@@ -433,3 +438,11 @@ class CPU(ABC):
 
         self.pc = program.entrypoint
         self.run(verbose)
+
+    @classmethod
+    @abstractmethod
+    def get_loaders(cls) -> typing.Iterable[Type[ProgramLoader]]:
+        pass
+
+    def get_best_loader_for(self, file_name: str) -> Type[ProgramLoader]:
+        return max(self.get_loaders(), key=lambda ld: ld.can_parse(file_name))

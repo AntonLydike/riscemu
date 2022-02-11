@@ -99,15 +99,14 @@ if __name__ == '__main__':
     ]
 
     try:
-        cpu = UserModeCPU(ins_to_load)
+        cpu = UserModeCPU(ins_to_load, cfg)
 
         opts = AssemblyFileLoader.get_options(sys.argv)
         for file in args.files:
             loader = AssemblyFileLoader.instantiate(file, opts)
-
             cpu.load_program(loader.parse())
-        # run the last loaded executable
 
+        # set up a stack
         cpu.setup_stack(cfg.stack_size)
 
         # launch the last loaded program

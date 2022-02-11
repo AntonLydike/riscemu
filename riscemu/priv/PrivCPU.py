@@ -3,19 +3,20 @@ RiscEmu (c) 2021 Anton Lydike
 
 SPDX-License-Identifier: MIT
 """
+import sys
 import time
 
 from riscemu.CPU import *
 from .CSR import CSR
+from .ElfLoader import ElfBinaryFileLoader
 from .Exceptions import *
-from .PrivMMU import PrivMMU
+from .ImageLoader import MemoryImageLoader
 from .PrivRV32I import PrivRV32I
 from .privmodes import PrivModes
-from ..IO import TextIO
 from ..instructions import RV32A, RV32M
+from ..types import Program
 
 if typing.TYPE_CHECKING:
-    from riscemu import types, LoadedExecutable, LoadedInstruction
     from riscemu.instructions.instruction_set import InstructionSet
 
 
@@ -38,20 +39,19 @@ class PrivCPU(CPU):
     controls the resolution of the time csr register (in nanoseconds)
     """
 
-    INS_XLEN = 4
+    pending_traps: List[CpuTrap]
     """
-    Size of an instruction in memory. Should be 4, but since our loading code is shit, instruction take up 
-    the equivalent of "1 byte" (this is actually impossible)
+    A list of traps which are pending to be handled
     """
 
     def __init__(self, conf):
-        super().__init__(conf, [PrivRV32I, RV32M, RV32A])
+        super().__init__(MMU(), [PrivRV32I, RV32M, RV32A], conf)
         # start in machine mode
         self.mode: PrivModes = PrivModes.MACHINE
 
-        self.syscall_int = None
-        self.launch_debug = False
         self.pending_traps: List[CpuTrap] = list()
+
+        self.exit_code = 0
 
         self._time_start = 0
         self._time_timecmp = 0
@@ -63,45 +63,37 @@ class PrivCPU(CPU):
         # init csr
         self._init_csr()
 
-    def _run(self, verbose=False):
+    def run(self, verbose=False):
         if self.pc <= 0:
             return False
-        ins = None
+
+        launch_debug = False
+
         try:
-            while not self.exit:
+            while not self.halted:
                 self.step(verbose)
         except RiscemuBaseException as ex:
             if isinstance(ex, LaunchDebuggerException):
-                self.launch_debug = True
+                launch_debug = True
                 self.pc += self.INS_XLEN
 
-        if self.exit:
+        if self.halted:
             print()
-            print(FMT_CPU + "Program exited with code {}".format(self.exit_code) + FMT_NONE)
+            print(FMT_CPU + "[CPU] System halted with code {}".format(self.exit_code) + FMT_NONE)
             sys.exit(self.exit_code)
-        elif self.launch_debug:
-            self.launch_debug = False
-            launch_debug_session(self, self.mmu, self.regs,
-                                 "Launching debugger:")
+
+        elif launch_debug:
+            launch_debug_session(self)
             if not self.debugger_active:
-                self._run(verbose)
+                self.run(verbose)
         else:
             print()
-            print(FMT_CPU + "Program stopped without exiting - perhaps you stopped the debugger?" + FMT_NONE)
+            print(FMT_CPU + "[CPU] System stopped without halting - perhaps you stopped the debugger?" + FMT_NONE)
 
-    def load(self, e: riscemu.base_types):
-        raise NotImplementedError("Not supported!")
-
-    def run_loaded(self, le: 'riscemu.LoadedExecutable'):
-        raise NotImplementedError("Not supported!")
-
-    def get_tokenizer(self, tokenizer_input):
-        raise NotImplementedError("Not supported!")
-
-    def run(self, verbose: bool = False):
+    def launch(self, program: Program, verbose: bool = False):
         print(FMT_CPU + '[CPU] Started running from 0x{:08X} ({})'.format(self.pc, "kernel") + FMT_NONE)
         self._time_start = time.perf_counter_ns() // self.TIME_RESOLUTION_NS
-        self._run(self.conf.verbosity > 1)
+        self.run(self.conf.verbosity > 1 or verbose)
 
     def _init_csr(self):
         # set up CSR
@@ -184,7 +176,7 @@ class PrivCPU(CPU):
         if not (len(self.pending_traps) > 0 and self.csr.get_mstatus('mie')):
             return
         # select best interrupt
-        # TODO: actually select based on the official ranking
+        # FIXME: actually select based on the official ranking
         trap = self.pending_traps.pop()  # use the most recent trap
         if self.conf.verbosity > 0:
             print(FMT_CPU + "[CPU] taking trap {}!".format(trap) + FMT_NONE)
@@ -209,7 +201,7 @@ class PrivCPU(CPU):
         if mtvec & 0b11 == 1:
             self.pc = (mtvec & 0b11111111111111111111111111111100) + (trap.code * 4)
         self.record_perf_profile()
-        if len(self._perf_counters) % 100 == 0:
+        if len(self._perf_counters) > 100:
             self.show_perf()
 
     def show_perf(self):
@@ -225,11 +217,6 @@ class PrivCPU(CPU):
                 continue
             cps = (cycle - cycled) / (time_ns - timed) * 1000000000
 
-            # print("    {:03d} cycles in {:08d}ns ({:.2f} cycles/s)".format(
-            #    cycle - cycled,
-            #    time_ns - timed,
-            #    cps
-            # ))
             cycled = cycle
             timed = time_ns
             cps_list.append(cps)
@@ -238,3 +225,9 @@ class PrivCPU(CPU):
 
     def record_perf_profile(self):
         self._perf_counters.append((time.perf_counter_ns(), self.cycle))
+
+    @classmethod
+    def get_loaders(cls) -> typing.Iterable[Type[ProgramLoader]]:
+        return [
+            AssemblyFileLoader, MemoryImageLoader, ElfBinaryFileLoader
+        ]

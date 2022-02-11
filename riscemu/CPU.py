@@ -10,13 +10,14 @@ import typing
 from typing import List, Type
 
 import riscemu
+from . import AssemblyFileLoader, RunConfig
 from .MMU import MMU
 from .base import BinaryDataMemorySection
 from .colors import FMT_CPU, FMT_NONE
 from .debug import launch_debug_session
 from .exceptions import RiscemuBaseException, LaunchDebuggerException
 from .syscall import SyscallInterface, get_syscall_symbols
-from .types import CPU
+from .types import CPU, ProgramLoader
 
 if typing.TYPE_CHECKING:
     from .instructions.instruction_set import InstructionSet
@@ -29,14 +30,14 @@ class UserModeCPU(CPU):
     It is initialized with a configuration and a list of instruction sets.
     """
 
-    def __init__(self, instruction_sets: List[Type['riscemu.InstructionSet']]):
+    def __init__(self, instruction_sets: List[Type['riscemu.InstructionSet']], conf: RunConfig):
         """
         Creates a CPU instance.
 
         :param instruction_sets: A list of instruction set classes. These must inherit from the InstructionSet class
         """
         # setup CPU states
-        super().__init__(MMU(), instruction_sets)
+        super().__init__(MMU(), instruction_sets, conf)
 
         self.exit_code = 0
 
@@ -104,3 +105,7 @@ class UserModeCPU(CPU):
             return False
 
         self.regs.set('sp', stack_sec.base + stack_sec.size)
+
+    @classmethod
+    def get_loaders(cls) -> typing.Iterable[Type[ProgramLoader]]:
+        return [AssemblyFileLoader]
