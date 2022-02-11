@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 from typing import Dict, List, Optional
 
 from .colors import *
-from .exceptions import InvalidAllocationException
+from .exceptions import InvalidAllocationException, MemoryAccessException
 from .helpers import align_addr, int_from_bytes
 from .types import Instruction, MemorySection, MemoryFlags, T_AbsoluteAddress, \
     Program
@@ -97,7 +97,7 @@ class MMU:
         sec = self.get_sec_containing(addr)
         if sec is None:
             print(FMT_MEM + "[MMU] Trying to read data form invalid region at 0x{:x}! ".format(addr) + FMT_NONE)
-            raise RuntimeError("Reading from uninitialized memory region!")
+            raise MemoryAccessException("region is non-initialized!", addr, size, 'read')
         return sec.read(addr - sec.base, size)
 
     def write(self, addr: int, size: int, data):
@@ -111,7 +111,7 @@ class MMU:
         sec = self.get_sec_containing(addr)
         if sec is None:
             print(FMT_MEM + '[MMU] Invalid write into non-initialized region at 0x{:08X}'.format(addr) + FMT_NONE)
-            raise RuntimeError("No write pls")
+            raise MemoryAccessException("region is non-initialized!", addr, size, 'write')
 
         return sec.write(addr - sec.base, size, data)
 
