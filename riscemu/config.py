@@ -1,11 +1,10 @@
 """
-RiscEmu (c) 2021 Anton Lydike
+RiscEmu (c) 2021-2022 Anton Lydike
 
 SPDX-License-Identifier: MIT
 """
 
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass(frozen=True, init=True)

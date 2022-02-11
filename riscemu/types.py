@@ -9,16 +9,20 @@ See base.py for some basic implementations of these classes
 """
 import os
 import re
+import typing
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple, Set, Union, Generator, Iterator, Callable, Type
+from typing import Dict, List, Optional, Tuple, Set, Union, Iterator, Callable, Type
 
-from . import MMU, InstructionSet
-from .assembler import get_section_base_name
-from .colors import FMT_MEM, FMT_NONE, FMT_UNDERLINE, FMT_ORANGE, FMT_PARSE, FMT_RED, FMT_BOLD
+from .colors import FMT_MEM, FMT_NONE, FMT_UNDERLINE, FMT_ORANGE, FMT_RED, FMT_BOLD
 from .exceptions import ParseException
-from .helpers import format_bytes
+from .helpers import format_bytes, get_section_base_name
+from .registers import Registers
+
+if typing.TYPE_CHECKING:
+    from .MMU import MMU
+    from .instructions.instruction_set import InstructionSet
 
 # define some base type aliases so we can keep track of absolute and relative addresses
 T_RelativeAddress = int
@@ -231,7 +235,7 @@ class Program:
         self.sections = []
         self.global_labels = set()
         self.base = base
-        self.loaded = False
+        self.is_loaded = False
 
     def add_section(self, sec: MemorySection):
         # print a warning when a section is located before the programs base
@@ -286,7 +290,7 @@ class Program:
             for sec in self.sections:
                 sec.base += at_addr
 
-        if self.base != at_addr:
+        if self.base is not None and self.base != at_addr:
             # move sections so they are located where they want to be located
             offset = at_addr - self.base
             for sec in self.sections:
@@ -354,7 +358,8 @@ class CPU(ABC):
     INS_XLEN: int = 4
 
     # housekeeping variables
-    mmu: MMU
+    regs: Registers
+    mmu: 'MMU'
     pc: T_AbsoluteAddress
     cycle: int
     halted: bool
@@ -364,10 +369,11 @@ class CPU(ABC):
 
     # instruction information
     instructions: Dict[str, Callable[[Instruction], None]]
-    instruction_sets: Set[InstructionSet]
+    instruction_sets: Set['InstructionSet']
 
-    def __init__(self, mmu: MMU, instruction_sets: List[Type[InstructionSet]]):
+    def __init__(self, mmu: 'MMU', instruction_sets: List[Type['InstructionSet']]):
         self.mmu = mmu
+        self.regs = Registers()
 
         self.instruction_sets = set()
         self.instructions = dict()
@@ -377,6 +383,7 @@ class CPU(ABC):
             self.instructions.update(ins_set.load())
             self.instruction_sets.add(ins_set)
 
+        self.halted = False
         self.cycle = 0
         self.pc = 0
         self.debugger_active = False
@@ -410,3 +417,19 @@ class CPU(ABC):
             self.halted,
             " ".join(s.name for s in self.instruction_sets)
         )
+
+    @abstractmethod
+    def step(self, verbose=False):
+        pass
+
+    @abstractmethod
+    def run(self, verbose=False):
+        pass
+
+    def launch(self, program: Program, verbose: bool = False):
+        if program not in self.mmu.programs:
+            print(FMT_RED + '[CPU] Cannot launch program that\'s not loaded!' + FMT_NONE)
+            return
+
+        self.pc = program.entrypoint
+        self.run(verbose)

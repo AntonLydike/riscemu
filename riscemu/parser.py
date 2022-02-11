@@ -53,6 +53,7 @@ def parse_tokens(name: str, tokens_iter: Iterable[Token]) -> Program:
     for token, args in composite_tokenizer(Peekable[Token](tokens_iter)):
         if token.type not in PARSERS:
             raise ParseException("Unexpected token type: {}, {}".format(token, args))
+        print('{}: {}'.format(token, args))
         PARSERS[token.type](token, args, context)
 
     return context.finalize()
@@ -73,6 +74,8 @@ def composite_tokenizer(tokens_iter: Iterable[Token]) -> Iterable[Tuple[Token, T
         token = next(tokens)
         if token.type in (TokenType.PSEUDO_OP, TokenType.LABEL, TokenType.INSTRUCTION_NAME):
             yield token, tuple(take_arguments(tokens))
+        else:
+            print("skipped {}".format(token))
 
 
 def take_arguments(tokens: Peekable[Token]) -> Iterable[str]:
@@ -85,12 +88,14 @@ def take_arguments(tokens: Peekable[Token]) -> Iterable[str]:
     while True:
         if tokens.peek().type == TokenType.ARGUMENT:
             yield next(tokens).value
-        if tokens.peek().type == TokenType.COMMA:
-            next(tokens)
         elif tokens.peek().type == TokenType.NEWLINE:
             next(tokens)
             break
-        break
+        elif tokens.peek().type == TokenType.COMMA:
+            next(tokens)
+        else:
+            break
+
         # raise ParseException("Expected newline, instead got {}".format(tokens.peek()))
 
 

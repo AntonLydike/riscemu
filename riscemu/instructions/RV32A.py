@@ -1,4 +1,4 @@
-from .InstructionSet import InstructionSet, Instruction
+from .instruction_set import InstructionSet, Instruction
 from ..exceptions import INS_NOT_IMPLEMENTED
 from ..helpers import int_from_bytes, int_to_bytes, to_unsigned, to_signed
 

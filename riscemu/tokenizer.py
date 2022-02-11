@@ -14,7 +14,7 @@ from .exceptions import ParseException
 
 LINE_COMMENT_STARTERS = ('#', ';', '//')
 WHITESPACE_PATTERN = re.compile(r'\s+')
-MEMORY_ADDRESS_PATTERN = re.compile(r'^(0[xX][A-f0-9]+|\d+|0b[0-1]+)\(([A-z]+[0-9]{0,2})\)$')
+MEMORY_ADDRESS_PATTERN = re.compile(r'^(0[xX][A-f0-9]+|\d+|0b[0-1]+|[A-z0-9_-]+)\(([A-z]+[0-9]{0,2})\)$')
 REGISTER_NAMES = RISCV_REGS
 
 

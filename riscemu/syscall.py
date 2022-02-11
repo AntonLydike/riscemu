@@ -15,7 +15,7 @@ import riscemu
 import typing
 
 if typing.TYPE_CHECKING:
-    from . import CPU
+    from riscemu.CPU import UserModeCPU
 
 SYSCALLS = {
     63: 'read',
@@ -43,7 +43,7 @@ class Syscall:
     """
     id: int
     """The syscall number (e.g. 64 - write)"""
-    cpu: 'riscemu.CPU'
+    cpu: 'UserModeCPU'
     """The CPU object that created the syscall"""
 
     @property
@@ -146,7 +146,8 @@ class SyscallInterface:
 
         Requires running with flag scall-fs
         """
-        if not scall.cpu.conf.scall_fs:
+        # FIXME: this should be toggleable in a global setting or somethign
+        if True:
             print(FMT_SYSCALL + '[Syscall] open: opening files not supported without scall-fs flag!' + FMT_NONE)
             return scall.ret(-1)
 
@@ -193,7 +194,7 @@ class SyscallInterface:
         """
         Exit syscall. Exits the system with status code a0
         """
-        scall.cpu.exit = True
+        scall.cpu.halted = True
         scall.cpu.exit_code = scall.cpu.regs.get('a0')
 
     def __repr__(self):

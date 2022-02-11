@@ -4,7 +4,7 @@ RiscEmu (c) 2021 Anton Lydike
 SPDX-License-Identifier: MIT
 """
 
-from .InstructionSet import *
+from .instruction_set import *
 from ..exceptions import INS_NOT_IMPLEMENTED
 
 

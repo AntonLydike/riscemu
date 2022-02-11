@@ -4,35 +4,33 @@ RiscEmu (c) 2021 Anton Lydike
 SPDX-License-Identifier: MIT
 """
 
-import typing
-from .registers import Registers
-from .colors import FMT_DEBUG, FMT_NONE
-from .types import Instruction
+from .base import SimpleInstruction
 from .helpers import *
 
 if typing.TYPE_CHECKING:
-    from . import *
+    from riscemu import CPU, Registers
 
 
-def launch_debug_session(cpu: 'CPU', mmu: 'MMU', reg: 'Registers', prompt=""):
-    if not cpu.conf.debug_instruction or cpu.active_debug:
+def launch_debug_session(cpu: 'CPU', prompt=""):
+    if cpu.debugger_active:
         return
     import code
     import readline
     import rlcompleter
 
-    cpu.active_debug = True
+    # set the active debug flag
+    cpu.debugger_active = True
 
     # setup some aliases:
-    registers = reg
-    regs = reg
-    memory = mmu
-    mem = mmu
-    syscall_interface = cpu.syscall_int
+    registers = cpu.regs
+    regs = cpu.regs
+    memory = cpu.mmu
+    mem = cpu.mmu
+    mmu = cpu.mmu
 
     # setup helper functions:
     def dump(what, *args, **kwargs):
-        if isinstance(what, Registers):
+        if what == regs:
             regs.dump(*args, **kwargs)
         else:
             mmu.dump(what, *args, **kwargs)
@@ -50,20 +48,39 @@ def launch_debug_session(cpu: 'CPU', mmu: 'MMU', reg: 'Registers', prompt=""):
             return
         bin = mmu.get_bin_containing(cpu.pc)
 
-        ins = Instruction(name, list(args), bin)
-        print(FMT_DEBUG + "Running instruction " + ins + FMT_NONE)
+        ins = SimpleInstruction(
+            name,
+            tuple(args),
+            bin.context,
+            cpu.pc)
+        print(FMT_DEBUG + "Running instruction {}".format(ins) + FMT_NONE)
         cpu.run_instruction(ins)
 
     def cont(verbose=False):
-        cpu.continue_from_debugger(verbose)
+        try:
+            cpu.run(verbose)
+        except LaunchDebuggerException:
+            print(FMT_DEBUG + 'Returning to debugger...')
+            return
 
     def step():
-        cpu.step()
+        try:
+            cpu.step()
+        except LaunchDebuggerException:
+            return
 
+    # collect all variables
     sess_vars = globals()
     sess_vars.update(locals())
 
+    # add tab completion
     readline.set_completer(rlcompleter.Completer(sess_vars).complete)
     readline.parse_and_bind("tab: complete")
-    code.InteractiveConsole(sess_vars).interact(banner=FMT_DEBUG + prompt + FMT_NONE, exitmsg="Exiting debugger")
-    cpu.active_debug = False
+
+    relaunch_debugger = False
+
+    try:
+        code.InteractiveConsole(sess_vars).interact(banner=FMT_DEBUG + prompt + FMT_NONE, exitmsg="Exiting debugger")
+    finally:
+        cpu.debugger_active = False
+

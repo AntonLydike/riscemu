@@ -5,16 +5,17 @@ SPDX-License-Identifier: MIT
 
 This file holds the logic for starting the emulator from the CLI
 """
+from riscemu.CPU import UserModeCPU
 
 if __name__ == '__main__':
-    from . import *
+    from .config import RunConfig
     from .helpers import *
     from .instructions import InstructionSetDict
+    from riscemu.parser import AssemblyFileLoader
     import argparse
     import sys
 
     all_ins_names = list(InstructionSetDict.keys())
-
 
     class OptionStringAction(argparse.Action):
         def __init__(self, option_strings, dest, keys=None, omit_empty=False, **kwargs):
@@ -93,17 +94,21 @@ if __name__ == '__main__':
     ]
 
     try:
-        cpu = CPU(cfg, ins_to_load)
-        loaded_exe = None
-        for file in args.files:
-            tk = cpu.get_tokenizer(RiscVInput.from_file(file))
-            tk.tokenize()
-            loaded_exe = cpu.load(ExecutableParser(tk).parse())
-        # run the last loaded executable
-        cpu.run_loaded(loaded_exe)
-    except RiscemuBaseException as e:
-        print("Error while parsing: {}".format(e.message()))
-        import traceback
+        cpu = UserModeCPU(ins_to_load)
 
-        traceback.print_exception(type(e), e, e.__traceback__)
+        opts = AssemblyFileLoader.get_options(sys.argv)
+        for file in args.files:
+            loader = AssemblyFileLoader.instantiate(file, opts)
+
+            cpu.load_program(loader.parse())
+        # run the last loaded executable
+
+        cpu.setup_stack(cfg.stack_size)
+
+        # launch the last loaded program
+        cpu.launch(cpu.mmu.programs[-1])
+    except RiscemuBaseException as e:
+        print("Error: {}".format(e.message()))
+        e.print_stacktrace()
+
         sys.exit(1)

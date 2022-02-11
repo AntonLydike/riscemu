@@ -16,7 +16,7 @@ from ..instructions import RV32A, RV32M
 
 if typing.TYPE_CHECKING:
     from riscemu import types, LoadedExecutable, LoadedInstruction
-    from riscemu.instructions.InstructionSet import InstructionSet
+    from riscemu.instructions.instruction_set import InstructionSet
 
 
 class PrivCPU(CPU):
@@ -83,7 +83,7 @@ class PrivCPU(CPU):
             self.launch_debug = False
             launch_debug_session(self, self.mmu, self.regs,
                                  "Launching debugger:")
-            if not self.active_debug:
+            if not self.debugger_active:
                 self._run(verbose)
         else:
             print()

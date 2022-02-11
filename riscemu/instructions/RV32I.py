@@ -4,7 +4,8 @@ RiscEmu (c) 2021 Anton Lydike
 SPDX-License-Identifier: MIT
 """
 
-from .InstructionSet import *
+from .instruction_set import *
+from ..CPU import UserModeCPU
 
 from ..helpers import int_from_bytes, int_to_bytes, to_unsigned, to_signed
 from ..colors import FMT_DEBUG, FMT_NONE
@@ -116,14 +117,8 @@ class RV32I(InstructionSet):
         )
 
     def instruction_add(self, ins: 'Instruction'):
-        dst = ""
-        if self.cpu.conf.add_accept_imm:
-            try:
-                dst, rs1, rs2 = self.parse_rd_rs_imm(ins)
-            except:
-                pass
-        if not dst:
-            dst, rs1, rs2 = self.parse_rd_rs_rs(ins)
+        # FIXME: once configuration is figured out, add flag to support immediate arg in add instruction
+        dst, rs1, rs2 = self.parse_rd_rs_rs(ins)
 
         self.regs.set(
             dst,
@@ -292,20 +287,19 @@ class RV32I(InstructionSet):
 
     def instruction_scall(self, ins: 'Instruction'):
         ASSERT_LEN(ins.args, 0)
+
+        if not isinstance(self.cpu, UserModeCPU):
+            # FIXME: add exception for syscall not supported or something
+            raise
+
         syscall = Syscall(self.regs.get('a7'), self.cpu)
         self.cpu.syscall_int.handle_syscall(syscall)
 
     def instruction_sbreak(self, ins: 'Instruction'):
         ASSERT_LEN(ins.args, 0)
-        if self.cpu.active_debug:
-            print(FMT_DEBUG + "Debug instruction encountered at 0x{:08X}".format(self.pc - 1) + FMT_NONE)
-            raise LaunchDebuggerException()
-        launch_debug_session(
-            self.cpu,
-            self.mmu,
-            self.regs,
-            "Debug instruction encountered at 0x{:08X}".format(self.pc - 1)
-        )
+
+        print(FMT_DEBUG + "Debug instruction encountered at 0x{:08X}".format(self.pc - 1) + FMT_NONE)
+        raise LaunchDebuggerException()
 
     def instruction_nop(self, ins: 'Instruction'):
         ASSERT_LEN(ins.args, 0)

@@ -17,6 +17,9 @@ class RiscemuBaseException(BaseException):
     def message(self):
         pass
 
+    def print_stacktrace(self):
+        import traceback
+        traceback.print_exception(type(self), self, self.__traceback__)
 
 # Parsing exceptions:
 
@@ -115,13 +118,15 @@ class InvalidAllocationException(RiscemuBaseException):
 
 
 class UnimplementedInstruction(RiscemuBaseException):
-    def __init__(self, ins: 'Instruction'):
+    def __init__(self, ins: 'Instruction', context = None):
         self.ins = ins
+        self.context = context
 
     def message(self):
-        return FMT_CPU + "{}({})".format(
+        return FMT_CPU + "{}({}{})".format(
             self.__class__.__name__,
-            repr(self.ins)
+            repr(self.ins),
+            ', context={}'.format(self.context) if self.context is not None else ''
         ) + FMT_NONE
 
 

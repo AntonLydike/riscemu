@@ -49,8 +49,10 @@ class MMU:
         """
         Create a new MMU
         """
+        self.programs = list()
         self.sections = list()
         self.global_symbols = dict()
+
 
     def get_sec_containing(self, addr: T_AbsoluteAddress) -> Optional[MemorySection]:
         """
@@ -79,8 +81,8 @@ class MMU:
         """
         sec = self.get_sec_containing(addr)
         if sec is None:
-            print(FMT_MEM + "[MMU] Trying to read instruction form invalid region! "
-                            "Have you forgotten an exit syscall or ret statement?" + FMT_NONE)
+            print(FMT_MEM + "[MMU] Trying to read instruction form invalid region! (read at {}) ".format(addr)
+                            + "Have you forgotten an exit syscall or ret statement?" + FMT_NONE)
             raise RuntimeError("No next instruction available!")
         return sec.read_ins(addr - sec.base)
 
@@ -181,8 +183,7 @@ class MMU:
 
             at_addr = program.base
         else:
-            first_guaranteed_free_address = self.sections[-1].base + self.sections[-1].size
-            at_addr = align_addr(first_guaranteed_free_address, align_to)
+            at_addr = align_addr(self.get_guaranteed_free_address(), align_to)
 
         # trigger the load event to set all addresses in the binary
         program.loaded_trigger(at_addr)
@@ -200,9 +201,34 @@ class MMU:
         # FIXME: this is pretty unclean and should probably be solved in a better way in the future
         program.context.global_symbol_dict = self.global_symbols
 
+    def load_section(self, sec: MemorySection, fixed_position: bool = False) -> bool:
+        if fixed_position:
+            if self.has_continous_free_region(sec.base, sec.base + sec.size):
+                self.sections.append(sec)
+                self._update_state()
+            else:
+                print(FMT_MEM + '[MMU] Cannot place section {} at {}, space is occupied!'.format(sec, sec.base))
+                return False
+        else:
+            at_addr = align_addr(self.get_guaranteed_free_address(), 8)
+            sec.base = at_addr
+            self.sections.append(sec)
+            self._update_state()
+            return True
+
     def _update_state(self):
+        """
+        Called whenever a section or program is added to keep the list of programs and sections consistent
+        :return:
+        """
         self.programs.sort(key=lambda bin: bin.base)
         self.sections.sort(key=lambda sec: sec.base)
+
+    def get_guaranteed_free_address(self) -> T_AbsoluteAddress:
+        if len(self.sections) == 0:
+            return 0x100
+        else:
+            return self.sections[-1].base + self.sections[-1].size
 
     def __repr__(self):
         return "MMU(\n\t{}\n)".format(

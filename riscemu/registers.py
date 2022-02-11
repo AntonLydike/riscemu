@@ -1,28 +1,23 @@
 """
-RiscEmu (c) 2021 Anton Lydike
+RiscEmu (c) 2021-2022 Anton Lydike
 
 SPDX-License-Identifier: MIT
 """
 
-from .config import RunConfig
-from .helpers import *
 from collections import defaultdict
-from .exceptions import InvalidRegisterException
+
+from .helpers import *
+
 
 class Registers:
     """
     Represents a bunch of registers
     """
 
-    def __init__(self, conf: RunConfig):
-        """
-        Initialize the register configuration, respecting the RunConfig conf
-        :param conf: The RunConfig
-        """
+    def __init__(self):
         self.vals = defaultdict(lambda: 0)
         self.last_set = None
         self.last_read = None
-        self.conf = conf
 
     def dump(self, full=False):
         """
@@ -96,7 +91,7 @@ class Registers:
         """
         if reg == 'zero':
             return False
-        #if reg not in Registers.all_registers():
+        # if reg not in Registers.all_registers():
         #    raise InvalidRegisterException(reg)
         # replace fp register with s1, as these are the same register
         if reg == 'fp':
@@ -114,7 +109,7 @@ class Registers:
         :param mark_read: If the register should be markes as "last read" (only used internally)
         :return: The contents of register reg
         """
-        #if reg not in Registers.all_registers():
+        # if reg not in Registers.all_registers():
         #    raise InvalidRegisterException(reg)
         if reg == 'fp':
             reg = 's0'
