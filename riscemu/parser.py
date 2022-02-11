@@ -5,15 +5,15 @@ SPDX-License-Identifier: MIT
 """
 import os
 import re
-from typing import Dict, Tuple, Iterable, Callable
+from typing import Dict, Tuple, Iterable, Callable, List
 
 from .helpers import Peekable
 from .assembler import MemorySectionType, ParseContext, AssemblerDirectives
-from .base_types import Program
+from .types import Program, T_ParserOpts, ProgramLoader
 from .colors import FMT_PARSE
 from .exceptions import ParseException
 from .tokenizer import Token, TokenType, tokenize
-from .types import SimpleInstruction
+from .base import SimpleInstruction
 
 
 def parse_instruction(token: Token, args: Tuple[str], context: ParseContext):
@@ -53,7 +53,6 @@ def parse_tokens(name: str, tokens_iter: Iterable[Token]) -> Program:
     for token, args in composite_tokenizer(Peekable[Token](tokens_iter)):
         if token.type not in PARSERS:
             raise ParseException("Unexpected token type: {}, {}".format(token, args))
-        print("{} {}".format(token, args))
         PARSERS[token.type](token, args, context)
 
     return context.finalize()
@@ -92,9 +91,37 @@ def take_arguments(tokens: Peekable[Token]) -> Iterable[str]:
             next(tokens)
             break
         break
-        #raise ParseException("Expected newline, instead got {}".format(tokens.peek()))
+        # raise ParseException("Expected newline, instead got {}".format(tokens.peek()))
 
 
-def parse_program_from_file(path: str) -> Program:
-    with open(path, 'r') as f:
-        return parse_tokens(os.path.split(path)[-1], tokenize(f))
+class AssemblyFileLoader(ProgramLoader):
+    """
+    This class loads assembly files written by hand. It understands some assembler directives and supports most
+    pseudo instructions. It does very little verification of source correctness.
+
+    It also supports numbered jump targets and properly supports local and global scope (.globl assembly directive)
+
+
+    The AssemblyFileLoader loads .asm, .S and .s files by default, and acts as a weak fallback to all other filetypes.
+    """
+    def parse(self) -> Program:
+        with open(self.source_path, 'r') as f:
+            return parse_tokens(self.filename, tokenize(f))
+
+    @classmethod
+    def can_parse(cls, source_path: str) -> float:
+        """
+
+        It also acts as a weak fallback if no other loaders want to take the file.
+
+        :param source_path: the path to the source file
+        :return:
+        """
+        # gcc recognizes these line endings as assembly. So we will do too.
+        if source_path.split('.')[-1] in ('asm', 'S', 's'):
+            return 1
+        return 0.01
+
+    @classmethod
+    def get_options(cls, argv: list[str]) -> [List[str], T_ParserOpts]:
+        return argv, {}

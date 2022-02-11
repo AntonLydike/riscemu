@@ -21,7 +21,7 @@ class PrivRV32I(RV32I):
     This is an extension of RV32I, written for the PrivCPU class
     """
 
-    def instruction_csrrw(self, ins: 'LoadedInstruction'):
+    def instruction_csrrw(self, ins: 'Instruction'):
         rd, rs, csr_addr = self.parse_crs_ins(ins)
         old_val = None
         if rd != 'zero':
@@ -34,7 +34,7 @@ class PrivRV32I(RV32I):
         if old_val is not None:
             self.regs.set(rd, old_val)
 
-    def instruction_csrrs(self, ins: 'LoadedInstruction'):
+    def instruction_csrrs(self, ins: 'Instruction'):
         rd, rs, csr_addr = self.parse_crs_ins(ins)
         if rs != 'zero':
             # oh no, this should not happen!
@@ -45,13 +45,13 @@ class PrivRV32I(RV32I):
             self.regs.set(rd, old_val)
 
 
-    def instruction_csrrc(self, ins: 'LoadedInstruction'):
+    def instruction_csrrc(self, ins: 'Instruction'):
         INS_NOT_IMPLEMENTED(ins)
 
-    def instruction_csrrsi(self, ins: 'LoadedInstruction'):
+    def instruction_csrrsi(self, ins: 'Instruction'):
         INS_NOT_IMPLEMENTED(ins)
 
-    def instruction_csrrwi(self, ins: 'LoadedInstruction'):
+    def instruction_csrrwi(self, ins: 'Instruction'):
         ASSERT_LEN(ins.args, 3)
         rd, imm, addr = ins.get_reg(0), ins.get_imm(1), ins.get_imm(2)
         if rd != 'zero':
@@ -62,10 +62,10 @@ class PrivRV32I(RV32I):
         self.cpu.csr.set(addr, imm)
 
 
-    def instruction_csrrci(self, ins: 'LoadedInstruction'):
+    def instruction_csrrci(self, ins: 'Instruction'):
         INS_NOT_IMPLEMENTED(ins)
 
-    def instruction_mret(self, ins: 'LoadedInstruction'):
+    def instruction_mret(self, ins: 'Instruction'):
         if self.cpu.mode != PrivModes.MACHINE:
             print("MRET not inside machine level code!")
             raise IllegalInstructionTrap(ins)
@@ -90,53 +90,53 @@ class PrivRV32I(RV32I):
                 if self.cpu.conf.verbosity > 1:
                     self.regs.dump_reg_a()
 
-    def instruction_uret(self, ins: 'LoadedInstruction'):
+    def instruction_uret(self, ins: 'Instruction'):
         raise IllegalInstructionTrap(ins)
 
-    def instruction_sret(self, ins: 'LoadedInstruction'):
+    def instruction_sret(self, ins: 'Instruction'):
         raise IllegalInstructionTrap(ins)
 
-    def instruction_scall(self, ins: 'LoadedInstruction'):
+    def instruction_scall(self, ins: 'Instruction'):
         """
         Overwrite the scall from userspace RV32I
         """
         raise EcallTrap(self.cpu.mode)
 
-    def instruction_beq(self, ins: 'LoadedInstruction'):
+    def instruction_beq(self, ins: 'Instruction'):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins)
         if rs1 == rs2:
             self.pc += dst - 4
 
-    def instruction_bne(self, ins: 'LoadedInstruction'):
+    def instruction_bne(self, ins: 'Instruction'):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins)
         if rs1 != rs2:
             self.pc += dst - 4
 
-    def instruction_blt(self, ins: 'LoadedInstruction'):
+    def instruction_blt(self, ins: 'Instruction'):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins)
         if rs1 < rs2:
             self.pc += dst - 4
 
-    def instruction_bge(self, ins: 'LoadedInstruction'):
+    def instruction_bge(self, ins: 'Instruction'):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins)
         if rs1 >= rs2:
             self.pc += dst - 4
 
-    def instruction_bltu(self, ins: 'LoadedInstruction'):
+    def instruction_bltu(self, ins: 'Instruction'):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins, signed=False)
         if rs1 < rs2:
             self.pc += dst - 4
 
-    def instruction_bgeu(self, ins: 'LoadedInstruction'):
+    def instruction_bgeu(self, ins: 'Instruction'):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins, signed=False)
         if rs1 >= rs2:
             self.pc += dst - 4
 
     # technically deprecated
-    def instruction_j(self, ins: 'LoadedInstruction'):
+    def instruction_j(self, ins: 'Instruction'):
         raise NotImplementedError("Should never be reached!")
 
-    def instruction_jal(self, ins: 'LoadedInstruction'):
+    def instruction_jal(self, ins: 'Instruction'):
         ASSERT_LEN(ins.args, 2)
         reg = ins.get_reg(0)
         addr = ins.get_imm(1)
@@ -148,20 +148,20 @@ class PrivRV32I(RV32I):
         self.regs.set(reg, self.pc)
         self.pc += addr - 4
 
-    def instruction_jalr(self, ins: 'LoadedInstruction'):
+    def instruction_jalr(self, ins: 'Instruction'):
         ASSERT_LEN(ins.args, 3)
         rd, rs, imm = self.parse_rd_rs_imm(ins)
         self.regs.set(rd, self.pc)
         self.pc = rs + imm - 4
 
-    def instruction_sbreak(self, ins: 'LoadedInstruction'):
+    def instruction_sbreak(self, ins: 'Instruction'):
         raise LaunchDebuggerException()
 
-    def parse_crs_ins(self, ins: 'LoadedInstruction'):
+    def parse_crs_ins(self, ins: 'Instruction'):
         ASSERT_LEN(ins.args, 3)
         return ins.get_reg(0), ins.get_reg(1), ins.get_imm(2)
 
-    def parse_mem_ins(self, ins: 'LoadedInstruction') -> Tuple[str, int]:
+    def parse_mem_ins(self, ins: 'Instruction') -> Tuple[str, int]:
         ASSERT_LEN(ins.args, 3)
         addr = self.get_reg_content(ins, 1) + ins.get_imm(2)
         reg = ins.get_reg(0)

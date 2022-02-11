@@ -22,7 +22,7 @@ from .CPU import CPU
 
 from .config import RunConfig
 
-from .parser import tokenize, parse_tokens, parse_program_from_file
+from .parser import tokenize, parse_tokens, AssemblyFileLoader
 
 __author__ = "Anton Lydike <Anton@Lydike.com>"
 __copyright__ = "Copyright 2021 Anton Lydike"

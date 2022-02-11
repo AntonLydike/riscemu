@@ -5,8 +5,11 @@ SPDX-License-Identifier: MIT
 """
 
 from abc import abstractmethod
-from .base_types import Instruction
 from .colors import *
+import typing
+
+if typing.TYPE_CHECKING:
+    from .types import Instruction
 
 
 class RiscemuBaseException(BaseException):
@@ -112,7 +115,7 @@ class InvalidAllocationException(RiscemuBaseException):
 
 
 class UnimplementedInstruction(RiscemuBaseException):
-    def __init__(self, ins: Instruction):
+    def __init__(self, ins: 'Instruction'):
         self.ins = ins
 
     def message(self):

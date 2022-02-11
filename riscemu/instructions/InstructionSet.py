@@ -10,7 +10,7 @@ from abc import ABC
 from ..CPU import CPU
 from ..helpers import to_unsigned
 from ..exceptions import ASSERT_LEN, ASSERT_IN
-from ..base_types import Instruction
+from ..types import Instruction
 
 
 class InstructionSet(ABC):

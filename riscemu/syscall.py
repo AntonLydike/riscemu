@@ -18,9 +18,9 @@ if typing.TYPE_CHECKING:
     from . import CPU
 
 SYSCALLS = {
-    63:   'read',
-    64:   'write',
-    93:   'exit',
+    63: 'read',
+    64: 'write',
+    93: 'exit',
     1024: 'open',
     1025: 'close',
 }
@@ -34,6 +34,7 @@ OPEN_MODES = {
     4: 'ab',
 }
 """All available file open modes"""
+
 
 @dataclass(frozen=True)
 class Syscall:

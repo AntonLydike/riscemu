@@ -2,124 +2,74 @@
 Laods a memory image with debug information into memory
 """
 
-import json
-from functools import lru_cache
-from typing import Dict, List, Optional, TYPE_CHECKING
+import os.path
+from typing import List, Iterable
 
-from .ElfLoader import ElfInstruction, ElfLoadedMemorySection, InstructionAccessFault, InstructionAddressMisalignedTrap
-from .PrivMMU import PrivMMU
-from ..config import RunConfig
-from ..base_types import LoadedMemorySection, MemoryFlags
-from ..IO.IOModule import IOModule
-from ..colors import FMT_ERROR, FMT_NONE, FMT_MEM
-from ..decoder import decode
-
-if TYPE_CHECKING:
-    pass
+from .ElfLoader import ElfMemorySection
+from .types import MemoryImageDebugInfos
+from ..assembler import INSTRUCTION_SECTION_NAMES
+from ..colors import FMT_NONE, FMT_PARSE
+from ..helpers import get_section_base_name
+from ..types import MemoryFlags, ProgramLoader, Program, T_ParserOpts
 
 
-class MemoryImageMMU(PrivMMU):
-    io: List[IOModule]
-    data: bytearray
-    io_start: int
-    debug_info: Dict[str, Dict[str, Dict[str, str]]]
+class MemoryImageLoader(ProgramLoader):
 
-    def __init__(self, file_name: str, io_start: int = 0xFF0000):
-        super(MemoryImageMMU, self).__init__(conf=RunConfig())
+    @classmethod
+    def can_parse(cls, source_path: str) -> float:
+        if source_path.split('.')[-1] == '.img':
+            return 1
+        return 0
 
-        with open(file_name, 'rb') as memf:
-            data = memf.read()
-        with open(file_name + '.dbg', 'r') as dbgf:
-            debug_info: Dict = json.load(dbgf)
+    @classmethod
+    def get_options(cls, argv: list[str]) -> [List[str], T_ParserOpts]:
+        return argv, {}
 
-        self.data = bytearray(data)
-        # TODO: super wasteful memory allocation happening here
-        if len(data) < io_start:
-            self.data += bytearray(io_start - len(data))
-        self.debug_info = debug_info
-        self.io_start = io_start
-        self.io = list()
+    def parse(self) -> Iterable[Program]:
+        if self.options.get('debug', False):
+            yield self.parse_no_debug()
+            return
 
-    def get_entrypoint(self):
-        try:
-            start = self.debug_info['symbols']['kernel'].get('_start', None)
-            if start is not None:
-                return start
-            return self.debug_info['symbols']['kernel'].get('_ftext')
-        except KeyError:
-            print(FMT_ERROR + '[MMU] cannot find kernel entry in debug information! Falling back to 0x100' + FMT_NONE)
-            return 0x100
+        with open(self.options.get('debug'), 'r') as debug_file:
+            debug_info = MemoryImageDebugInfos.load(debug_file.read())
 
-    @lru_cache(maxsize=2048)
-    def read_ins(self, addr: int) -> ElfInstruction:
-        if addr >= self.io_start:
-            raise InstructionAccessFault(addr)
-        if addr % 4 != 0:
-            raise InstructionAddressMisalignedTrap(addr)
+        with open(self.source_path, 'rb') as source_file:
+            data: bytearray = bytearray(source_file.read())
 
-        return ElfInstruction(*decode(self.data[addr:addr + 4]))
+        for name, sections in debug_info.sections.items():
+            program = Program(name)
 
-    def read(self, addr: int, size: int) -> bytearray:
-        if addr < 0x100:
-            pc = self.cpu.pc
-            text_sec = self.get_sec_containing(pc)
-            print(FMT_ERROR + "[MMU] possible null dereference (read {:x}) from (pc={:x},sec={},rel={:x})".format(
-                addr, pc, text_sec.owner + ':' + text_sec.name, pc - text_sec.base
-            ) + FMT_NONE)
-        if addr >= self.io_start:
-            return self.io_at(addr).read(addr, size)
-        return self.data[addr: addr + size]
+            for sec_name, (start, size) in sections.items():
+                if program.base is None:
+                    program.base = start
 
-    def write(self, addr: int, size: int, data):
-        if addr < 0x100:
-            pc = self.cpu.pc
-            text_sec = self.get_sec_containing(pc)
-            print(FMT_ERROR + "[MMU] possible null dereference (write {:x}) from (pc={:x},sec={},rel={:x})".format(
-                addr, pc, text_sec.owner + ':' + text_sec.name, pc - text_sec.base
-            ) + FMT_NONE)
+                in_code_sec = get_section_base_name(sec_name) in INSTRUCTION_SECTION_NAMES
+                program.add_section(
+                    ElfMemorySection(
+                        data[start:start+size], sec_name, program.context,
+                        name, start, MemoryFlags(in_code_sec, in_code_sec)
+                    )
+                )
 
-        if addr >= self.io_start:
-            return self.io_at(addr).write(addr, data, size)
-        self.data[addr:addr + size] = data[0:size]
+            program.context.labels.update(debug_info.symbols.get(name, dict()))
+            program.global_labels.update(debug_info.globals.get(name, set()))
 
-    def io_at(self, addr) -> IOModule:
-        for mod in self.io:
-            if mod.contains(addr):
-                return mod
-        raise InstructionAccessFault(addr)
+            yield program
 
-    def add_io(self, io: IOModule):
-        self.io.append(io)
+    def parse_no_debug(self) -> Program:
+        print(FMT_PARSE + "[MemoryImageLoader] Warning: loading memory image without debug information!" + FMT_NONE)
 
-    def __repr__(self):
-        return "MemoryImageMMU()"
+        with open(self.source_path, 'rb') as source_file:
+            data: bytes = source_file.read()
 
-    @lru_cache(maxsize=32)
-    def get_sec_containing(self, addr: int) -> Optional[LoadedMemorySection]:
-        next_sec = len(self.data)
-        for sec_addr, name in reversed(self.debug_info['sections'].items()):
-            if addr >= int(sec_addr):
-                owner, name = name.split(':')
-                base = int(sec_addr)
-                size = next_sec - base
-                flags = MemoryFlags('.text' in name, '.text' in name)
-                return ElfLoadedMemorySection(name, base, size, self.data[base:next_sec], flags, owner)
-            else:
-                next_sec = int(sec_addr)
+        p = Program(self.filename)
+        p.add_section(ElfMemorySection(
+            bytearray(data), 'memory image contents', p.context, p.name, 0, MemoryFlags(False, True)
+        ))
+        return p
 
-    def translate_address(self, addr: int):
-        sec = self.get_sec_containing(addr)
-        if sec.name == '.empty':
-            return "<empty>"
-        symbs = self.debug_info['symbols'][sec.owner]
-        for sym, val in reversed(symbs.items()):
-            if addr >= val:
-                return "{}{:+x} ({}:{})".format(sym, addr - val, sec.owner, sec.name)
-        return "{}:{}{:+x}".format(sec.owner, sec.name, addr - sec.base)
-
-    def label(self, symb: str):
-        print(FMT_MEM + "Looking up symbol {}".format(symb))
-        for owner, symbs in self.debug_info['symbols'].items():
-            if symb in symbs:
-                print("  Hit in {}: {} = {}".format(owner, symb, symbs[symb]))
-        print(FMT_NONE, end="")
+    @classmethod
+    def instantiate(cls, source_path: str, options: T_ParserOpts) -> 'ProgramLoader':
+        if os.path.exists(source_path + '.dbg'):
+            return MemoryImageLoader(source_path, dict(**options, debug=source_path + '.dbg'))
+        return MemoryImageLoader(source_path, options)

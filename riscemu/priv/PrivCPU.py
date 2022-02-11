@@ -15,7 +15,7 @@ from ..IO import TextIO
 from ..instructions import RV32A, RV32M
 
 if typing.TYPE_CHECKING:
-    from riscemu import base_types, LoadedExecutable, LoadedInstruction
+    from riscemu import types, LoadedExecutable, LoadedInstruction
     from riscemu.instructions.InstructionSet import InstructionSet
 
 
@@ -25,7 +25,7 @@ class PrivCPU(CPU):
 
     It should support M and U Mode, but no U-Mode Traps.
 
-    This allows us to
+    This is meant to emulate whole operating systems.
     """
 
     csr: CSR
@@ -44,16 +44,10 @@ class PrivCPU(CPU):
     the equivalent of "1 byte" (this is actually impossible)
     """
 
-    def __init__(self, conf, mmu: PrivMMU):
+    def __init__(self, conf):
         super().__init__(conf, [PrivRV32I, RV32M, RV32A])
+        # start in machine mode
         self.mode: PrivModes = PrivModes.MACHINE
-
-        mmu.set_cpu(self)
-        self.pc = mmu.get_entrypoint()
-        self.mmu = mmu
-
-        if hasattr(self.mmu, 'add_io'):
-            self.mmu.add_io(TextIO.TextIO(0xff0000, 64))
 
         self.syscall_int = None
         self.launch_debug = False

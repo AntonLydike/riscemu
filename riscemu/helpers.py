@@ -139,3 +139,9 @@ class Peekable(Generic[T], Iterator[T]):
 
     def is_empty(self) -> bool:
         return self.peek() is None
+
+
+def get_section_base_name(section_name: str) -> str:
+    if '.' not in section_name:
+        print(FMT_PARSE + f"Invalid section {section_name}, not starting with a dot!" + FMT_NONE)
+    return '.' + section_name.split('.')[1]

@@ -9,7 +9,7 @@ on them.
 import sys
 from typing import Tuple, List, Dict, Callable, Type
 
-from .base_types import MemoryFlags
+from .types import MemoryFlags
 from .syscall import SyscallInterface, get_syscall_symbols
 from .exceptions import RiscemuBaseException, LaunchDebuggerException
 from .MMU import MMU
@@ -23,7 +23,7 @@ import riscemu
 import typing
 
 if typing.TYPE_CHECKING:
-    from . import base_types, LoadedExecutable, LoadedInstruction
+    from . import types, LoadedExecutable, LoadedInstruction
     from .instructions.InstructionSet import InstructionSet
 
 
@@ -34,7 +34,7 @@ class CPU:
     It is initialized with a configuration and a list of instruction sets.
     """
 
-    INS_XLEN = 1
+    INS_XLEN = 4
 
     def __init__(self, conf: RunConfig, instruction_sets: List[Type['riscemu.InstructionSet']]):
         """
@@ -69,34 +69,6 @@ class CPU:
         # provide global syscall symbols if option is set
         if conf.include_scall_symbols:
             self.mmu.global_symbols.update(get_syscall_symbols())
-
-    def get_tokenizer(self, tokenizer_input):
-        """
-        Returns a tokenizer that respects the language of the CPU
-
-        :param tokenizer_input: an instance of the RiscVTokenizerInput class
-        """
-        return RiscVTokenizer(tokenizer_input, self.all_instructions())
-
-    def load(self, e: riscemu.base_types):
-        """
-        Load an executable into Memory
-        """
-        return self.mmu.load_bin(e)
-
-    def run_loaded(self, le: 'riscemu.LoadedExecutable'):
-        """
-        Run a loaded executable
-        """
-        self.pc = le.run_ptr
-
-        if self.conf.stack_size > 0:
-            self.stack = self.mmu.allocate_section("stack", self.conf.stack_size, MemoryFlags(False, False))
-            self.regs.set('sp', self.stack.base + self.stack.size)
-            print(FMT_CPU + '[CPU] Allocated {} bytes of stack'.format(self.stack.size) + FMT_NONE)
-
-        print(FMT_CPU + '[CPU] Started running from 0x{:08X} ({})'.format(le.run_ptr, le.name) + FMT_NONE)
-        self._run()
 
     def continue_from_debugger(self, verbose=True):
         """
@@ -156,24 +128,6 @@ class CPU:
         else:
             print()
             print(FMT_CPU + "Program stopped without exiting - perhaps you stopped the debugger?" + FMT_NONE)
-
-    def run_instruction(self, ins: 'LoadedInstruction'):
-        """
-        Execute a single instruction
-
-        :param ins: The instruction to execute
-        """
-        if ins.name in self.instructions:
-            self.instructions[ins.name](ins)
-        else:
-            # this should never be reached, as unknown instructions are imparseable
-            raise RuntimeError("Unknown instruction: {}".format(ins))
-
-    def all_instructions(self) -> List[str]:
-        """
-        Return a list of all instructions this CPU can execute.
-        """
-        return list(self.instructions.keys())
 
     def __repr__(self):
         """

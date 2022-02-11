@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 import typing
 from .registers import Registers
 from .colors import FMT_DEBUG, FMT_NONE
-from .base_types import Instruction
+from .types import Instruction
 from .helpers import *
 
 if typing.TYPE_CHECKING:

@@ -133,7 +133,3 @@ def split_whitespace_respecting_quotes(line: str) -> Iterable[str]:
 
     if part:
         yield part
-
-
-
-

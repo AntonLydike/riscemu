@@ -2,14 +2,20 @@ from typing import Optional, Tuple, Union, List
 from enum import Enum, auto
 from typing import Optional, Tuple, Union
 
-from .helpers import parse_numeric_argument, align_addr, int_to_bytes
-from .base_types import Program, T_RelativeAddress, InstructionContext, Instruction
+from .helpers import parse_numeric_argument, align_addr, int_to_bytes, get_section_base_name
+from .types import Program, T_RelativeAddress, InstructionContext, Instruction
 from .colors import FMT_PARSE, FMT_NONE
 from .exceptions import ParseException, ASSERT_LEN, ASSERT_NOT_NULL
 from .tokenizer import Token
-from .types import BinaryDataMemorySection, InstructionMemorySection
+from .base import BinaryDataMemorySection, InstructionMemorySection
 
 INSTRUCTION_SECTION_NAMES = ('.text', '.init', '.fini')
+"""
+A tuple containing all section names which contain executable code (instead of data)
+
+The first segment of each segment (first segment of ".text.main" is ".text") is checked
+against this list to determine the type of it.
+"""
 
 
 class MemorySectionType(Enum):
@@ -64,17 +70,21 @@ class ParseContext:
         if self.section is None:
             return
         if self.section.type == MemorySectionType.Data:
-            section = BinaryDataMemorySection(self.section.data, self.section.name, self.context, self.program)
+            section = BinaryDataMemorySection(
+                self.section.data, self.section.name, self.context, self.program.name, self.section.base
+            )
             self.program.add_section(section)
         elif self.section.type == MemorySectionType.Instructions:
-            section = InstructionMemorySection(self.section.data, self.section.name, self.context, self.program)
+            section = InstructionMemorySection(
+                self.section.data, self.section.name, self.context, self.program.name, self.section.base
+            )
             self.program.add_section(section)
         self.section = None
 
-    def new_section(self, name: str, type: MemorySectionType):
+    def new_section(self, name: str, type: MemorySectionType, alignment: int = 4):
         base = 0
         if self.section is not None:
-            base = align_addr(self.section.current_address(), 4)
+            base = align_addr(self.section.current_address(), alignment)
             print("base at {}".format(base))
         self._finalize_section()
         self.section = CurrentSection(name, type, base)
@@ -92,10 +102,6 @@ def ASSERT_IN_SECTION_TYPE(context: ParseContext, type: MemorySectionType):
         raise ParseException(
             'Error, expected to be in {} section, but currently in {}...'.format(type.name, context.section)
         )
-
-
-def get_section_base_name(section_name: str) -> str:
-    return '.' + section_name.split('.')[1]
 
 
 class AssemblerDirectives:

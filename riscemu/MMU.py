@@ -4,17 +4,20 @@ RiscEmu (c) 2021 Anton Lydike
 SPDX-License-Identifier: MIT
 """
 
-from .base_types import InstructionContext, Instruction, MemorySection, MemoryFlags, T_RelativeAddress, T_AbsoluteAddress, \
-    Program
-from .helpers import align_addr, int_from_bytes
-from .exceptions import OutOfMemoryException, InvalidAllocationException
+from typing import Dict, List, Optional
+
 from .colors import *
-from typing import Dict, List, Tuple, Optional
+from .exceptions import InvalidAllocationException
+from .helpers import align_addr, int_from_bytes
+from .types import Instruction, MemorySection, MemoryFlags, T_AbsoluteAddress, \
+    Program
 
 
 class MMU:
     """
-    The MemoryManagementUnit (handles loading binaries, and reading/writing data)
+    The MemoryManagementUnit. This provides a unified interface for reading/writing data from/to memory.
+
+    It also provides various translations for addresses.
     """
 
     max_size = 0xFFFFFFFF
@@ -62,9 +65,9 @@ class MMU:
         return None
 
     def get_bin_containing(self, addr: T_AbsoluteAddress) -> Optional[Program]:
-        for exe in self.binaries:
-            if exe.base_addr <= addr < exe.base_addr + exe.size:
-                return exe
+        for program in self.programs:
+            if program.base <= addr < program.base + program.size:
+                return program
         return None
 
     def read_ins(self, addr: T_AbsoluteAddress) -> Instruction:
@@ -140,7 +143,68 @@ class MMU:
     def read_int(self, addr: int) -> int:
         return int_from_bytes(self.read(addr, 4))
 
+    def translate_address(self, address: T_AbsoluteAddress) -> str:
+        # FIXME: proper implementation using the debug info
+        return str(address)
+
+    def has_continous_free_region(self, start: int, end: int) -> bool:
+        # if we have no sections we are all good
+        if len(self.sections) == 0:
+            return True
+        # if the last section is located before the start we are also good
+        if start > self.sections[-1].base + self.sections[-1].size:
+            return True
+
+        for sec in self.sections:
+            # skip all sections that end before the required start point
+            if sec.base + sec.size < start:
+                continue
+            # we now have the first section that doesn't end **before** the start point
+            # if this section starts after the specified end, we are good
+            if sec.base > end:
+                return True
+            # otherwise we can't continue
+            return False
+        # if all sections end before the requested start we are good
+        # technically we shouldn't ever reach this point, but better safe than sorry
+        return True
+
+    def load_program(self, program: Program, align_to: int = 4):
+        if program.base is not None:
+            if not self.has_continous_free_region(program.base, program.base + program.size):
+                print(FMT_MEM + "Cannot load program {} into desired space (0x{:0x}-0x{:0x}), area occupied.".format(
+                    program.name, program.base, program.base + program.size
+                ) + FMT_NONE)
+                raise InvalidAllocationException("Area occupied".format(
+                    program.name, program.base, program.base + program.size
+                ), program.name, program.size, MemoryFlags(False, True))
+
+            at_addr = program.base
+        else:
+            first_guaranteed_free_address = self.sections[-1].base + self.sections[-1].size
+            at_addr = align_addr(first_guaranteed_free_address, align_to)
+
+        # trigger the load event to set all addresses in the binary
+        program.loaded_trigger(at_addr)
+
+        # add program and sections to internal state
+        self.programs.append(program)
+        self.sections += program.sections
+        self._update_state()
+
+        # load all global symbols from program
+        self.global_symbols.update(
+            {key: program.context.labels[key] for key in program.global_labels}
+        )
+        # inject reference to global symbol table into program context
+        # FIXME: this is pretty unclean and should probably be solved in a better way in the future
+        program.context.global_symbol_dict = self.global_symbols
+
+    def _update_state(self):
+        self.programs.sort(key=lambda bin: bin.base)
+        self.sections.sort(key=lambda sec: sec.base)
+
     def __repr__(self):
         return "MMU(\n\t{}\n)".format(
-            "\n\t".join(repr(x) for x in self.sections)
+            "\n\t".join(repr(x) for x in self.programs)
         )
