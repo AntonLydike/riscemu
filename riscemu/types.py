@@ -65,7 +65,7 @@ class InstructionContext:
 
     global_symbol_dict: Dict[str, T_AbsoluteAddress]
     """
-    A reference to the MMU for access to global symbols
+    A reference to the MMU's global symbol dictionary for access to global symbols
     """
 
     def __init__(self):
@@ -264,7 +264,7 @@ class Program:
             return base + self.context.labels.get('main')
         for sec in self.sections:
             if get_section_base_name(sec.name) == '.text' and sec.flags.executable:
-                return base + sec.base
+                return sec.base
 
     def loaded_trigger(self, at_addr: T_AbsoluteAddress):
         """

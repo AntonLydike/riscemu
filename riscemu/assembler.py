@@ -173,6 +173,9 @@ class AssemblerDirectives:
 
     @classmethod
     def add_text(cls, text: str, context: ParseContext, zero_terminate: bool = True):
+        # replace '\t' and '\n' escape sequences
+        text = text.replace('\\n', '\n').replace('\\t', '\t')
+
         encoded_bytes = bytearray(text.encode('ascii'))
         if zero_terminate:
             encoded_bytes += bytearray(1)
