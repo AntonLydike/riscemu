@@ -72,6 +72,8 @@ if __name__ == '__main__':
     parser.add_argument('--interactive', help="Launch the interactive debugger instantly instead of loading any "
                                               "programs", action='store_true')
 
+    args = parser.parse_args()
+
     # create a RunConfig from the cli args
     cfg_dict = dict(
         stack_size=args.stack_size,
