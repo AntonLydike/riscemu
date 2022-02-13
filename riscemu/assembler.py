@@ -175,8 +175,9 @@ class AssemblerDirectives:
 
         if content is None:
             content = bytearray(size)
-        if isinstance(context, int):
+        if isinstance(content, int):
             content = int_to_bytes(content, size, unsigned)
+
         context.section.data += content
 
     @classmethod

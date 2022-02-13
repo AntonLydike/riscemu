@@ -88,6 +88,8 @@ class UserModeCPU(CPU):
         while not self.halted:
             self.step(verbose)
 
+        print(FMT_CPU + "[CPU] Program exited with code {}".format(self.exit_code) + FMT_NONE)
+
     def setup_stack(self, stack_size=1024 * 4) -> bool:
         """
         Create program stack and populate stack pointer

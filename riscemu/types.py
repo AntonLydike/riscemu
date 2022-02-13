@@ -258,11 +258,10 @@ class Program:
 
     @property
     def entrypoint(self):
-        base = 0 if self.base is None else self.base
         if '_start' in self.context.labels:
-            return base + self.context.labels.get('_start')
+            return self.context.labels.get('_start')
         if 'main' in self.context.labels:
-            return base + self.context.labels.get('main')
+            return self.context.labels.get('main')
         for sec in self.sections:
             if get_section_base_name(sec.name) == '.text' and sec.flags.executable:
                 return sec.base

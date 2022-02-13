@@ -24,7 +24,7 @@ class PrivMMU(MMU):
 
         # calc start end end of "free" space
         prev_sec_end = 0 if sec_before is None else sec_before.end
-        next_sec_start = 0x7FFFFFFF if sec_after is None else sec_before.base
+        next_sec_start = 0x7FFFFFFF if sec_after is None else sec_after.base
 
         # start at the end of the prev section, or current address - 0xFFFF (aligned to 16 byte boundary)
         start = max(prev_sec_end, align_addr(addr - 0xFFFF, 16))

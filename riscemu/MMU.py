@@ -234,10 +234,10 @@ class MMU:
             "\n\t".join(repr(x) for x in self.programs)
         )
 
-    def context_for(self, addr: T_AbsoluteAddress) -> Optional[InstructionContext]:
+    def context_for(self, addr: T_AbsoluteAddress) -> InstructionContext:
         sec = self.get_sec_containing(addr)
 
         if sec is not None:
             return sec.context
 
-        return None
+        return InstructionContext()

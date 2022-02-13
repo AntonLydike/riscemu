@@ -11,6 +11,7 @@ from .helpers import *
 if typing.TYPE_CHECKING:
     from riscemu import CPU, Registers
 
+HIST_FILE = os.path.join(os.path.expanduser('~'), '.riscemu_history')
 
 
 def launch_debug_session(cpu: 'CPU', prompt=""):
@@ -78,8 +79,8 @@ def launch_debug_session(cpu: 'CPU', prompt=""):
     # add tab completion
     readline.set_completer(rlcompleter.Completer(sess_vars).complete)
     readline.parse_and_bind("tab: complete")
-    if os.path.exists('~/.riscemu_history'):
-        readline.read_history_file('~/.riscemu_history')
+    if os.path.exists(HIST_FILE):
+        readline.read_history_file(HIST_FILE)
 
     relaunch_debugger = False
 
@@ -90,5 +91,5 @@ def launch_debug_session(cpu: 'CPU', prompt=""):
         )
     finally:
         cpu.debugger_active = False
-        readline.write_history_file('~/.riscemu_history')
+        readline.write_history_file(HIST_FILE)
 

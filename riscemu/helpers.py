@@ -46,7 +46,7 @@ def int_from_bytes(bytes, unsigned=False) -> int:
     if unsigned:
         return num
 
-    return to_signed(num)
+    return to_signed(num, len(bytes))
 
 
 def to_unsigned(num: int, bytes=4) -> int:

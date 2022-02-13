@@ -31,7 +31,7 @@ def parse_label(token: Token, args: Tuple[str], context: ParseContext):
     else:
         if name in context.context.labels:
             print(FMT_PARSE + 'Warn: Symbol {} defined twice!'.format(name))
-        context.context.labels[name] = context.section.current_address()
+        context.add_label(name, context.section.current_address(), is_relative=True)
 
 
 PARSERS: Dict[TokenType, Callable[[Token, Tuple[str], ParseContext], None]] = {
@@ -53,7 +53,6 @@ def parse_tokens(name: str, tokens_iter: Iterable[Token]) -> Program:
     for token, args in composite_tokenizer(Peekable[Token](tokens_iter)):
         if token.type not in PARSERS:
             raise ParseException("Unexpected token type: {}, {}".format(token, args))
-        print('{}: {}'.format(token, args))
         PARSERS[token.type](token, args, context)
 
     return context.finalize()
@@ -74,8 +73,6 @@ def composite_tokenizer(tokens_iter: Iterable[Token]) -> Iterable[Tuple[Token, T
         token = next(tokens)
         if token.type in (TokenType.PSEUDO_OP, TokenType.LABEL, TokenType.INSTRUCTION_NAME):
             yield token, tuple(take_arguments(tokens))
-        else:
-            print("skipped {}".format(token))
 
 
 def take_arguments(tokens: Peekable[Token]) -> Iterable[str]:
