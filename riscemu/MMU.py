@@ -10,7 +10,7 @@ from .colors import *
 from .exceptions import InvalidAllocationException, MemoryAccessException
 from .helpers import align_addr, int_from_bytes
 from .types import Instruction, MemorySection, MemoryFlags, T_AbsoluteAddress, \
-    Program
+    Program, InstructionContext
 
 
 class MMU:
@@ -53,7 +53,6 @@ class MMU:
         self.sections = list()
         self.global_symbols = dict()
 
-
     def get_sec_containing(self, addr: T_AbsoluteAddress) -> Optional[MemorySection]:
         """
         Returns the section that contains the address addr
@@ -82,7 +81,7 @@ class MMU:
         sec = self.get_sec_containing(addr)
         if sec is None:
             print(FMT_MEM + "[MMU] Trying to read instruction form invalid region! (read at {}) ".format(addr)
-                            + "Have you forgotten an exit syscall or ret statement?" + FMT_NONE)
+                  + "Have you forgotten an exit syscall or ret statement?" + FMT_NONE)
             raise RuntimeError("No next instruction available!")
         return sec.read_ins(addr - sec.base)
 
@@ -234,3 +233,11 @@ class MMU:
         return "MMU(\n\t{}\n)".format(
             "\n\t".join(repr(x) for x in self.programs)
         )
+
+    def context_for(self, addr: T_AbsoluteAddress) -> Optional[InstructionContext]:
+        sec = self.get_sec_containing(addr)
+
+        if sec is not None:
+            return sec.context
+
+        return None

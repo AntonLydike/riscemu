@@ -9,9 +9,9 @@ from riscemu.CPU import UserModeCPU
 
 if __name__ == '__main__':
     from .config import RunConfig
-    from .helpers import *
     from .instructions import InstructionSetDict
-    from riscemu.parser import AssemblyFileLoader
+    from .colors import FMT_BOLD, FMT_MAGENTA
+    from .parser import AssemblyFileLoader
     import argparse
     import sys
 
@@ -69,7 +69,8 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--verbose', help="Verbosity level (can be used multiple times)", action='count',
                         default=0)
 
-    args = parser.parse_args()
+    parser.add_argument('--interactive', help="Launch the interactive debugger instantly instead of loading any "
+                                              "programs", action='store_true')
 
     # create a RunConfig from the cli args
     cfg_dict = dict(

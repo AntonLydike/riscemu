@@ -11,14 +11,13 @@ It contains everything needed to run assembly files, so you don't need any custo
 from .exceptions import RiscemuBaseException, LaunchDebuggerException, InvalidSyscallException, LinkerException, \
     ParseException, NumberFormatException, InvalidRegisterException, MemoryAccessException, OutOfMemoryException
 
-#from .base_types import Executable, LoadedExecutable, LoadedMemorySection
-
 from .instructions import *
 
 from .MMU import MMU
 from .registers import Registers
 from .syscall import SyscallInterface, Syscall
-from .CPU import CPU
+from .CPU import CPU, UserModeCPU
+from .debug import launch_debug_session
 
 from .config import RunConfig
 

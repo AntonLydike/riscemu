@@ -10,7 +10,7 @@ import typing
 from typing import List, Type
 
 import riscemu
-from . import AssemblyFileLoader, RunConfig
+from .config import RunConfig
 from .MMU import MMU
 from .base import BinaryDataMemorySection
 from .colors import FMT_CPU, FMT_NONE
@@ -18,6 +18,7 @@ from .debug import launch_debug_session
 from .exceptions import RiscemuBaseException, LaunchDebuggerException
 from .syscall import SyscallInterface, get_syscall_symbols
 from .types import CPU, ProgramLoader
+from .parser import AssemblyFileLoader
 
 if typing.TYPE_CHECKING:
     from .instructions.instruction_set import InstructionSet
@@ -105,6 +106,7 @@ class UserModeCPU(CPU):
             return False
 
         self.regs.set('sp', stack_sec.base + stack_sec.size)
+        return True
 
     @classmethod
     def get_loaders(cls) -> typing.Iterable[Type[ProgramLoader]]:

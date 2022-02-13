@@ -61,6 +61,7 @@ def to_signed(num: int, bytes=4) -> int:
     return num
 
 
+
 def create_chunks(my_list, chunk_size):
     """Split a list like [a,b,c,d,e,f,g,h,i,j,k,l,m] into e.g. [[a,b,c,d],[e,f,g,h],[i,j,k,l],[m]]"""
     return [my_list[i:i + chunk_size] for i in range(0, len(my_list), chunk_size)]

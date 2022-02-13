@@ -5,7 +5,7 @@ This aims to be a simple base, usable for everyone who needs the basic functiona
 want to set up their own subtypes of Instruction and MemorySection
 """
 
-from typing import List, Tuple
+from typing import List, Tuple, Union
 from .exceptions import MemoryAccessException
 from .helpers import parse_numeric_argument
 from .types import Instruction, MemorySection, MemoryFlags, InstructionContext, T_RelativeAddress, \
@@ -13,7 +13,8 @@ from .types import Instruction, MemorySection, MemoryFlags, InstructionContext, 
 
 
 class SimpleInstruction(Instruction):
-    def __init__(self, name: str, args: Tuple[str], context: InstructionContext, addr: T_RelativeAddress):
+    def __init__(self, name: str, args: Union[Tuple[()], Tuple[str], Tuple[str, str], Tuple[str, str, str]],
+                 context: InstructionContext, addr: T_RelativeAddress):
         self.context = context
         self.name = name
         self.args = args

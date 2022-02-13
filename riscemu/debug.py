@@ -3,12 +3,14 @@ RiscEmu (c) 2021 Anton Lydike
 
 SPDX-License-Identifier: MIT
 """
+import os.path
 
 from .base import SimpleInstruction
 from .helpers import *
 
 if typing.TYPE_CHECKING:
     from riscemu import CPU, Registers
+
 
 
 def launch_debug_session(cpu: 'CPU', prompt=""):
@@ -46,12 +48,12 @@ def launch_debug_session(cpu: 'CPU', prompt=""):
         if len(args) > 3:
             print("Invalid arg count!")
             return
-        bin = mmu.get_bin_containing(cpu.pc)
+        context = mmu.context_for(cpu.pc)
 
         ins = SimpleInstruction(
             name,
             tuple(args),
-            bin.context,
+            context,
             cpu.pc)
         print(FMT_DEBUG + "Running instruction {}".format(ins) + FMT_NONE)
         cpu.run_instruction(ins)
@@ -76,11 +78,17 @@ def launch_debug_session(cpu: 'CPU', prompt=""):
     # add tab completion
     readline.set_completer(rlcompleter.Completer(sess_vars).complete)
     readline.parse_and_bind("tab: complete")
+    if os.path.exists('~/.riscemu_history'):
+        readline.read_history_file('~/.riscemu_history')
 
     relaunch_debugger = False
 
     try:
-        code.InteractiveConsole(sess_vars).interact(banner=FMT_DEBUG + prompt + FMT_NONE, exitmsg="Exiting debugger")
+        code.InteractiveConsole(sess_vars).interact(
+            banner=FMT_DEBUG + prompt + FMT_NONE,
+            exitmsg="Exiting debugger",
+        )
     finally:
         cpu.debugger_active = False
+        readline.write_history_file('~/.riscemu_history')
 

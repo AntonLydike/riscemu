@@ -89,6 +89,14 @@ class ParseContext:
         self._finalize_section()
         self.section = CurrentSection(name, type, base)
 
+    def add_label(self, name: str, value: int, is_global: bool = False, is_relative: bool = False):
+        self.context.labels[name] = value
+        if is_global:
+            self.program.global_labels.add(name)
+        if is_relative:
+            self.program.relative_labels.add(name)
+
+
     def __repr__(self):
         return "{}(\n\tsetion={},\n\tprogram={}\n)".format(
             self.__class__.__name__, self.section, self.program

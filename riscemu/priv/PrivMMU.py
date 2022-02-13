@@ -1,42 +1,43 @@
+from .types import ElfMemorySection
 from ..MMU import *
 from abc import abstractmethod
 
 import typing
-
-from .ElfLoader import ElfExecutable
 
 if typing.TYPE_CHECKING:
     from .PrivCPU import PrivCPU
 
 
 class PrivMMU(MMU):
-    cpu: 'PrivCPU'
 
-    @abstractmethod
-    def get_entrypoint(self) -> int:
-        raise
+    def get_sec_containing(self, addr: T_AbsoluteAddress) -> MemorySection:
+        # try to get an existing section
+        existing_sec = super().get_sec_containing(addr)
 
-    def set_cpu(self, cpu: 'PrivCPU'):
-        self.cpu = cpu
+        if existing_sec is not None:
+            return existing_sec
 
-    def translate_address(self, addr: int):
-        return ""
+        # get section preceding empty space at addr
+        sec_before = next((sec for sec in reversed(self.sections) if sec.end < addr), None)
+        # get sec succeeding empty space at addr
+        sec_after = next((sec for sec in self.sections if sec.base > addr), None)
 
+        # calc start end end of "free" space
+        prev_sec_end = 0 if sec_before is None else sec_before.end
+        next_sec_start = 0x7FFFFFFF if sec_after is None else sec_before.base
 
-class LoadedElfMMU(PrivMMU):
-    def __init__(self, elf: ElfExecutable):
-        super().__init__(conf=RunConfig())
-        self.entrypoint = elf.symbols['_start']
+        # start at the end of the prev section, or current address - 0xFFFF (aligned to 16 byte boundary)
+        start = max(prev_sec_end, align_addr(addr - 0xFFFF, 16))
+        # end at the start of the next section, or address + 0xFFFF (aligned to 16 byte boundary)
+        end = min(next_sec_start, align_addr(addr + 0xFFFF, 16))
 
-        self.binaries.append(elf)
-        for sec in elf.sections:
-            self.sections.append(sec)
+        sec = ElfMemorySection(bytearray(end - start), '.empty', self.global_instruction_context(), '', start, MemoryFlags(False, True))
+        self.sections.append(sec)
+        self._update_state()
 
-    def load_bin(self, exe: Executable) -> LoadedExecutable:
-        raise NotImplementedError("This is a privMMU, it's initialized with a single ElfExecutable!")
+        return sec
 
-    def allocate_section(self, name: str, req_size: int, flag: MemoryFlags):
-        raise NotImplementedError("Not supported!")
-
-    def get_entrypoint(self):
-        return self.entrypoint
+    def global_instruction_context(self) -> InstructionContext:
+        context = InstructionContext()
+        context.global_symbol_dict = self.global_symbols
+        return context

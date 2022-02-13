@@ -15,7 +15,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple, Set, Union, Iterator, Callable, Type
 
-from . import RunConfig
+from .config import RunConfig
 from .colors import FMT_MEM, FMT_NONE, FMT_UNDERLINE, FMT_ORANGE, FMT_RED, FMT_BOLD
 from .exceptions import ParseException
 from .helpers import format_bytes, get_section_base_name
@@ -81,19 +81,17 @@ class InstructionContext:
                 raise ParseException("Cannot resolve relative symbol {} without an address!".format(symbol))
 
             direction = symbol[-1]
+            values = self.numbered_labels.get(symbol[:-1], [])
             if direction == 'b':
-                return max([addr for addr in self.numbered_labels.get(symbol[:-1], []) if addr < address_at],
-                           default=None)
+                return max((addr + self.base_address for addr in values if addr < address_at), default=None)
             else:
-                return min([addr for addr in self.numbered_labels.get(symbol[:-1], []) if addr > address_at],
-                           default=None)
+                return min((addr + self.base_address for addr in values if addr > address_at), default=None)
         else:
+            # if it's not a local symbol, try the globals
             if symbol not in self.labels:
                 return self.global_symbol_dict.get(symbol, None)
-            value = self.labels.get(symbol, None)
-            if value is None:
-                return value
-            return value + self.base_address
+            # otherwise return the local symbol
+            return self.labels.get(symbol, None)
 
 
 class Instruction(ABC):
@@ -218,6 +216,7 @@ class Program:
     name: str
     context: InstructionContext
     global_labels: Set[str]
+    relative_labels: Set[str]
     sections: List[MemorySection]
     base: Optional[T_AbsoluteAddress]
     is_loaded: bool
@@ -235,6 +234,7 @@ class Program:
         self.context = InstructionContext()
         self.sections = []
         self.global_labels = set()
+        self.relative_labels = set()
         self.base = base
         self.is_loaded = False
 
@@ -285,17 +285,17 @@ class Program:
             print(FMT_MEM + 'WARNING: Program loaded at different address then expected! (loaded at {}, '
                             'but expects to be loaded at {})'.format(at_addr, self.base) + FMT_NONE)
 
-        # if the program is not located anywhere explicitly in memory, add the program address
-        # to the defined section bases
-        if self.base is None:
-            for sec in self.sections:
-                sec.base += at_addr
+        # check if we are relocating
+        if self.base != at_addr:
+            offset = at_addr if self.base is None else at_addr - self.base
 
-        if self.base is not None and self.base != at_addr:
-            # move sections so they are located where they want to be located
-            offset = at_addr - self.base
+            # move all sections by the offset
             for sec in self.sections:
                 sec.base += offset
+
+            # move all relative symbols by the offset
+            for name in self.relative_labels:
+                self.context.labels[name] += offset
 
         self.base = at_addr
         self.context.base_address = at_addr
@@ -393,9 +393,6 @@ class CPU(ABC):
         self.pc = 0
         self.debugger_active = False
 
-        self.sections = list()
-        self.programs = list()
-
     def run_instruction(self, ins: Instruction):
         """
         Execute a single instruction
@@ -446,3 +443,11 @@ class CPU(ABC):
 
     def get_best_loader_for(self, file_name: str) -> Type[ProgramLoader]:
         return max(self.get_loaders(), key=lambda ld: ld.can_parse(file_name))
+
+    @property
+    def sections(self):
+        return self.mmu.sections
+
+    @property
+    def programs(self):
+        return self.mmu.programs
