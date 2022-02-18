@@ -17,7 +17,7 @@ class MemoryImageLoader(ProgramLoader):
 
     @classmethod
     def can_parse(cls, source_path: str) -> float:
-        if source_path.split('.')[-1] == '.img':
+        if source_path.split('.')[-1] == 'img':
             return 1
         return 0
 

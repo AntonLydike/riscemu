@@ -11,6 +11,7 @@ from .CSR import CSR
 from .ElfLoader import ElfBinaryFileLoader
 from .Exceptions import *
 from .ImageLoader import MemoryImageLoader
+from .PrivMMU import PrivMMU
 from .PrivRV32I import PrivRV32I
 from .privmodes import PrivModes
 from ..instructions import RV32A, RV32M
@@ -45,7 +46,7 @@ class PrivCPU(CPU):
     """
 
     def __init__(self, conf):
-        super().__init__(MMU(), [PrivRV32I, RV32M, RV32A], conf)
+        super().__init__(PrivMMU(), [PrivRV32I, RV32M, RV32A], conf)
         # start in machine mode
         self.mode: PrivModes = PrivModes.MACHINE
 
@@ -90,10 +91,16 @@ class PrivCPU(CPU):
             print()
             print(FMT_CPU + "[CPU] System stopped without halting - perhaps you stopped the debugger?" + FMT_NONE)
 
-    def launch(self, program: Program, verbose: bool = False):
+    def launch(self, program: Optional[Program] = None, verbose: bool = False):
         print(FMT_CPU + '[CPU] Started running from 0x{:08X} ({})'.format(self.pc, "kernel") + FMT_NONE)
         self._time_start = time.perf_counter_ns() // self.TIME_RESOLUTION_NS
+
         self.run(self.conf.verbosity > 1 or verbose)
+
+    def load_program(self, program: Program):
+        if program.name == 'kernel':
+            self.pc = program.entrypoint
+        super().load_program(program)
 
     def _init_csr(self):
         # set up CSR
