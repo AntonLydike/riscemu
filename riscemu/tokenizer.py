@@ -7,10 +7,10 @@ SPDX-License-Identifier: MIT
 import re
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import List, Iterable, Optional
-from riscemu.decoder import RISCV_REGS
+from typing import List, Iterable
 
-from .exceptions import ParseException
+from riscemu.decoder import RISCV_REGS
+from riscemu.types.exceptions import ParseException
 
 LINE_COMMENT_STARTERS = ('#', ';', '//')
 WHITESPACE_PATTERN = re.compile(r'\s+')

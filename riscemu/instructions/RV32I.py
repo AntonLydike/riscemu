@@ -8,8 +8,7 @@ from .instruction_set import *
 from ..CPU import UserModeCPU
 
 from ..colors import FMT_DEBUG, FMT_NONE
-from ..debug import launch_debug_session
-from ..exceptions import LaunchDebuggerException
+from riscemu.types.exceptions import LaunchDebuggerException
 from ..syscall import Syscall
 from ..types import Instruction, Int32, UInt32
 

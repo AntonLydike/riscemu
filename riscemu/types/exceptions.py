@@ -5,11 +5,11 @@ SPDX-License-Identifier: MIT
 """
 
 from abc import abstractmethod
-from .colors import *
+from ..colors import *
 import typing
 
 if typing.TYPE_CHECKING:
-    from .types import Instruction
+    from . import Instruction
 
 
 class RiscemuBaseException(BaseException):

@@ -10,6 +10,7 @@ T_ParserOpts = Dict[str, any]
 
 NUMBER_SYMBOL_PATTERN = re.compile(r'^\d+[fb]$')
 
+# base classes
 from .flags import MemoryFlags
 from .int32 import UInt32, Int32
 from .instruction import Instruction
@@ -22,5 +23,7 @@ from .simple_instruction import SimpleInstruction
 from .instruction_memory_section import InstructionMemorySection
 from .binary_data_memory_section import BinaryDataMemorySection
 
-
-
+# exceptions
+from .exceptions import ParseException, NumberFormatException, MemoryAccessException, OutOfMemoryException, \
+    LinkerException, LaunchDebuggerException, RiscemuBaseException, InvalidRegisterException, \
+    InvalidAllocationException, InvalidSyscallException, UnimplementedInstruction

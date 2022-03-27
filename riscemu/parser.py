@@ -8,10 +8,10 @@ from typing import Dict, Tuple, Iterable, Callable, List
 
 from .assembler import MemorySectionType, ParseContext, AssemblerDirectives
 from .colors import FMT_PARSE
-from .exceptions import ParseException
 from .helpers import Peekable
 from .tokenizer import Token, TokenType, tokenize
 from .types import Program, T_ParserOpts, ProgramLoader, SimpleInstruction
+from .types.exceptions import ParseException
 
 
 def parse_instruction(token: Token, args: Tuple[str], context: ParseContext):

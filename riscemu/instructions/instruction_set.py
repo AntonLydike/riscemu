@@ -8,7 +8,7 @@ from typing import Tuple, Callable, Dict
 
 from abc import ABC
 from ..CPU import CPU
-from ..exceptions import ASSERT_LEN, ASSERT_IN
+from riscemu.types.exceptions import ASSERT_LEN, ASSERT_IN
 from ..types import Instruction, Int32, UInt32
 
 

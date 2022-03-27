@@ -14,7 +14,7 @@ from .config import RunConfig
 from .MMU import MMU
 from .colors import FMT_CPU, FMT_NONE
 from .debug import launch_debug_session
-from .exceptions import RiscemuBaseException, LaunchDebuggerException
+from .types.exceptions import RiscemuBaseException, LaunchDebuggerException
 from .syscall import SyscallInterface, get_syscall_symbols
 from .types import CPU, ProgramLoader, Int32, BinaryDataMemorySection
 from .parser import AssemblyFileLoader

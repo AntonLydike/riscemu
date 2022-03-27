@@ -7,10 +7,10 @@ SPDX-License-Identifier: MIT
 from typing import Dict, List, Optional, Union
 
 from .colors import *
-from .exceptions import InvalidAllocationException, MemoryAccessException
 from .helpers import align_addr
 from .types import Instruction, MemorySection, MemoryFlags, T_AbsoluteAddress, \
     Program, InstructionContext, Int32
+from .types.exceptions import InvalidAllocationException, MemoryAccessException
 
 
 class MMU:

@@ -1,5 +1,5 @@
 from . import MemorySection, InstructionContext, MemoryFlags, T_RelativeAddress, Instruction
-from ..exceptions import MemoryAccessException
+from ..types.exceptions import MemoryAccessException
 
 
 class BinaryDataMemorySection(MemorySection):

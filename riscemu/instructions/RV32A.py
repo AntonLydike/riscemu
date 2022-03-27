@@ -1,5 +1,5 @@
 from .instruction_set import InstructionSet, Instruction
-from ..exceptions import INS_NOT_IMPLEMENTED
+from riscemu.types.exceptions import INS_NOT_IMPLEMENTED
 from ..types import Int32, UInt32
 
 

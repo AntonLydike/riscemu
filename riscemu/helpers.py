@@ -7,8 +7,8 @@ SPDX-License-Identifier: MIT
 from math import log10, ceil
 from typing import Iterable, Iterator, TypeVar, Generic, List, Optional
 
-from .exceptions import *
-import types
+from .types.exceptions import *
+from .types import Int32, UInt32
 
 
 def align_addr(addr: int, to_bytes: int = 8) -> int:
@@ -55,10 +55,10 @@ def format_bytes(byte_arr: bytearray, fmt: str, group: int = 1, highlight: int =
         return highlight_in_list(['0x{}'.format(ch.hex()) for ch in chunks], highlight)
     if fmt == 'int':
         spc = str(ceil(log10(2 ** (group * 8 - 1))) + 1)
-        return highlight_in_list([('{:0' + spc + 'd}').format(types.Int32(ch)) for ch in chunks], highlight)
+        return highlight_in_list([('{:0' + spc + 'd}').format(Int32(ch)) for ch in chunks], highlight)
     if fmt == 'uint':
         spc = str(ceil(log10(2 ** (group * 8))))
-        return highlight_in_list([('{:0' + spc + 'd}').format(types.UInt32(ch)) for ch in chunks],
+        return highlight_in_list([('{:0' + spc + 'd}').format(UInt32(ch)) for ch in chunks],
                                  highlight)
     if fmt == 'ascii':
         return "".join(repr(chr(b))[1:-1] for b in byte_arr)
