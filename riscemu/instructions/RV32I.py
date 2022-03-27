@@ -24,11 +24,11 @@ class RV32I(InstructionSet):
 
     def instruction_lb(self, ins: 'Instruction'):
         rd, addr = self.parse_mem_ins(ins)
-        self.regs.set(rd, Int32(self.mmu.read(addr.unsigned_value, 1)))
+        self.regs.set(rd, Int32.sign_extend(self.mmu.read(addr.unsigned_value, 1), 8))
 
     def instruction_lh(self, ins: 'Instruction'):
         rd, addr = self.parse_mem_ins(ins)
-        self.regs.set(rd, Int32(self.mmu.read(addr.unsigned_value, 2)))
+        self.regs.set(rd, Int32.sign_extend(self.mmu.read(addr.unsigned_value, 2), 16))
 
     def instruction_lw(self, ins: 'Instruction'):
         rd, addr = self.parse_mem_ins(ins)
@@ -36,23 +36,23 @@ class RV32I(InstructionSet):
 
     def instruction_lbu(self, ins: 'Instruction'):
         rd, addr = self.parse_mem_ins(ins)
-        self.regs.set(rd, UInt32(self.mmu.read(addr.unsigned_value, 1)))
+        self.regs.set(rd, Int32(self.mmu.read(addr.unsigned_value, 1)))
 
     def instruction_lhu(self, ins: 'Instruction'):
         rd, addr = self.parse_mem_ins(ins)
-        self.regs.set(rd, UInt32(self.mmu.read(addr.unsigned_value, 2)))
+        self.regs.set(rd, Int32(self.mmu.read(addr.unsigned_value, 2)))
 
     def instruction_sb(self, ins: 'Instruction'):
         rd, addr = self.parse_mem_ins(ins)
-        self.mmu.write(addr.value, 1, self.regs.get(rd).to_bytes(1))
+        self.mmu.write(addr.unsigned_value, 1, self.regs.get(rd).to_bytes(1))
 
     def instruction_sh(self, ins: 'Instruction'):
         rd, addr = self.parse_mem_ins(ins)
-        self.mmu.write(addr.value, 2, self.regs.get(rd).to_bytes(2))
+        self.mmu.write(addr.unsigned_value, 2, self.regs.get(rd).to_bytes(2))
 
     def instruction_sw(self, ins: 'Instruction'):
         rd, addr = self.parse_mem_ins(ins)
-        self.mmu.write(addr.value, 4, self.regs.get(rd).to_bytes(4))
+        self.mmu.write(addr.unsigned_value, 4, self.regs.get(rd).to_bytes(4))
 
     def instruction_sll(self, ins: 'Instruction'):
         ASSERT_LEN(ins.args, 3)
@@ -140,7 +140,7 @@ class RV32I(InstructionSet):
     def instruction_lui(self, ins: 'Instruction'):
         ASSERT_LEN(ins.args, 2)
         reg = ins.get_reg(0)
-        imm = UInt32(ins.get_imm(1)) << 12
+        imm = UInt32(ins.get_imm(1) << 12)
         self.regs.set(reg, Int32(imm))
 
     def instruction_auipc(self, ins: 'Instruction'):
@@ -263,14 +263,14 @@ class RV32I(InstructionSet):
             ASSERT_LEN(ins.args, 2)
             reg = ins.get_reg(0)
             addr = ins.get_imm(1)
-        self.regs.set(reg, self.pc)
+        self.regs.set(reg, Int32(self.pc))
         self.pc = addr
 
     def instruction_jalr(self, ins: 'Instruction'):
         ASSERT_LEN(ins.args, 2)
         reg = ins.get_reg(0)
         addr = ins.get_imm(1)
-        self.regs.set(reg, self.pc)
+        self.regs.set(reg, Int32(self.pc))
         self.pc = addr
 
     def instruction_ret(self, ins: 'Instruction'):
@@ -307,13 +307,13 @@ class RV32I(InstructionSet):
         ASSERT_LEN(ins.args, 2)
         reg = ins.get_reg(0)
         immediate = ins.get_imm(1)
-        self.regs.set(reg, immediate)
+        self.regs.set(reg, Int32(immediate))
 
     def instruction_la(self, ins: 'Instruction'):
         ASSERT_LEN(ins.args, 2)
         reg = ins.get_reg(0)
         immediate = ins.get_imm(1)
-        self.regs.set(reg, immediate)
+        self.regs.set(reg, Int32(immediate))
 
     def instruction_mv(self, ins: 'Instruction'):
         ASSERT_LEN(ins.args, 2)

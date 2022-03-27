@@ -16,7 +16,8 @@ class Int32:
 
     def __init__(self, val: Union[int, c_int32, c_uint32, 'Int32', bytes, bytearray] = 0):
         if isinstance(val, (bytes, bytearray)):
-            self._val = self.__class__._type(int.from_bytes(val, 'little', signed=True))
+            signed = len(val) == 4 and self._type == c_int32
+            self._val = self.__class__._type(int.from_bytes(val, 'little', signed=signed))
         elif isinstance(val, self.__class__._type):
             self._val = val
         elif isinstance(val, (c_uint32, c_int32, Int32)):
@@ -187,7 +188,7 @@ class Int32:
         :param bytes: The length of the bytearray
         :return: A little-endian representation of the contained integer
         """
-        return bytearray(self.unsigned_value.to_bytes(bytes, 'little'))
+        return bytearray(self.unsigned_value.to_bytes(4, 'little'))[0:bytes]
 
     def signed(self) -> 'Int32':
         """
@@ -224,6 +225,25 @@ class Int32:
 
     def __hex__(self):
         return hex(self.value)
+
+    @classmethod
+    def sign_extend(cls, data: Union[bytes, bytearray, int], bits: int):
+        """
+        Create an instance of Int32 by sign extending :param:bits bits from :param:data
+        to 32 bits
+
+        :param data: The source data
+        :param bits: The number of bits in the source data
+        :return: An instance of Int32, holding the sign-extended value
+        """
+        if isinstance(data, (bytes, bytearray)):
+            data = int.from_bytes(data, 'little')
+        sign = data >> (bits - 1)
+        if sign > 1:
+            print("overflow in Int32.sext!")
+        if sign:
+            data = (data & (2 ** (bits - 1) - 1)) - 2**(bits-1)
+        return cls(data)
 
 
 class UInt32(Int32):

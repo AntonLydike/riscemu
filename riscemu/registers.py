@@ -109,7 +109,7 @@ class Registers:
         if mark_set:
             self.last_set = reg
         # check 32 bit signed bounds
-        self.vals[reg] = val
+        self.vals[reg] = val.unsigned()
         return True
 
     def get(self, reg, mark_read=True) -> 'Int32':
