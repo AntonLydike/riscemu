@@ -5,7 +5,7 @@ SPDX-License-Identifier: MIT
 
 This file holds the logic for starting the emulator from the CLI
 """
-from riscemu import RiscemuBaseException
+from riscemu import RiscemuBaseException, __copyright__, __version__
 from riscemu.CPU import UserModeCPU
 
 if __name__ == '__main__':
@@ -18,6 +18,12 @@ if __name__ == '__main__':
 
     all_ins_names = list(InstructionSetDict.keys())
 
+    if '--version' in sys.argv:
+        print("riscemu version {}\n{}\n\nAvailable ISA: {}".format(
+            __version__, __copyright__,
+            ", ".join(InstructionSetDict.keys())
+        ))
+        sys.exit()
 
     class OptionStringAction(argparse.Action):
         def __init__(self, option_strings, dest, keys=None, omit_empty=False, **kwargs):
