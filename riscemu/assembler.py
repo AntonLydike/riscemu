@@ -84,7 +84,6 @@ class ParseContext:
         base = 0
         if self.section is not None:
             base = align_addr(self.section.current_address(), alignment)
-            print("base at {}".format(base))
         self._finalize_section()
         self.section = CurrentSection(name, type, base)
 

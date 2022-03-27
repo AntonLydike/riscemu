@@ -8,7 +8,7 @@ or [riscemu.datenvorr.at](https://riscemu.datenvorr.at/index.html).
 This emulator contains:
 * RISC-V Assembly parser
 * RISC-V Assembly loader
-* Emulation for parts of the basic RISC-V instruction set
+* Emulation for most parts of the basic RISC-V instruction set and the M and A extensions
 * Naive memory emulator
 * Basic implementation of some syscalls 
 * A debugging environment
@@ -97,7 +97,6 @@ generate and make all doc files for you. Finally, you can open the docs locall b
   * RISC-V reference card: https://www.cl.cam.ac.uk/teaching/1617/ECAD+Arch/files/docs/RISCVGreenCardv8-20151013.pdf
   
 ## TODO:
- * Currently registers don't enforce 32 bit (no overflows etc)
  * Correctly handle 12 and 20 bit immediate (currently not limited to bits at all)
  * Add a cycle limit to the options and CPU to catch infinite loops
  * Move away from `print` and use `logging.logger` instead
