@@ -121,22 +121,18 @@ class PrivCPU(CPU):
         # CSR write callbacks:
 
         @self.csr.callback('halt')
-        def halt(old: int, new: int):
+        def halt(old: UInt32, new: UInt32):
             if new != 0:
-                self.exit = True
-                self.exit_code = new
-
-        @self.csr.callback('mstatus')
-        def mstatus(old: int, new: int):
-            pass
+                self.halted = True
+                self.exit_code = new.value
 
         @self.csr.callback('mtimecmp')
-        def mtimecmp(old, new):
+        def mtimecmp(old: UInt32, new: UInt32):
             self._time_timecmp = (self.csr.get('mtimecmph') << 32) + new
             self._time_interrupt_enabled = True
 
         @self.csr.callback('mtimecmph')
-        def mtimecmph(old, new):
+        def mtimecmph(old: UInt32, new: UInt32):
             self._time_timecmp = (new << 32) + self.csr.get('mtimecmp')
             self._time_interrupt_enabled = True
 
