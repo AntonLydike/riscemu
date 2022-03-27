@@ -1,7 +1,7 @@
 from typing import List
 
 from . import MemorySection, Instruction, InstructionContext, MemoryFlags, T_RelativeAddress
-from .. import MemoryAccessException
+from .exceptions import MemoryAccessException
 
 
 class InstructionMemorySection(MemorySection):
