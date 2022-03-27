@@ -28,7 +28,7 @@ copyright = '2022, Anton Lydike'
 author = 'Anton Lydike'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1.0'
+release = '2.0.0a2'
 
 # -- General configuration ---------------------------------------------------
 

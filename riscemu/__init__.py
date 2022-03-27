@@ -24,5 +24,5 @@ from .config import RunConfig
 from .parser import tokenize, parse_tokens, AssemblyFileLoader
 
 __author__ = "Anton Lydike <Anton@Lydike.com>"
-__copyright__ = "Copyright 2021 Anton Lydike"
-__version__ = '2.0.0a1'
+__copyright__ = "Copyright 2022 Anton Lydike"
+__version__ = '2.0.0a2'
