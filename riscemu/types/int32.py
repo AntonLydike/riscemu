@@ -3,6 +3,14 @@ from ctypes import c_int32, c_uint32
 
 
 class Int32:
+    """
+    This class implements 32bit signed integers (see :class:`UInt32` for unsigned integers)
+
+    It implements basically all mathematical dunder magic methods (__add__, __sub__, etc.)
+
+    You can use it just like you would any other integer, just be careful when passing it
+    to functions which actually expect an integer and not a Int32.
+    """
     _type = c_int32
     __slots__ = ('_val',)
 
@@ -158,25 +166,55 @@ class Int32:
         return self.__class__(other) ^ self
 
     @property
-    def value(self):
+    def value(self) -> int:
+        """
+        The value represented by this Integer
+        :return:
+        """
         return self._val.value
 
     def unsigned(self) -> 'UInt32':
+        """
+        Convert to an unsigned representation. See :class:Uint32
+        :return:
+        """
         return UInt32(self)
 
     def to_bytes(self, bytes: int = 4) -> bytearray:
+        """
+        Convert to a bytearray of length :param:bytes
+
+        :param bytes: The length of the bytearray
+        :return: A little-endian representation of the contained integer
+        """
         return bytearray(self.unsigned_value.to_bytes(bytes, 'little'))
 
     def signed(self) -> 'Int32':
+        """
+        Convert to a signed representation. See :class:Int32
+        :return:
+        """
         if self.__class__ == Int32:
             return self
         return Int32(self)
 
     @property
     def unsigned_value(self):
+        """
+        Return the value interpreted as an unsigned integer
+        :return:
+        """
         return c_uint32(self.value).value
 
-    def shift_right_logical(self, ammount: Union['Int32', int]):
+    def shift_right_logical(self, ammount: Union['Int32', int]) -> 'Int32':
+        """
+        This function implements logical right shifts, meaning that the sign bit is shifted as well.
+
+        This is equivalent to (self.value % 0x100000000) >> ammount
+
+        :param ammount: Number of positions to shift
+        :return: A new Int32 object representing the shifted value (keeps the signed-ness of the source)
+        """
         if isinstance(ammount, Int32):
             ammount = ammount.value
         return self.__class__((self.value % 0x100000000) >> ammount)
@@ -189,14 +227,27 @@ class Int32:
 
 
 class UInt32(Int32):
+    """
+    An unsigned version of :class:Int32.
+    """
     _type = c_uint32
 
     def unsigned(self) -> 'UInt32':
+        """
+        Return a new instance representing the same bytes, but signed
+        :return:
+        """
         return self
 
     @property
-    def unsigned_value(self):
+    def unsigned_value(self) -> int:
         return self._val.value
 
-    def shift_right_logical(self, ammount: Union['Int32', int]):
+    def shift_right_logical(self, ammount: Union['Int32', int]) -> 'UInt32':
+        """
+        see :meth:`Int32.shift_right_logical <Int32.shift_right_logical>`
+
+        :param ammount: Number of positions to shift
+        :return: A new Int32 object representing the shifted value (keeps the signed-ness of the source)
+        """
         return self >> ammount
