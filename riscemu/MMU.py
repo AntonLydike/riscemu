@@ -154,16 +154,30 @@ class MMU:
 
         bin = self.get_bin_containing(address)
         secs = set(sec.name for sec in bin.sections) if bin else []
+        elf_markers = {
+            '__global_pointer$', '_fdata', '_etext', '_gp',
+            '_bss_start', '_bss_end', '_ftext', '_edata', '_end', '_fbss'
+        }
 
         def key(x):
             name, val = x
-
-            if name in secs or val > address:
-                return float('inf')
             return address - val
 
-        name, val = min(sec.context.labels.items(), key=key, default=('.empty', None))
-        if val is None:
+        best_fit = iter(sorted(filter(lambda x: x[1] <= address, sec.context.labels.items()), key=key))
+
+        best = ('', float('inf'))
+        for name, val in best_fit:
+            if address - val < best[1]:
+                best = (name, val)
+            if address - val == best[1]:
+                if best[0] in elf_markers:
+                    best = (name, val)
+                elif best[0] in secs and name not in elf_markers:
+                    best = (name, val)
+
+        name, val = best
+
+        if not name:
             return "unknown at 0x{:0x}".format(address)
 
         return str('{}:{} at {} (0x{:0x}) + 0x{:0x}'.format(
@@ -274,6 +288,4 @@ class MMU:
         if owner:
             print("owned by: {}".format(owner[0]))
 
-
         print("{}: 0x{:0x} + 0x{:0x}".format(name, val, addr - val))
-
