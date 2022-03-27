@@ -3,17 +3,15 @@ RiscEmu (c) 2021 Anton Lydike
 
 SPDX-License-Identifier: MIT
 """
-import os
 import re
 from typing import Dict, Tuple, Iterable, Callable, List
 
-from .helpers import Peekable
 from .assembler import MemorySectionType, ParseContext, AssemblerDirectives
-from .types import Program, T_ParserOpts, ProgramLoader
 from .colors import FMT_PARSE
 from .exceptions import ParseException
+from .helpers import Peekable
 from .tokenizer import Token, TokenType, tokenize
-from .base import SimpleInstruction
+from .types import Program, T_ParserOpts, ProgramLoader, SimpleInstruction
 
 
 def parse_instruction(token: Token, args: Tuple[str], context: ParseContext):

@@ -2,12 +2,11 @@ from enum import Enum, auto
 from typing import List
 from typing import Optional, Tuple, Union
 
-from .base import BinaryDataMemorySection, InstructionMemorySection
 from .colors import FMT_PARSE, FMT_NONE
 from .exceptions import ParseException, ASSERT_LEN
 from .helpers import parse_numeric_argument, align_addr, get_section_base_name
 from .tokenizer import Token
-from .types import Program, T_RelativeAddress, InstructionContext, Instruction, UInt32, Int32
+from .types import Program, T_RelativeAddress, InstructionContext, Instruction, BinaryDataMemorySection, InstructionMemorySection
 
 INSTRUCTION_SECTION_NAMES = ('.text', '.init', '.fini')
 """

@@ -4,12 +4,11 @@ from dataclasses import dataclass
 from functools import lru_cache
 from typing import Tuple, Dict, Set
 
-from riscemu import MemoryAccessException
-from riscemu.priv.Exceptions import InstructionAccessFault, InstructionAddressMisalignedTrap, LoadAccessFault
-from riscemu.types import Instruction, InstructionContext, T_RelativeAddress, MemoryFlags, T_AbsoluteAddress
-from riscemu.base import BinaryDataMemorySection
 from riscemu.colors import FMT_NONE, FMT_PARSE
 from riscemu.decoder import format_ins, RISCV_REGS, decode
+from riscemu.priv.Exceptions import InstructionAccessFault, InstructionAddressMisalignedTrap, LoadAccessFault
+from riscemu.types import Instruction, InstructionContext, T_RelativeAddress, MemoryFlags, T_AbsoluteAddress, \
+    BinaryDataMemorySection
 
 
 @dataclass(frozen=True)

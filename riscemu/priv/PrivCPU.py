@@ -191,6 +191,7 @@ class PrivCPU(CPU):
         trap = self.pending_traps.pop()  # use the most recent trap
         if self.conf.verbosity > 0:
             print(FMT_CPU + "[CPU] taking trap {}!".format(trap) + FMT_NONE)
+            self.regs.dump_reg_a()
 
         if trap.priv != PrivModes.MACHINE:
             print(FMT_CPU + "[CPU] Trap not targeting machine mode encountered! - undefined behaviour!" + FMT_NONE)

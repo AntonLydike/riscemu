@@ -1,6 +1,5 @@
 from riscemu import RunConfig
-from riscemu.base import InstructionMemorySection, SimpleInstruction
-from riscemu.types import InstructionContext, Program
+from riscemu.types import InstructionMemorySection, SimpleInstruction, Program
 
 if __name__ == '__main__':
     from .CPU import UserModeCPU
