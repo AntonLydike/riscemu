@@ -20,7 +20,7 @@ def format_ins(ins: int, name: str, fmt: str = 'int'):
         return f"{name} <unknown op>"
 
     decoder = INSTRUCTION_ARGS_DECODER[opcode]
-    if name in ('ecall', 'ebreak'):
+    if name in ('ecall', 'ebreak', 'mret', 'sret', 'uret'):
         return name
     if opcode in (0x8, 0x0):
         r1, r2, imm = decoder(ins)
