@@ -1,8 +1,6 @@
 from riscemu import RunConfig
 from riscemu.types import Program
 from .PrivCPU import PrivCPU
-from .ElfLoader import ElfBinaryFileLoader
-from .ImageLoader import MemoryImageLoader
 
 import sys
 
@@ -19,9 +17,11 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--verbose', help="Verbosity level (can be used multiple times)", action='count',
                         default=0)
 
+    parser.add_argument('--slowdown', help="Slow down the emulated CPU clock by a factor", type=float, default=1)
+
     args = parser.parse_args()
 
-    cpu = PrivCPU(RunConfig(verbosity=args.verbose, debug_on_exception=args.debug_exceptions))
+    cpu = PrivCPU(RunConfig(verbosity=args.verbose, debug_on_exception=args.debug_exceptions, slowdown=args.slowdown))
 
     for source_path in args.source:
         loader = max((loader for loader in cpu.get_loaders()), key=lambda l: l.can_parse(source_path))

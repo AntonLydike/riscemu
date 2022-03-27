@@ -69,6 +69,8 @@ class PrivCPU(CPU):
         # init csr
         self._init_csr()
 
+        self.TIME_RESOLUTION_NS = int(self.TIME_RESOLUTION_NS * conf.slowdown)
+
     def run(self, verbose=False):
         if self.pc <= 0:
             return False

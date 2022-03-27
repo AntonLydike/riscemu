@@ -19,6 +19,7 @@ class RunConfig:
     scall_input: bool = True
     scall_fs: bool = False
     verbosity: int = 0
+    slowdown: float = 1
 
 
 CONFIG = RunConfig()
