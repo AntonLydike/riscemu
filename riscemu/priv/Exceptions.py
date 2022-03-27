@@ -7,6 +7,7 @@ import typing
 
 from .. import RiscemuBaseException
 from ..colors import FMT_PARSE, FMT_NONE
+from ..types import UInt32
 
 if typing.TYPE_CHECKING:
     from .ElfLoader import ElfInstruction
@@ -29,7 +30,7 @@ class CpuTrap(BaseException):
     The isInterrupt bit in the mstatus register
     """
 
-    mtval: int
+    mtval: UInt32
     """
     contents of the mtval register
     """
@@ -47,7 +48,7 @@ class CpuTrap(BaseException):
     def __init__(self, code: int, mtval, type: CpuTrapType, priv: PrivModes = PrivModes.MACHINE):
         self.interrupt = 0 if type == CpuTrapType.EXCEPTION else 1
         self.code = code
-        self.mtval = mtval
+        self.mtval = UInt32(mtval)
         self.priv = priv
         self.type = type
 

@@ -8,9 +8,8 @@ from typing import Tuple, Callable, Dict
 
 from abc import ABC
 from ..CPU import CPU
-from ..helpers import to_unsigned
 from ..exceptions import ASSERT_LEN, ASSERT_IN
-from ..types import Instruction
+from ..types import Instruction, Int32, UInt32
 
 
 class InstructionSet(ABC):
@@ -52,7 +51,7 @@ class InstructionSet(ABC):
             if member.startswith('instruction_'):
                 yield member[12:].replace('_', '.'), getattr(self, member)
 
-    def parse_mem_ins(self, ins: 'Instruction') -> Tuple[str, int]:
+    def parse_mem_ins(self, ins: 'Instruction') -> Tuple[str, Int32]:
         """
         parses both rd, rs, imm and rd, imm(rs) argument format and returns (rd, imm+rs1)
         (so a register and address tuple for memory instructions)
@@ -70,7 +69,7 @@ class InstructionSet(ABC):
         rd = ins.get_reg(0)
         return rd, rs + imm
 
-    def parse_rd_rs_rs(self, ins: 'Instruction', signed=True) -> Tuple[str, int, int]:
+    def parse_rd_rs_rs(self, ins: 'Instruction', signed=True) -> Tuple[str, Int32, Int32]:
         """
         Assumes the command is in <name> rd, rs1, rs2 format
         Returns the name of rd, and the values in rs1 and rs2
@@ -82,10 +81,10 @@ class InstructionSet(ABC):
                    self.get_reg_content(ins, 2)
         else:
             return ins.get_reg(0), \
-                   to_unsigned(self.get_reg_content(ins, 1)), \
-                   to_unsigned(self.get_reg_content(ins, 2))
+                   UInt32(self.get_reg_content(ins, 1)), \
+                   UInt32(self.get_reg_content(ins, 2))
 
-    def parse_rd_rs_imm(self, ins: 'Instruction', signed=True) -> Tuple[str, int, int]:
+    def parse_rd_rs_imm(self, ins: 'Instruction', signed=True) -> Tuple[str, Int32, Int32]:
         """
         Assumes the command is in <name> rd, rs, imm format
         Returns the name of rd, the value in rs and the immediate imm
@@ -93,28 +92,28 @@ class InstructionSet(ABC):
         ASSERT_LEN(ins.args, 3)
         if signed:
             return ins.get_reg(0), \
-                   self.get_reg_content(ins, 1), \
-                   ins.get_imm(2)
+                   Int32(self.get_reg_content(ins, 1)), \
+                   Int32(ins.get_imm(2))
         else:
             return ins.get_reg(0), \
-                   to_unsigned(self.get_reg_content(ins, 1)), \
-                   to_unsigned(ins.get_imm(2))
+                   UInt32(self.get_reg_content(ins, 1)), \
+                   UInt32(ins.get_imm(2))
 
-    def parse_rs_rs_imm(self, ins: 'Instruction', signed=True) -> Tuple[int, int, int]:
+    def parse_rs_rs_imm(self, ins: 'Instruction', signed=True) -> Tuple[Int32, Int32, Int32]:
         """
         Assumes the command is in <name> rs1, rs2, imm format
         Returns the values in rs1, rs2 and the immediate imm
         """
         if signed:
-            return self.get_reg_content(ins, 0), \
-                   self.get_reg_content(ins, 1), \
-                   ins.get_imm(2)
+            return Int32(self.get_reg_content(ins, 0)), \
+                   Int32(self.get_reg_content(ins, 1)), \
+                   Int32(ins.get_imm(2))
         else:
-            return to_unsigned(self.get_reg_content(ins, 0)), \
-                   to_unsigned(self.get_reg_content(ins, 1)), \
-                   to_unsigned(ins.get_imm(2))
+            return UInt32(self.get_reg_content(ins, 0)), \
+                   UInt32(self.get_reg_content(ins, 1)), \
+                   UInt32(ins.get_imm(2))
 
-    def get_reg_content(self, ins: 'Instruction', ind: int) -> int:
+    def get_reg_content(self, ins: 'Instruction', ind: int) -> Int32:
         """
         get the register name from ins and then return the register contents
         """

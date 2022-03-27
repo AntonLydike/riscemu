@@ -26,7 +26,7 @@ class MemoryImageLoader(ProgramLoader):
         return argv, {}
 
     def parse(self) -> Iterable[Program]:
-        if self.options.get('debug', False):
+        if 'debug' not in self.options:
             yield self.parse_no_debug()
             return
 
@@ -43,11 +43,11 @@ class MemoryImageLoader(ProgramLoader):
                 if program.base is None:
                     program.base = start
 
-                in_code_sec = get_section_base_name(sec_name) in INSTRUCTION_SECTION_NAMES
+                #in_code_sec = get_section_base_name(sec_name) in INSTRUCTION_SECTION_NAMES
                 program.add_section(
                     ElfMemorySection(
                         data[start:start+size], sec_name, program.context,
-                        name, start, MemoryFlags(in_code_sec, in_code_sec)
+                        name, start, MemoryFlags(False, True)
                     )
                 )
 
@@ -64,12 +64,12 @@ class MemoryImageLoader(ProgramLoader):
 
         p = Program(self.filename)
         p.add_section(ElfMemorySection(
-            bytearray(data), 'memory image contents', p.context, p.name, 0, MemoryFlags(False, True)
+            bytearray(data), '.text', p.context, p.name, 0, MemoryFlags(False, True)
         ))
         return p
 
     @classmethod
     def instantiate(cls, source_path: str, options: T_ParserOpts) -> 'ProgramLoader':
-        if os.path.exists(source_path + '.dbg'):
+        if os.path.isfile(source_path + '.dbg'):
             return MemoryImageLoader(source_path, dict(**options, debug=source_path + '.dbg'))
         return MemoryImageLoader(source_path, options)

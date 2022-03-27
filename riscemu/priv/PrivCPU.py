@@ -14,8 +14,9 @@ from .ImageLoader import MemoryImageLoader
 from .PrivMMU import PrivMMU
 from .PrivRV32I import PrivRV32I
 from .privmodes import PrivModes
+from ..IO.TextIO import TextIO
 from ..instructions import RV32A, RV32M
-from ..types import Program
+from ..types import Program, UInt32
 
 if typing.TYPE_CHECKING:
     from riscemu.instructions.instruction_set import InstructionSet
@@ -55,11 +56,15 @@ class PrivCPU(CPU):
         self.exit_code = 0
 
         self._time_start = 0
-        self._time_timecmp = 0
+        self._time_timecmp = UInt32(0)
         self._time_interrupt_enabled = False
 
         # performance counters
         self._perf_counters = list()
+
+        # add TextIO
+        io = TextIO(0xFF0000, 64)
+        self.mmu.load_section(io, True)
 
         # init csr
         self._init_csr()
@@ -105,11 +110,11 @@ class PrivCPU(CPU):
     def _init_csr(self):
         # set up CSR
         self.csr = CSR()
-        self.csr.set('mhartid', 0)  # core id
+        self.csr.set('mhartid', UInt32(0))  # core id
         # TODO: set correct value
-        self.csr.set('mimpid', 0)  # implementation id
+        self.csr.set('mimpid', UInt32(0))  # implementation id
         # set mxl to 1 (32 bit) and set bits for i and m isa
-        self.csr.set('misa', (1 << 30) + (1 << 8) + (1 << 12))  # available ISA
+        self.csr.set('misa', UInt32((1 << 30) + (1 << 8) + (1 << 12)))  # available ISA
 
         # CSR write callbacks:
 
@@ -137,11 +142,11 @@ class PrivCPU(CPU):
 
         @self.csr.virtual_register('time')
         def get_time():
-            return (time.perf_counter_ns() // self.TIME_RESOLUTION_NS - self._time_start) & (2 ** 32 - 1)
+            return UInt32(time.perf_counter_ns() // self.TIME_RESOLUTION_NS - self._time_start)
 
         @self.csr.virtual_register('timeh')
         def get_timeh():
-            return (time.perf_counter_ns() // self.TIME_RESOLUTION_NS - self._time_start) >> 32
+            return UInt32((time.perf_counter_ns() // self.TIME_RESOLUTION_NS - self._time_start) >> 32)
 
         # add minstret and mcycle counters
 
@@ -156,7 +161,7 @@ class PrivCPU(CPU):
                 self._timer_step()
             self._check_interrupt()
             ins = self.mmu.read_ins(self.pc)
-            if verbose and self.mode == PrivModes.USER:
+            if verbose and (self.mode == PrivModes.USER or self.conf.verbosity > 4):
                 print(FMT_CPU + "   Running 0x{:08X}:{} {}".format(self.pc, FMT_NONE, ins))
             self.run_instruction(ins)
             self.pc += self.INS_XLEN
@@ -168,6 +173,7 @@ class PrivCPU(CPU):
                     self.mmu.translate_address(self.pc),
                     self.pc
                 ) + FMT_NONE)
+                breakpoint()
                 if self.conf.debug_on_exception:
                     raise LaunchDebuggerException()
             self.pc += self.INS_XLEN
@@ -197,16 +203,16 @@ class PrivCPU(CPU):
 
         self.csr.set_mstatus('mpie', self.csr.get_mstatus('mie'))
         self.csr.set_mstatus('mpp', self.mode.value)
-        self.csr.set_mstatus('mie', 0)
+        self.csr.set_mstatus('mie', UInt32(0))
         self.csr.set('mcause', trap.mcause)
         self.csr.set('mepc', self.pc - self.INS_XLEN)
         self.csr.set('mtval', trap.mtval)
         self.mode = trap.priv
         mtvec = self.csr.get('mtvec')
         if mtvec & 0b11 == 0:
-            self.pc = mtvec
+            self.pc = mtvec.value
         if mtvec & 0b11 == 1:
-            self.pc = (mtvec & 0b11111111111111111111111111111100) + (trap.code * 4)
+            self.pc = ((mtvec & 0b11111111111111111111111111111100) + (trap.code * 4)).value
         self.record_perf_profile()
         if len(self._perf_counters) > 100:
             self.show_perf()

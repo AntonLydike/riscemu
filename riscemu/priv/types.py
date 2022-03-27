@@ -43,8 +43,8 @@ class ElfMemorySection(BinaryDataMemorySection):
     def __init__(self, data: bytearray, name: str, context: InstructionContext, owner: str, base: int,
                  flags: MemoryFlags):
         super().__init__(data, name, context, owner, base=base, flags=flags)
+        self.read_ins = lru_cache(maxsize=self.size // 4)(self.read_ins)
 
-    @lru_cache
     def read_ins(self, offset):
         if not self.flags.executable:
             print(FMT_PARSE + "Reading instruction from non-executable memory!" + FMT_NONE)
@@ -65,7 +65,7 @@ class ElfMemorySection(BinaryDataMemorySection):
 
 
 class MemoryImageDebugInfos:
-    VERSION = '1'
+    VERSION = '1.0.0'
     """
     Schema version
     """
@@ -99,6 +99,8 @@ class MemoryImageDebugInfos:
         self.sections = sections
         self.symbols = symbols
         self.globals = globals
+        for name in globals:
+            globals[name] = set(globals[name])
         self.base = base
 
     def serialize(self) -> str:
@@ -110,7 +112,13 @@ class MemoryImageDebugInfos:
             return "<<unserializable {}>>".format(getattr(obj, '__qualname__', '{unknown}'))
 
         return json.dumps(
-            dict(sections=self.sections, symbols=self.symbols, globals=self.globals, base=self.base),
+            dict(
+                sections=self.sections,
+                symbols=self.symbols,
+                globals=self.globals,
+                base=self.base,
+                VERSION=self.VERSION
+            ),
             default=serialize
         )
 
@@ -124,7 +132,7 @@ class MemoryImageDebugInfos:
         version: str = json_obj.pop('VERSION')
 
         # compare major version
-        if version != cls.VERSION or version.split('.')[0] != cls.VERSION.split('.')[0]:
+        if version != cls.VERSION and version.split('.')[0] != cls.VERSION.split('.')[0]:
             raise RuntimeError(
                 "Unknown MemoryImageDebugInfo version! This emulator expects version {}, debug info version {}".format(
                     cls.VERSION, version

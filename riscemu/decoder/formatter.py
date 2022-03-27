@@ -24,7 +24,7 @@ def format_ins(ins: int, name: str, fmt: str = 'int'):
         return name
     if opcode in (0x8, 0x0):
         r1, r2, imm = decoder(ins)
-        return f"{name:<7} {r1}, {imm}({r2})"
+        return f"{name:<7} {RISCV_REGS[r1]}, {imm}({RISCV_REGS[r2]})"
     elif decoder in (decode_i, decode_i_unsigned, decode_b, decode_i_shamt, decode_s):
         r1, r2, imm = decoder(ins)
         r1, r2 = RISCV_REGS[r1], RISCV_REGS[r2]

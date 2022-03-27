@@ -1,6 +1,4 @@
 from riscemu.colors import FMT_ERROR, FMT_NONE, FMT_BOLD, FMT_GREEN
-from riscemu.exceptions import ASSERT_LEN
-from riscemu.helpers import int_from_bytes
 from riscemu.instructions import InstructionSet
 from riscemu.types import Instruction, CPU
 from riscemu.decoder import RISCV_REGS

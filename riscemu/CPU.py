@@ -17,7 +17,7 @@ from .colors import FMT_CPU, FMT_NONE
 from .debug import launch_debug_session
 from .exceptions import RiscemuBaseException, LaunchDebuggerException
 from .syscall import SyscallInterface, get_syscall_symbols
-from .types import CPU, ProgramLoader
+from .types import CPU, ProgramLoader, Int32
 from .parser import AssemblyFileLoader
 
 if typing.TYPE_CHECKING:
@@ -107,7 +107,7 @@ class UserModeCPU(CPU):
         if not self.mmu.load_section(stack_sec, fixed_position=False):
             return False
 
-        self.regs.set('sp', stack_sec.base + stack_sec.size)
+        self.regs.set('sp', Int32(stack_sec.base + stack_sec.size))
         return True
 
     @classmethod

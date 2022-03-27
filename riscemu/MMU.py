@@ -4,13 +4,13 @@ RiscEmu (c) 2021 Anton Lydike
 SPDX-License-Identifier: MIT
 """
 
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 from .colors import *
 from .exceptions import InvalidAllocationException, MemoryAccessException
-from .helpers import align_addr, int_from_bytes
+from .helpers import align_addr
 from .types import Instruction, MemorySection, MemoryFlags, T_AbsoluteAddress, \
-    Program, InstructionContext
+    Program, InstructionContext, Int32
 
 
 class MMU:
@@ -85,7 +85,7 @@ class MMU:
             raise RuntimeError("No next instruction available!")
         return sec.read_ins(addr - sec.base)
 
-    def read(self, addr: int, size: int) -> bytearray:
+    def read(self, addr: Union[int, Int32], size: int) -> bytearray:
         """
         Read size bytes of memory at addr
 
@@ -93,13 +93,16 @@ class MMU:
         :param size: The number of bytes to read
         :return: The bytearray at addr
         """
+        if isinstance(addr, Int32):
+            breakpoint()
+            addr = addr.unsigned_value
         sec = self.get_sec_containing(addr)
         if sec is None:
             print(FMT_MEM + "[MMU] Trying to read data form invalid region at 0x{:x}! ".format(addr) + FMT_NONE)
             raise MemoryAccessException("region is non-initialized!", addr, size, 'read')
         return sec.read(addr - sec.base, size)
 
-    def write(self, addr: int, size: int, data):
+    def write(self, addr: int, size: int, data: bytearray):
         """
         Write bytes into memory
 
@@ -137,32 +140,51 @@ class MMU:
         print(FMT_MEM + "[MMU] Lookup for symbol {}:".format(symb) + FMT_NONE)
         if symb in self.global_symbols:
             print("   Found global symbol {}: 0x{:X}".format(symb, self.global_symbols[symb]))
-        for section in self.sections:
-            if symb in section.context.labels:
-                print("   Found local labels {}: 0x{:X} in {}".format(symb, section.context.labels[symb], section.name))
+        for bin in self.programs:
+            if symb in bin.context.labels:
+                print("   Found local labels {}: 0x{:X} in {}".format(symb, bin.context.labels[symb], bin.name))
 
-    def read_int(self, addr: int) -> int:
-        return int_from_bytes(self.read(addr, 4))
+    def read_int(self, addr: int) -> Int32:
+        return Int32(self.read(addr, 4))
 
     def translate_address(self, address: T_AbsoluteAddress) -> str:
-        # FIXME: proper implementation using the debug info
-        return str(address)
+        sec = self.get_sec_containing(address)
+        if not sec:
+            return "unknown at 0x{:0x}".format(address)
+
+        bin = self.get_bin_containing(address)
+        secs = set(sec.name for sec in bin.sections) if bin else []
+
+        def key(x):
+            name, val = x
+
+            if name in secs or val > address:
+                return float('inf')
+            return address - val
+
+        name, val = min(sec.context.labels.items(), key=key, default=('.empty', None))
+        if val is None:
+            return "unknown at 0x{:0x}".format(address)
+
+        return str('{}:{} at {} (0x{:0x}) + 0x{:0x}'.format(
+            sec.owner, sec.name, name, val, address - val
+        ))
 
     def has_continous_free_region(self, start: int, end: int) -> bool:
         # if we have no sections we are all good
         if len(self.sections) == 0:
             return True
         # if the last section is located before the start we are also good
-        if start > self.sections[-1].base + self.sections[-1].size:
+        if start >= self.sections[-1].base + self.sections[-1].size:
             return True
 
         for sec in self.sections:
             # skip all sections that end before the required start point
-            if sec.base + sec.size < start:
+            if sec.base + sec.size <= start:
                 continue
             # we now have the first section that doesn't end **before** the start point
             # if this section starts after the specified end, we are good
-            if sec.base > end:
+            if sec.base >= end:
                 return True
             # otherwise we can't continue
             return False
@@ -230,7 +252,8 @@ class MMU:
             return self.sections[-1].base + self.sections[-1].size
 
     def __repr__(self):
-        return "MMU(\n\t{}\n)".format(
+        return "{}(\n\t{}\n)".format(
+            self.__class__.__name__,
             "\n\t".join(repr(x) for x in self.programs)
         )
 
@@ -241,3 +264,16 @@ class MMU:
             return sec.context
 
         return InstructionContext()
+
+    def report_addr(self, addr: T_AbsoluteAddress):
+        sec = self.get_sec_containing(addr)
+        if not sec:
+            print("addr is in no section!")
+            return
+        owner = [b for b in self.programs if b.name == sec.owner]
+        if owner:
+            print("owned by: {}".format(owner[0]))
+
+
+        print("{}: 0x{:0x} + 0x{:0x}".format(name, val, addr - val))
+

@@ -5,8 +5,10 @@ SPDX-License-Identifier: MIT
 """
 
 from math import log10, ceil
-from .exceptions import *
 from typing import Iterable, Iterator, TypeVar, Generic, List, Optional
+
+from .exceptions import *
+import types
 
 
 def align_addr(addr: int, to_bytes: int = 8) -> int:
@@ -26,40 +28,6 @@ def parse_numeric_argument(arg: str) -> int:
         return int(arg)
     except ValueError as ex:
         raise ParseException('Invalid immediate argument \"{}\", maybe missing symbol?'.format(arg), (arg, ex))
-
-
-def int_to_bytes(val, bytes=4, unsigned=False) -> bytearray:
-    """
-    int -> byte (two's complement)
-    """
-    if unsigned and val < 0:
-        raise NumberFormatException("unsigned negative number!")
-    return bytearray(to_unsigned(val, bytes).to_bytes(bytes, 'little'))
-
-
-def int_from_bytes(bytes, unsigned=False) -> int:
-    """
-    byte -> int (two's complement)
-    """
-    num = int.from_bytes(bytes, 'little')
-
-    if unsigned:
-        return num
-
-    return to_signed(num, len(bytes))
-
-
-def to_unsigned(num: int, bytes=4) -> int:
-    if num < 0:
-        return (2 ** (bytes * 8)) + num
-    return num
-
-
-def to_signed(num: int, bytes=4) -> int:
-    if num >> (bytes * 8 - 1):
-        return num - 2 ** (8 * bytes)
-    return num
-
 
 
 def create_chunks(my_list, chunk_size):
@@ -87,10 +55,10 @@ def format_bytes(byte_arr: bytearray, fmt: str, group: int = 1, highlight: int =
         return highlight_in_list(['0x{}'.format(ch.hex()) for ch in chunks], highlight)
     if fmt == 'int':
         spc = str(ceil(log10(2 ** (group * 8 - 1))) + 1)
-        return highlight_in_list([('{:0' + spc + 'd}').format(int_from_bytes(ch)) for ch in chunks], highlight)
+        return highlight_in_list([('{:0' + spc + 'd}').format(types.Int32(ch)) for ch in chunks], highlight)
     if fmt == 'uint':
         spc = str(ceil(log10(2 ** (group * 8))))
-        return highlight_in_list([('{:0' + spc + 'd}').format(int_from_bytes(ch, unsigned=True)) for ch in chunks],
+        return highlight_in_list([('{:0' + spc + 'd}').format(types.UInt32(ch)) for ch in chunks],
                                  highlight)
     if fmt == 'ascii':
         return "".join(repr(chr(b))[1:-1] for b in byte_arr)

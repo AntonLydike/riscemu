@@ -81,12 +81,14 @@ class ElfBinaryFileLoader(ProgramLoader):
         )
 
     def _parse_symtab(self, symtab: 'SymbolTableSection'):
+        from elftools.elf.enums import ENUM_ST_VISIBILITY
+
         for sym in symtab.iter_symbols():
             if not sym.name:
                 continue
             self.program.context.labels[sym.name] = sym.entry.st_value
             # check if it has st_visibility bit set
-            if sym.entry.st_shndx == 1:  # STB_GLOBAL = 1
+            if sym.entry.st_info.bind == 'STB_GLOBAL':
                 self.program.global_labels.add(sym.name)
                 print(FMT_PARSE + "LOADED GLOBAL SYMBOL {}: {}".format(sym.name, sym.entry.st_value) + FMT_NONE)
 

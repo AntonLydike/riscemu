@@ -34,4 +34,4 @@ if __name__ == '__main__':
             for program in program_iter:
                 cpu.load_program(program)
 
-    cpu.launch()
+    cpu.launch(verbose=args.verbose > 4)

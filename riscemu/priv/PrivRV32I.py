@@ -44,7 +44,6 @@ class PrivRV32I(RV32I):
             old_val = self.cpu.csr.get(csr_addr)
             self.regs.set(rd, old_val)
 
-
     def instruction_csrrc(self, ins: 'Instruction'):
         INS_NOT_IMPLEMENTED(ins)
 
@@ -61,7 +60,6 @@ class PrivRV32I(RV32I):
         self.cpu.csr.assert_can_write(self.cpu.mode, addr)
         self.cpu.csr.set(addr, imm)
 
-
     def instruction_csrrci(self, ins: 'Instruction'):
         INS_NOT_IMPLEMENTED(ins)
 
@@ -77,10 +75,10 @@ class PrivRV32I(RV32I):
         self.cpu.mode = PrivModes(mpp)
         # restore pc
         mepc = self.cpu.csr.get('mepc')
-        self.cpu.pc = mepc - self.cpu.INS_XLEN
+        self.cpu.pc = (mepc - self.cpu.INS_XLEN).value
 
         if self.cpu.conf.verbosity > 0:
-            sec = self.mmu.get_sec_containing(mepc)
+            sec = self.mmu.get_sec_containing(mepc.value)
             if sec is not None:
                 print(FMT_CPU + "[CPU] returning to mode {} in {} (0x{:x})".format(
                     PrivModes(mpp).name,
@@ -105,32 +103,32 @@ class PrivRV32I(RV32I):
     def instruction_beq(self, ins: 'Instruction'):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins)
         if rs1 == rs2:
-            self.pc += dst - 4
+            self.pc += dst.value - 4
 
     def instruction_bne(self, ins: 'Instruction'):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins)
         if rs1 != rs2:
-            self.pc += dst - 4
+            self.pc += dst.value - 4
 
     def instruction_blt(self, ins: 'Instruction'):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins)
         if rs1 < rs2:
-            self.pc += dst - 4
+            self.pc += dst.value - 4
 
     def instruction_bge(self, ins: 'Instruction'):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins)
         if rs1 >= rs2:
-            self.pc += dst - 4
+            self.pc += dst.value - 4
 
     def instruction_bltu(self, ins: 'Instruction'):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins, signed=False)
         if rs1 < rs2:
-            self.pc += dst - 4
+            self.pc += dst.value - 4
 
     def instruction_bgeu(self, ins: 'Instruction'):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins, signed=False)
         if rs1 >= rs2:
-            self.pc += dst - 4
+            self.pc += dst.value - 4
 
     # technically deprecated
     def instruction_j(self, ins: 'Instruction'):
@@ -140,19 +138,24 @@ class PrivRV32I(RV32I):
         ASSERT_LEN(ins.args, 2)
         reg = ins.get_reg(0)
         addr = ins.get_imm(1)
-        if reg == 'ra' and self.cpu.mode == PrivModes.USER and self.cpu.conf.verbosity > 1:
-            print(FMT_CPU + 'Jumping to {} (0x{:x})'.format(
+        if reg == 'ra' and (
+                (self.cpu.mode == PrivModes.USER and self.cpu.conf.verbosity > 1) or
+                (self.cpu.conf.verbosity > 3)
+        ):
+            print(FMT_CPU + 'Jumping from 0x{:x} to {} (0x{:x})'.format(
+                self.pc,
                 self.mmu.translate_address(self.pc + addr),
                 self.pc + addr
             ) + FMT_NONE)
-        self.regs.set(reg, self.pc)
+            self.regs.dump_reg_a()
+        self.regs.set(reg, Int32(self.pc))
         self.pc += addr - 4
 
     def instruction_jalr(self, ins: 'Instruction'):
         ASSERT_LEN(ins.args, 3)
         rd, rs, imm = self.parse_rd_rs_imm(ins)
-        self.regs.set(rd, self.pc)
-        self.pc = rs + imm - 4
+        self.regs.set(rd, Int32(self.pc))
+        self.pc = rs.value + imm.value - 4
 
     def instruction_sbreak(self, ins: 'Instruction'):
         raise LaunchDebuggerException()

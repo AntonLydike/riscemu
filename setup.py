@@ -8,7 +8,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 setuptools.setup(
     name="riscemu",
     version=riscemu.__version__,
-    author="Anton Lydike",
+    author=riscemu.__author__,
     author_email="pip@antonlydike.de",
     description="RISC-V userspace and privileged emulator",
     long_description=long_description,

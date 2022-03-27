@@ -2,49 +2,49 @@ from typing import Dict, Union, Callable, Optional
 from collections import defaultdict
 from .privmodes import PrivModes
 from .Exceptions import InstructionAccessFault
-from ..helpers import to_signed
 from ..colors import FMT_CSR, FMT_NONE
 
 from .CSRConsts import CSR_NAME_TO_ADDR, MSTATUS_LEN_2, MSTATUS_OFFSETS
+from ..types import UInt32
 
 
 class CSR:
     """
     This holds all Control and Status Registers (CSR)
     """
-    regs: Dict[int, int]
+    regs: Dict[int, UInt32]
     """
     All Control and Status Registers are stored here
     """
 
-    virtual_regs: Dict[int, Callable[[], int]]
+    virtual_regs: Dict[int, Callable[[], UInt32]]
     """
     list of virtual CSR registers, with values computed on read
     """
 
-    listeners: Dict[int, Callable[[int, int], None]]
+    listeners: Dict[int, Callable[[UInt32, UInt32], None]]
 
-    mstatus_cache: Dict[str, int]
+    mstatus_cache: Dict[str, UInt32]
     mstatus_cache_dirty = True
 
     def __init__(self):
-        self.regs = defaultdict(lambda: 0)
+        self.regs = defaultdict(lambda: UInt32(0))
         self.listeners = defaultdict(lambda: (lambda x, y: None))
         self.virtual_regs = dict()
         self.mstatus_cache = dict()
         # TODO: implement write masks (bitmasks which control writeable bits in registers
 
-    def set(self, addr: Union[str, int], val: int):
+    def set(self, addr: Union[str, int], val: Union[int, UInt32]):
         addr = self._name_to_addr(addr)
         if addr is None:
             return
-        val = to_signed(val)
+        val = UInt32(val)
         self.listeners[addr](self.regs[addr], val)
         if addr == 0x300:
             self.mstatus_cache_dirty = True
         self.regs[addr] = val
 
-    def get(self, addr: Union[str, int]) -> int:
+    def get(self, addr: Union[str, int]) -> UInt32:
         addr = self._name_to_addr(addr)
         if addr is None:
             raise RuntimeError(f"Invalid CSR name: {addr}!")
@@ -52,7 +52,7 @@ class CSR:
             return self.virtual_regs[addr]()
         return self.regs[addr]
 
-    def set_listener(self, addr: Union[str, int], listener: Callable[[int, int], None]):
+    def set_listener(self, addr: Union[str, int], listener: Callable[[UInt32, UInt32], None]):
         addr = self._name_to_addr(addr)
         if addr is None:
             print("unknown csr address name: {}".format(addr))
@@ -60,7 +60,7 @@ class CSR:
         self.listeners[addr] = listener
 
     # mstatus properties
-    def set_mstatus(self, name: str, val: int):
+    def set_mstatus(self, name: str, val: UInt32):
         """
         Set mstatus bits using this helper. mstatus is a 32 bit register, holding various machine status flags
         Setting them by hand is super painful, so this helper allows you to set specific bits.
@@ -79,7 +79,7 @@ class CSR:
         new_val = erased | (val << off)
         self.set('mstatus', new_val)
 
-    def get_mstatus(self, name) -> int:
+    def get_mstatus(self, name) -> UInt32:
         if not self.mstatus_cache_dirty and name in self.mstatus_cache:
             return self.mstatus_cache[name]
 
@@ -94,7 +94,7 @@ class CSR:
         return val
 
     def callback(self, addr: Union[str, int]):
-        def inner(func: Callable[[int, int], None]):
+        def inner(func: Callable[[UInt32, UInt32], None]):
             self.set_listener(addr, func)
             return func
 
@@ -121,7 +121,7 @@ class CSR:
         if addr is None:
             print("unknown csr address name: {}".format(addr))
 
-        def inner(func: Callable[[], int]):
+        def inner(func: Callable[[], UInt32]):
             self.virtual_regs[addr] = func
             return func
 

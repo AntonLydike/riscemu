@@ -7,12 +7,11 @@ SPDX-License-Identifier: MIT
 from .instruction_set import *
 from ..CPU import UserModeCPU
 
-from ..helpers import int_from_bytes, int_to_bytes, to_unsigned, to_signed
 from ..colors import FMT_DEBUG, FMT_NONE
 from ..debug import launch_debug_session
 from ..exceptions import LaunchDebuggerException
 from ..syscall import Syscall
-from ..types import Instruction
+from ..types import Instruction, Int32, UInt32
 
 
 class RV32I(InstructionSet):
@@ -26,35 +25,35 @@ class RV32I(InstructionSet):
 
     def instruction_lb(self, ins: 'Instruction'):
         rd, addr = self.parse_mem_ins(ins)
-        self.regs.set(rd, int_from_bytes(self.mmu.read(addr, 1)))
+        self.regs.set(rd, Int32(self.mmu.read(addr.unsigned_value, 1)))
 
     def instruction_lh(self, ins: 'Instruction'):
         rd, addr = self.parse_mem_ins(ins)
-        self.regs.set(rd, int_from_bytes(self.mmu.read(addr, 2)))
+        self.regs.set(rd, Int32(self.mmu.read(addr.unsigned_value, 2)))
 
     def instruction_lw(self, ins: 'Instruction'):
         rd, addr = self.parse_mem_ins(ins)
-        self.regs.set(rd, int_from_bytes(self.mmu.read(addr, 4)))
+        self.regs.set(rd, Int32(self.mmu.read(addr.unsigned_value, 4)))
 
     def instruction_lbu(self, ins: 'Instruction'):
         rd, addr = self.parse_mem_ins(ins)
-        self.regs.set(rd, int_from_bytes(self.mmu.read(addr, 1), unsigned=True))
+        self.regs.set(rd, UInt32(self.mmu.read(addr.unsigned_value, 1)))
 
     def instruction_lhu(self, ins: 'Instruction'):
         rd, addr = self.parse_mem_ins(ins)
-        self.regs.set(rd, int_from_bytes(self.mmu.read(addr, 2), unsigned=True))
+        self.regs.set(rd, UInt32(self.mmu.read(addr.unsigned_value, 2)))
 
     def instruction_sb(self, ins: 'Instruction'):
         rd, addr = self.parse_mem_ins(ins)
-        self.mmu.write(addr, 1, int_to_bytes(self.regs.get(rd), 1))
+        self.mmu.write(addr.value, 1, self.regs.get(rd).to_bytes(1))
 
     def instruction_sh(self, ins: 'Instruction'):
         rd, addr = self.parse_mem_ins(ins)
-        self.mmu.write(addr, 2, int_to_bytes(self.regs.get(rd), 2))
+        self.mmu.write(addr.value, 2, self.regs.get(rd).to_bytes(2))
 
     def instruction_sw(self, ins: 'Instruction'):
         rd, addr = self.parse_mem_ins(ins)
-        self.mmu.write(addr, 4, int_to_bytes(self.regs.get(rd), 4))
+        self.mmu.write(addr.value, 4, self.regs.get(rd).to_bytes(4))
 
     def instruction_sll(self, ins: 'Instruction'):
         ASSERT_LEN(ins.args, 3)
@@ -63,7 +62,7 @@ class RV32I(InstructionSet):
         src2 = ins.get_reg(2)
         self.regs.set(
             dst,
-            to_signed(to_unsigned(self.regs.get(src1)) << (self.regs.get(src2) & 0b11111))
+            self.regs.get(src1) << (self.regs.get(src2) & 0b11111)
         )
 
     def instruction_slli(self, ins: 'Instruction'):
@@ -73,7 +72,7 @@ class RV32I(InstructionSet):
         imm = ins.get_imm(2)
         self.regs.set(
             dst,
-            to_signed(to_unsigned(self.regs.get(src1)) << (imm & 0b11111))
+            self.regs.get(src1) << (imm & 0b11111)
         )
 
     def instruction_srl(self, ins: 'Instruction'):
@@ -83,7 +82,7 @@ class RV32I(InstructionSet):
         src2 = ins.get_reg(2)
         self.regs.set(
             dst,
-            to_signed(to_unsigned(self.regs.get(src1)) >> (self.regs.get(src2) & 0b11111))
+            self.regs.get(src1).shift_right_logical(self.regs.get(src2) & 0b11111)
         )
 
     def instruction_srli(self, ins: 'Instruction'):
@@ -93,7 +92,7 @@ class RV32I(InstructionSet):
         imm = ins.get_imm(2)
         self.regs.set(
             dst,
-            to_signed(to_unsigned(self.regs.get(src1)) >> (imm & 0b11111))
+            self.regs.get(src1).shift_right_logical(imm & 0b11111)
         )
 
     def instruction_sra(self, ins: 'Instruction'):
@@ -142,14 +141,14 @@ class RV32I(InstructionSet):
     def instruction_lui(self, ins: 'Instruction'):
         ASSERT_LEN(ins.args, 2)
         reg = ins.get_reg(0)
-        imm = ins.get_imm(1)
-        self.regs.set(reg, imm << 12)
+        imm = UInt32(ins.get_imm(1)) << 12
+        self.regs.set(reg, Int32(imm))
 
     def instruction_auipc(self, ins: 'Instruction'):
         ASSERT_LEN(ins.args, 2)
         reg = ins.get_reg(0)
-        imm = to_unsigned(ins.get_imm(1))
-        self.regs.set(reg, self.pc + (imm << 12))
+        imm = UInt32(ins.get_imm(1) << 12)
+        self.regs.set(reg, imm.signed() + self.pc)
 
     def instruction_xor(self, ins: 'Instruction'):
         rd, rs1, rs2 = self.parse_rd_rs_rs(ins)
@@ -197,59 +196,59 @@ class RV32I(InstructionSet):
         rd, rs1, rs2 = self.parse_rd_rs_rs(ins)
         self.regs.set(
             rd,
-            int(rs1 < rs2)
+            Int32(int(rs1 < rs2))
         )
 
     def instruction_slti(self, ins: 'Instruction'):
         rd, rs1, imm = self.parse_rd_rs_imm(ins)
         self.regs.set(
             rd,
-            int(rs1 < imm)
+            Int32(int(rs1 < imm))
         )
 
     def instruction_sltu(self, ins: 'Instruction'):
         dst, rs1, rs2 = self.parse_rd_rs_rs(ins, signed=False)
         self.regs.set(
             dst,
-            int(rs1 < rs2)
+            Int32(int(rs1 < rs2))
         )
 
     def instruction_sltiu(self, ins: 'Instruction'):
         dst, rs1, imm = self.parse_rd_rs_imm(ins, signed=False)
         self.regs.set(
             dst,
-            int(rs1 < imm)
+            Int32(int(rs1 < imm))
         )
 
     def instruction_beq(self, ins: 'Instruction'):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins)
         if rs1 == rs2:
-            self.pc = dst
+            self.pc = dst.unsigned_value
 
     def instruction_bne(self, ins: 'Instruction'):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins)
         if rs1 != rs2:
-            self.pc = dst
+            self.pc = dst.unsigned_value
 
     def instruction_blt(self, ins: 'Instruction'):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins)
         if rs1 < rs2:
-            self.pc = dst
+            self.pc = dst.unsigned_value
 
     def instruction_bge(self, ins: 'Instruction'):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins)
         if rs1 >= rs2:
-            self.pc = dst
+            self.pc = dst.unsigned_value
 
     def instruction_bltu(self, ins: 'Instruction'):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins, signed=False)
         if rs1 < rs2:
-            self.pc = dst
+            self.pc = dst.unsigned_value
 
     def instruction_bgeu(self, ins: 'Instruction'):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins, signed=False)
         if rs1 >= rs2:
-            self.pc = dst
+            self.pc = dst.unsigned_value
 
     # technically deprecated
     def instruction_j(self, ins: 'Instruction'):
@@ -277,7 +276,7 @@ class RV32I(InstructionSet):
 
     def instruction_ret(self, ins: 'Instruction'):
         ASSERT_LEN(ins.args, 0)
-        self.pc = self.regs.get('ra')
+        self.pc = self.regs.get('ra').value
 
     def instruction_ecall(self, ins: 'Instruction'):
         self.instruction_scall(ins)
