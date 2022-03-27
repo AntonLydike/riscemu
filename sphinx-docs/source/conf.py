@@ -24,7 +24,7 @@ if os.getenv('READTHEDOCS', False) and not os.path.exists('riscemu.rst'):
 # -- Project information -----------------------------------------------------
 
 project = 'RiscEmu'
-copyright = '2021, Anton Lydike'
+copyright = '2022, Anton Lydike'
 author = 'Anton Lydike'
 
 # The full version, including alpha/beta/rc tags
