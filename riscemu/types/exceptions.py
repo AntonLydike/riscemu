@@ -4,13 +4,12 @@ RiscEmu (c) 2021 Anton Lydike
 SPDX-License-Identifier: MIT
 """
 
+from abc import abstractmethod
+from ..colors import *
 import typing
 
-from abc import abstractmethod
-from .colors import *
-
 if typing.TYPE_CHECKING:
-    from .Executable import LoadedInstruction
+    from . import Instruction
 
 
 class RiscemuBaseException(BaseException):
@@ -18,12 +17,15 @@ class RiscemuBaseException(BaseException):
     def message(self):
         pass
 
+    def print_stacktrace(self):
+        import traceback
+        traceback.print_exception(type(self), self, self.__traceback__)
 
 # Parsing exceptions:
 
 class ParseException(RiscemuBaseException):
     def __init__(self, msg, data=None):
-        super().__init__()
+        super().__init__(msg, data)
         self.msg = msg
         self.data = data
 
@@ -116,13 +118,15 @@ class InvalidAllocationException(RiscemuBaseException):
 
 
 class UnimplementedInstruction(RiscemuBaseException):
-    def __init__(self, ins: 'LoadedInstruction'):
+    def __init__(self, ins: 'Instruction', context = None):
         self.ins = ins
+        self.context = context
 
     def message(self):
-        return FMT_CPU + "{}({})".format(
+        return FMT_CPU + "{}({}{})".format(
             self.__class__.__name__,
-            repr(self.ins)
+            repr(self.ins),
+            ', context={}'.format(self.context) if self.context is not None else ''
         ) + FMT_NONE
 
 

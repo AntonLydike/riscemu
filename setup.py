@@ -8,7 +8,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 setuptools.setup(
     name="riscemu",
     version=riscemu.__version__,
-    author="Anton Lydike",
+    author=riscemu.__author__,
     author_email="pip@antonlydike.de",
     description="RISC-V userspace and privileged emulator",
     long_description=long_description,
@@ -23,7 +23,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     package_dir={"": "."},
-    packages=["riscemu", "riscemu.decoder", "riscemu.instructions", "riscemu.IO", "riscemu.priv"],
+    packages=["riscemu", "riscemu.decoder", "riscemu.instructions", "riscemu.IO", "riscemu.priv", "riscemu.types"],
     python_requires=">=3.6",
     install_requires=[
         "pyelftools~=0.27"

@@ -1,28 +1,27 @@
 """
-RiscEmu (c) 2021 Anton Lydike
+RiscEmu (c) 2021-2022 Anton Lydike
 
 SPDX-License-Identifier: MIT
 """
 
-from .Config import RunConfig
-from .helpers import *
 from collections import defaultdict
-from .Exceptions import InvalidRegisterException
+
+from .helpers import *
+
+if typing.TYPE_CHECKING:
+    from .types import Int32
+
 
 class Registers:
     """
     Represents a bunch of registers
     """
 
-    def __init__(self, conf: RunConfig):
-        """
-        Initialize the register configuration, respecting the RunConfig conf
-        :param conf: The RunConfig
-        """
-        self.vals = defaultdict(lambda: 0)
+    def __init__(self):
+        from .types import Int32
+        self.vals = defaultdict(lambda: Int32(0))
         self.last_set = None
         self.last_read = None
-        self.conf = conf
 
     def dump(self, full=False):
         """
@@ -86,7 +85,7 @@ class Registers:
             return FMT_GRAY + txt + FMT_NONE
         return txt
 
-    def set(self, reg, val, mark_set=True) -> bool:
+    def set(self, reg, val: 'Int32', mark_set=True) -> bool:
         """
         Set a register content to val
         :param reg: The register to set
@@ -94,9 +93,15 @@ class Registers:
         :param mark_set: If True, marks this register as "last accessed" (only used internally)
         :return: If the operation was successful
         """
+
+        from .types import Int32
+        # remove after refactoring is complete
+        if not isinstance(val, Int32):
+            raise RuntimeError("Setting register to non-Int32 value! Please refactor your code!")
+
         if reg == 'zero':
             return False
-        #if reg not in Registers.all_registers():
+        # if reg not in Registers.all_registers():
         #    raise InvalidRegisterException(reg)
         # replace fp register with s1, as these are the same register
         if reg == 'fp':
@@ -104,17 +109,17 @@ class Registers:
         if mark_set:
             self.last_set = reg
         # check 32 bit signed bounds
-        self.vals[reg] = bind_twos_complement(val)
+        self.vals[reg] = val.unsigned()
         return True
 
-    def get(self, reg, mark_read=True):
+    def get(self, reg, mark_read=True) -> 'Int32':
         """
         Retuns the contents of register reg
         :param reg: The register name
         :param mark_read: If the register should be markes as "last read" (only used internally)
         :return: The contents of register reg
         """
-        #if reg not in Registers.all_registers():
+        # if reg not in Registers.all_registers():
         #    raise InvalidRegisterException(reg)
         if reg == 'fp':
             reg = 's0'

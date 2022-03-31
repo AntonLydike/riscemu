@@ -5,7 +5,10 @@ SPDX-License-Identifier: MIT
 """
 
 from math import log10, ceil
-from .Exceptions import *
+from typing import Iterable, Iterator, TypeVar, Generic, List, Optional
+
+from .types.exceptions import *
+from .types import Int32, UInt32
 
 
 def align_addr(addr: int, to_bytes: int = 8) -> int:
@@ -25,39 +28,6 @@ def parse_numeric_argument(arg: str) -> int:
         return int(arg)
     except ValueError as ex:
         raise ParseException('Invalid immediate argument \"{}\", maybe missing symbol?'.format(arg), (arg, ex))
-
-
-def int_to_bytes(val, bytes=4, unsigned=False) -> bytearray:
-    """
-    int -> byte (two's complement)
-    """
-    if unsigned and val < 0:
-        raise NumberFormatException("unsigned negative number!")
-    return bytearray(to_unsigned(val, bytes).to_bytes(bytes, 'little'))
-
-
-def int_from_bytes(bytes, unsigned=False) -> int:
-    """
-    byte -> int (two's complement)
-    """
-    num = int.from_bytes(bytes, 'little')
-
-    if unsigned:
-        return num
-
-    return to_signed(num)
-
-
-def to_unsigned(num: int, bytes=4) -> int:
-    if num < 0:
-        return (2 ** (bytes * 8)) + num
-    return num
-
-
-def to_signed(num: int, bytes=4) -> int:
-    if num >> (bytes * 8 - 1):
-        return num - 2 ** (8 * bytes)
-    return num
 
 
 def create_chunks(my_list, chunk_size):
@@ -85,10 +55,10 @@ def format_bytes(byte_arr: bytearray, fmt: str, group: int = 1, highlight: int =
         return highlight_in_list(['0x{}'.format(ch.hex()) for ch in chunks], highlight)
     if fmt == 'int':
         spc = str(ceil(log10(2 ** (group * 8 - 1))) + 1)
-        return highlight_in_list([('{:0' + spc + 'd}').format(int_from_bytes(ch)) for ch in chunks], highlight)
+        return highlight_in_list([('{:0' + spc + 'd}').format(Int32(ch)) for ch in chunks], highlight)
     if fmt == 'uint':
         spc = str(ceil(log10(2 ** (group * 8))))
-        return highlight_in_list([('{:0' + spc + 'd}').format(int_from_bytes(ch, unsigned=True)) for ch in chunks],
+        return highlight_in_list([('{:0' + spc + 'd}').format(UInt32(ch)) for ch in chunks],
                                  highlight)
     if fmt == 'ascii':
         return "".join(repr(chr(b))[1:-1] for b in byte_arr)
@@ -105,3 +75,42 @@ def bind_twos_complement(val):
     elif val > 2147483647:
         return val - 4294967296
     return val
+
+
+T = TypeVar('T')
+
+
+class Peekable(Generic[T], Iterator[T]):
+    def __init__(self, iterable: Iterable[T]):
+        self.iterable = iter(iterable)
+        self.cache: List[T] = list()
+
+    def __iter__(self) -> Iterator[T]:
+        return self
+
+    def __next__(self) -> T:
+        if self.cache:
+            return self.cache.pop()
+        return next(self.iterable)
+
+    def peek(self) -> Optional[T]:
+        try:
+            if self.cache:
+                return self.cache[0]
+            pop = next(self.iterable)
+            self.cache.append(pop)
+            return pop
+        except StopIteration:
+            return None
+
+    def push_back(self, item: T):
+        self.cache = [item] + self.cache
+
+    def is_empty(self) -> bool:
+        return self.peek() is None
+
+
+def get_section_base_name(section_name: str) -> str:
+    if '.' not in section_name:
+        print(FMT_PARSE + f"Invalid section {section_name}, not starting with a dot!" + FMT_NONE)
+    return '.' + section_name.split('.')[1]

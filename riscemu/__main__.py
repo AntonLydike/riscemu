@@ -5,16 +5,25 @@ SPDX-License-Identifier: MIT
 
 This file holds the logic for starting the emulator from the CLI
 """
+from riscemu import RiscemuBaseException, __copyright__, __version__
+from riscemu.CPU import UserModeCPU
 
 if __name__ == '__main__':
-    from . import *
-    from .helpers import *
+    from .config import RunConfig
     from .instructions import InstructionSetDict
+    from .colors import FMT_BOLD, FMT_MAGENTA
+    from .parser import AssemblyFileLoader
     import argparse
     import sys
 
     all_ins_names = list(InstructionSetDict.keys())
 
+    if '--version' in sys.argv:
+        print("riscemu version {}\n{}\n\nAvailable ISA: {}".format(
+            __version__, __copyright__,
+            ", ".join(InstructionSetDict.keys())
+        ))
+        sys.exit()
 
     class OptionStringAction(argparse.Action):
         def __init__(self, option_strings, dest, keys=None, omit_empty=False, **kwargs):
@@ -64,6 +73,12 @@ if __name__ == '__main__':
 
     parser.add_argument('--stack_size', type=int, help='Stack size of loaded programs, defaults to 8MB', nargs='?')
 
+    parser.add_argument('-v', '--verbose', help="Verbosity level (can be used multiple times)", action='count',
+                        default=0)
+
+    parser.add_argument('--interactive', help="Launch the interactive debugger instantly instead of loading any "
+                                              "programs", action='store_true')
+
     args = parser.parse_args()
 
     # create a RunConfig from the cli args
@@ -74,7 +89,8 @@ if __name__ == '__main__':
         debug_on_exception=not args.options['fail_on_ex'],
         add_accept_imm=args.options['add_accept_imm'],
         scall_fs=args.syscall_opts['fs_access'],
-        scall_input=not args.syscall_opts['disable_input']
+        scall_input=not args.syscall_opts['disable_input'],
+        verbosity=args.verbose
     )
     for k, v in dict(cfg_dict).items():
         if v is None:
@@ -93,17 +109,21 @@ if __name__ == '__main__':
     ]
 
     try:
-        cpu = CPU(cfg, ins_to_load)
-        loaded_exe = None
-        for file in args.files:
-            tk = cpu.get_tokenizer(RiscVInput.from_file(file))
-            tk.tokenize()
-            loaded_exe = cpu.load(ExecutableParser(tk).parse())
-        # run the last loaded executable
-        cpu.run_loaded(loaded_exe)
-    except RiscemuBaseException as e:
-        print("Error while parsing: {}".format(e.message()))
-        import traceback
+        cpu = UserModeCPU(ins_to_load, cfg)
 
-        traceback.print_exception(type(e), e, e.__traceback__)
+        opts = AssemblyFileLoader.get_options(sys.argv)
+        for file in args.files:
+            loader = AssemblyFileLoader.instantiate(file, opts)
+            cpu.load_program(loader.parse())
+
+        # set up a stack
+        cpu.setup_stack(cfg.stack_size)
+
+        # launch the last loaded program
+        cpu.launch(cpu.mmu.programs[-1], verbose=cfg.verbosity > 1)
+
+    except RiscemuBaseException as e:
+        print("Error: {}".format(e.message()))
+        e.print_stacktrace()
+
         sys.exit(1)

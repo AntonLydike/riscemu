@@ -4,23 +4,19 @@ RiscEmu (c) 2021 Anton Lydike
 SPDX-License-Identifier: MIT
 """
 
+import sys
 from dataclasses import dataclass
 from typing import Dict, IO
-import sys
 
 from .helpers import *
 
-import riscemu
-
-import typing
-
 if typing.TYPE_CHECKING:
-    from . import CPU
+    from riscemu.CPU import UserModeCPU
 
 SYSCALLS = {
-    63:   'read',
-    64:   'write',
-    93:   'exit',
+    63: 'read',
+    64: 'write',
+    93: 'exit',
     1024: 'open',
     1025: 'close',
 }
@@ -35,6 +31,7 @@ OPEN_MODES = {
 }
 """All available file open modes"""
 
+
 @dataclass(frozen=True)
 class Syscall:
     """
@@ -42,7 +39,7 @@ class Syscall:
     """
     id: int
     """The syscall number (e.g. 64 - write)"""
-    cpu: 'riscemu.CPU'
+    cpu: 'UserModeCPU'
     """The CPU object that created the syscall"""
 
     @property
@@ -55,7 +52,7 @@ class Syscall:
         )
 
     def ret(self, code):
-        self.cpu.regs.set('a0', code)
+        self.cpu.regs.set('a0', Int32(code))
 
 
 def get_syscall_symbols():
@@ -94,9 +91,9 @@ class SyscallInterface:
         read syscall (63): read from file no a0, into addr a1, at most a2 bytes
         on return a0 will be the number of read bytes or -1 if an error occured
         """
-        fileno = scall.cpu.regs.get('a0')
-        addr = scall.cpu.regs.get('a1')
-        size = scall.cpu.regs.get('a2')
+        fileno = scall.cpu.regs.get('a0').unsigned_value
+        addr = scall.cpu.regs.get('a1').unsigned_value
+        size = scall.cpu.regs.get('a2').unsigned_value
         if fileno not in self.open_files:
             scall.cpu.regs.set('a0', -1)
             return
@@ -116,9 +113,9 @@ class SyscallInterface:
         write syscall (64): write a2 bytes from addr a1 into fileno a0
         on return a0 will hold the number of bytes written or -1 if an error occured
         """
-        fileno = scall.cpu.regs.get('a0')
-        addr = scall.cpu.regs.get('a1')
-        size = scall.cpu.regs.get('a2')
+        fileno = scall.cpu.regs.get('a0').unsigned_value
+        addr = scall.cpu.regs.get('a1').unsigned_value
+        size = scall.cpu.regs.get('a2').unsigned_value
         if fileno not in self.open_files:
             return scall.ret(-1)
 
@@ -145,13 +142,14 @@ class SyscallInterface:
 
         Requires running with flag scall-fs
         """
-        if not scall.cpu.conf.scall_fs:
+        # FIXME: this should be toggleable in a global setting or somethign
+        if True:
             print(FMT_SYSCALL + '[Syscall] open: opening files not supported without scall-fs flag!' + FMT_NONE)
             return scall.ret(-1)
 
-        mode = scall.cpu.regs.get('a0')
-        addr = scall.cpu.regs.get('a1')
-        size = scall.cpu.regs.get('a2')
+        mode = scall.cpu.regs.get('a0').unsigned_value
+        addr = scall.cpu.regs.get('a1').unsigned_value
+        size = scall.cpu.regs.get('a2').unsigned_value
 
         mode_st = OPEN_MODES.get(mode, )
         if mode_st == -1:
@@ -178,7 +176,7 @@ class SyscallInterface:
 
         return -1 if an error was encountered, otherwise returns 0
         """
-        fileno = scall.cpu.regs.get('a0')
+        fileno = scall.cpu.regs.get('a0').unsigned_value
         if fileno not in self.open_files:
             print(FMT_SYSCALL + '[Syscall] close: unknown fileno {}!'.format(fileno) + FMT_NONE)
             return scall.ret(-1)
@@ -192,8 +190,8 @@ class SyscallInterface:
         """
         Exit syscall. Exits the system with status code a0
         """
-        scall.cpu.exit = True
-        scall.cpu.exit_code = scall.cpu.regs.get('a0')
+        scall.cpu.halted = True
+        scall.cpu.exit_code = scall.cpu.regs.get('a0').value
 
     def __repr__(self):
         return "{}(\n\tfiles={}\n)".format(

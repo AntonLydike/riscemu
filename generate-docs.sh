@@ -6,7 +6,7 @@ echo "Generating docs!"
 
 if ! command -v 'sphinx-apidoc'; then
   source venv/bin/activate
-  pip install sphinx
+  pip install -r sphinx-docs/requirements.txt
 fi
 
 

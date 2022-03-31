@@ -4,17 +4,20 @@ RiscEmu (c) 2021 Anton Lydike
 SPDX-License-Identifier: MIT
 """
 
-from .Config import RunConfig
-from .Executable import Executable, LoadedExecutable, LoadedMemorySection, LoadedInstruction, MemoryFlags
-from .helpers import align_addr, int_from_bytes
-from .Exceptions import OutOfMemoryException, InvalidAllocationException
+from typing import Dict, List, Optional, Union
+
 from .colors import *
-from typing import Dict, List, Tuple, Optional
+from .helpers import align_addr
+from .types import Instruction, MemorySection, MemoryFlags, T_AbsoluteAddress, \
+    Program, InstructionContext, Int32
+from .types.exceptions import InvalidAllocationException, MemoryAccessException
 
 
 class MMU:
     """
-    The MemoryManagementUnit (handles loading binaries, and reading/writing data)
+    The MemoryManagementUnit. This provides a unified interface for reading/writing data from/to memory.
+
+    It also provides various translations for addresses.
     """
 
     max_size = 0xFFFFFFFF
@@ -27,19 +30,14 @@ class MMU:
     No single allocation can be bigger than 64 MB
     """
 
-    sections: List[LoadedMemorySection]
+    sections: List[MemorySection]
     """
     A list of all loaded memory sections
     """
 
-    binaries: List[LoadedExecutable]
+    programs: List[Program]
     """
-    A list of all loaded executables
-    """
-
-    last_bin: Optional[LoadedExecutable] = None
-    """
-    The last loaded executable (the next executable is inserted directly after this one)
+    A list of all loaded programs
     """
 
     global_symbols: Dict[str, int]
@@ -47,79 +45,15 @@ class MMU:
     The global symbol table
     """
 
-    last_ins_sec: Optional[LoadedMemorySection]
-
-    def __init__(self, conf: RunConfig):
+    def __init__(self):
         """
-        Create a new MMU, respecting the active RunConfiguration
-
-        :param conf: The config to respect
+        Create a new MMU
         """
-        self.sections: List[LoadedMemorySection] = list()
-        self.binaries: List[LoadedExecutable] = list()
-        self.first_free_addr: int = 0x100
-        self.conf: RunConfig = conf
-        self.global_symbols: Dict[str, int] = dict()
-        self.last_ins_sec = None
+        self.programs = list()
+        self.sections = list()
+        self.global_symbols = dict()
 
-    def load_bin(self, exe: Executable) -> LoadedExecutable:
-        """
-        Load an executable into memory
-
-        :param exe: the executable to load
-        :return: A LoadedExecutable
-        :raises OutOfMemoryException: When all memory is used
-        """
-
-        # align to 8 byte word
-        addr = align_addr(self.first_free_addr)
-
-        loaded_bin = LoadedExecutable(exe, addr, self.global_symbols)
-
-        if loaded_bin.size + addr > self.max_size:
-            raise OutOfMemoryException('load of executable')
-
-        self.binaries.append(loaded_bin)
-        self.first_free_addr = loaded_bin.base_addr + loaded_bin.size
-
-        # read sections into sec dict
-        for sec in loaded_bin.sections:
-            self.sections.append(sec)
-
-        self.global_symbols.update(loaded_bin.exported_symbols)
-
-        print(FMT_MEM + "[MMU] Successfully loaded{}: {}".format(FMT_NONE, loaded_bin))
-
-        return loaded_bin
-
-    def allocate_section(self, name: str, req_size: int, flag: MemoryFlags):
-        """
-        Used to allocate a memory region (data only). Use `load_bin` if you want to load a binary, this is used for
-        stack and maybe malloc in the future.
-
-        :param name: Name of the section to allocate
-        :param req_size: The requested size
-        :param flag: The flags protecting this memory section
-        :return: The LoadedMemorySection
-        """
-        if flag.executable:
-            raise InvalidAllocationException('cannot allocate executable section', name, req_size, flag)
-
-        if req_size < 0:
-            raise InvalidAllocationException('Invalid size request', name, req_size, flag)
-
-        if req_size > self.max_alloc_size:
-            raise InvalidAllocationException('Cannot allocate more than {} bytes at a time'.format(self.max_alloc_size),
-                                             name, req_size, flag)
-
-        base = align_addr(self.first_free_addr)
-        size = align_addr(req_size)
-        sec = LoadedMemorySection(name, base, size, bytearray(size), flag, "<runtime>")
-        self.sections.append(sec)
-        self.first_free_addr = base + size
-        return sec
-
-    def get_sec_containing(self, addr: int) -> Optional[LoadedMemorySection]:
+    def get_sec_containing(self, addr: T_AbsoluteAddress) -> Optional[MemorySection]:
         """
         Returns the section that contains the address addr
 
@@ -131,31 +65,27 @@ class MMU:
                 return sec
         return None
 
-    def get_bin_containing(self, addr: int) -> Optional[LoadedExecutable]:
-        for exe in self.binaries:
-            if exe.base_addr <= addr < exe.base_addr + exe.size:
-                return exe
+    def get_bin_containing(self, addr: T_AbsoluteAddress) -> Optional[Program]:
+        for program in self.programs:
+            if program.base <= addr < program.base + program.size:
+                return program
         return None
 
-    def read_ins(self, addr: int) -> LoadedInstruction:
+    def read_ins(self, addr: T_AbsoluteAddress) -> Instruction:
         """
         Read a single instruction located at addr
 
         :param addr: The location
         :return: The Instruction
         """
-        sec = self.last_ins_sec
-        if sec is not None and sec.base <= addr < sec.base + sec.size:
-            return sec.read_instruction(addr - sec.base)
         sec = self.get_sec_containing(addr)
-        self.last_ins_sec = sec
         if sec is None:
-            print(FMT_MEM + "[MMU] Trying to read instruction form invalid region! "
-                            "Have you forgotten an exit syscall or ret statement?" + FMT_NONE)
+            print(FMT_MEM + "[MMU] Trying to read instruction form invalid region! (read at {}) ".format(addr)
+                  + "Have you forgotten an exit syscall or ret statement?" + FMT_NONE)
             raise RuntimeError("No next instruction available!")
-        return sec.read_instruction(addr - sec.base)
+        return sec.read_ins(addr - sec.base)
 
-    def read(self, addr: int, size: int) -> bytearray:
+    def read(self, addr: Union[int, Int32], size: int) -> bytearray:
         """
         Read size bytes of memory at addr
 
@@ -163,10 +93,16 @@ class MMU:
         :param size: The number of bytes to read
         :return: The bytearray at addr
         """
+        if isinstance(addr, Int32):
+            breakpoint()
+            addr = addr.unsigned_value
         sec = self.get_sec_containing(addr)
+        if sec is None:
+            print(FMT_MEM + "[MMU] Trying to read data form invalid region at 0x{:x}! ".format(addr) + FMT_NONE)
+            raise MemoryAccessException("region is non-initialized!", addr, size, 'read')
         return sec.read(addr - sec.base, size)
 
-    def write(self, addr: int, size: int, data):
+    def write(self, addr: int, size: int, data: bytearray):
         """
         Write bytes into memory
 
@@ -176,8 +112,8 @@ class MMU:
         """
         sec = self.get_sec_containing(addr)
         if sec is None:
-            print(FMT_MEM + '[MMU] Invalid write into non-initialized section at 0x{:08X}'.format(addr) + FMT_NONE)
-            raise RuntimeError("No write pls")
+            print(FMT_MEM + '[MMU] Invalid write into non-initialized region at 0x{:08X}'.format(addr) + FMT_NONE)
+            raise MemoryAccessException("region is non-initialized!", addr, size, 'write')
 
         return sec.write(addr - sec.base, size, data)
 
@@ -195,7 +131,7 @@ class MMU:
             return
         sec.dump(addr, *args, **kwargs)
 
-    def symbol(self, symb: str):
+    def label(self, symb: str):
         """
         Look up the symbol symb in all local symbol tables (and the global one)
 
@@ -204,14 +140,152 @@ class MMU:
         print(FMT_MEM + "[MMU] Lookup for symbol {}:".format(symb) + FMT_NONE)
         if symb in self.global_symbols:
             print("   Found global symbol {}: 0x{:X}".format(symb, self.global_symbols[symb]))
-        for b in self.binaries:
-            if symb in b.symbols:
-                print("   Found local symbol {}: 0x{:X} in {}".format(symb, b.symbols[symb], b.name))
+        for bin in self.programs:
+            if symb in bin.context.labels:
+                print("   Found local labels {}: 0x{:X} in {}".format(symb, bin.context.labels[symb], bin.name))
 
-    def read_int(self, addr: int) -> int:
-        return int_from_bytes(self.read(addr, 4))
+    def read_int(self, addr: int) -> Int32:
+        return Int32(self.read(addr, 4))
+
+    def translate_address(self, address: T_AbsoluteAddress) -> str:
+        sec = self.get_sec_containing(address)
+        if not sec:
+            return "unknown at 0x{:0x}".format(address)
+
+        bin = self.get_bin_containing(address)
+        secs = set(sec.name for sec in bin.sections) if bin else []
+        elf_markers = {
+            '__global_pointer$', '_fdata', '_etext', '_gp',
+            '_bss_start', '_bss_end', '_ftext', '_edata', '_end', '_fbss'
+        }
+
+        def key(x):
+            name, val = x
+            return address - val
+
+        best_fit = iter(sorted(filter(lambda x: x[1] <= address, sec.context.labels.items()), key=key))
+
+        best = ('', float('inf'))
+        for name, val in best_fit:
+            if address - val < best[1]:
+                best = (name, val)
+            if address - val == best[1]:
+                if best[0] in elf_markers:
+                    best = (name, val)
+                elif best[0] in secs and name not in elf_markers:
+                    best = (name, val)
+
+        name, val = best
+
+        if not name:
+            return "unknown at 0x{:0x}".format(address)
+
+        return str('{}:{} at {} (0x{:0x}) + 0x{:0x}'.format(
+            sec.owner, sec.name, name, val, address - val
+        ))
+
+    def has_continous_free_region(self, start: int, end: int) -> bool:
+        # if we have no sections we are all good
+        if len(self.sections) == 0:
+            return True
+        # if the last section is located before the start we are also good
+        if start >= self.sections[-1].base + self.sections[-1].size:
+            return True
+
+        for sec in self.sections:
+            # skip all sections that end before the required start point
+            if sec.base + sec.size <= start:
+                continue
+            # we now have the first section that doesn't end **before** the start point
+            # if this section starts after the specified end, we are good
+            if sec.base >= end:
+                return True
+            # otherwise we can't continue
+            return False
+        # if all sections end before the requested start we are good
+        # technically we shouldn't ever reach this point, but better safe than sorry
+        return True
+
+    def load_program(self, program: Program, align_to: int = 4):
+        if program.base is not None:
+            if not self.has_continous_free_region(program.base, program.base + program.size):
+                print(FMT_MEM + "Cannot load program {} into desired space (0x{:0x}-0x{:0x}), area occupied.".format(
+                    program.name, program.base, program.base + program.size
+                ) + FMT_NONE)
+                raise InvalidAllocationException("Area occupied".format(
+                    program.name, program.base, program.base + program.size
+                ), program.name, program.size, MemoryFlags(False, True))
+
+            at_addr = program.base
+        else:
+            at_addr = align_addr(self.get_guaranteed_free_address(), align_to)
+
+        # trigger the load event to set all addresses in the binary
+        program.loaded_trigger(at_addr)
+
+        # add program and sections to internal state
+        self.programs.append(program)
+        self.sections += program.sections
+        self._update_state()
+
+        # load all global symbols from program
+        self.global_symbols.update(
+            {key: program.context.labels[key] for key in program.global_labels}
+        )
+        # inject reference to global symbol table into program context
+        # FIXME: this is pretty unclean and should probably be solved in a better way in the future
+        program.context.global_symbol_dict = self.global_symbols
+
+    def load_section(self, sec: MemorySection, fixed_position: bool = False) -> bool:
+        if fixed_position:
+            if self.has_continous_free_region(sec.base, sec.base + sec.size):
+                self.sections.append(sec)
+                self._update_state()
+            else:
+                print(FMT_MEM + '[MMU] Cannot place section {} at {}, space is occupied!'.format(sec, sec.base))
+                return False
+        else:
+            at_addr = align_addr(self.get_guaranteed_free_address(), 8)
+            sec.base = at_addr
+            self.sections.append(sec)
+            self._update_state()
+            return True
+
+    def _update_state(self):
+        """
+        Called whenever a section or program is added to keep the list of programs and sections consistent
+        :return:
+        """
+        self.programs.sort(key=lambda bin: bin.base)
+        self.sections.sort(key=lambda sec: sec.base)
+
+    def get_guaranteed_free_address(self) -> T_AbsoluteAddress:
+        if len(self.sections) == 0:
+            return 0x100
+        else:
+            return self.sections[-1].base + self.sections[-1].size
 
     def __repr__(self):
-        return "MMU(\n\t{}\n)".format(
-            "\n\t".join(repr(x) for x in self.sections)
+        return "{}(\n\t{}\n)".format(
+            self.__class__.__name__,
+            "\n\t".join(repr(x) for x in self.programs)
         )
+
+    def context_for(self, addr: T_AbsoluteAddress) -> InstructionContext:
+        sec = self.get_sec_containing(addr)
+
+        if sec is not None:
+            return sec.context
+
+        return InstructionContext()
+
+    def report_addr(self, addr: T_AbsoluteAddress):
+        sec = self.get_sec_containing(addr)
+        if not sec:
+            print("addr is in no section!")
+            return
+        owner = [b for b in self.programs if b.name == sec.owner]
+        if owner:
+            print("owned by: {}".format(owner[0]))
+
+        print("{}: 0x{:0x} + 0x{:0x}".format(name, val, addr - val))
