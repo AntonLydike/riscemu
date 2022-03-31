@@ -6,7 +6,8 @@ from .colors import FMT_PARSE, FMT_NONE
 from riscemu.types.exceptions import ParseException, ASSERT_LEN
 from .helpers import parse_numeric_argument, align_addr, get_section_base_name
 from .tokenizer import Token
-from .types import Program, T_RelativeAddress, InstructionContext, Instruction, BinaryDataMemorySection, InstructionMemorySection
+from .types import Program, T_RelativeAddress, InstructionContext, Instruction, BinaryDataMemorySection, \
+    InstructionMemorySection, Int32
 
 INSTRUCTION_SECTION_NAMES = ('.text', '.init', '.fini')
 """
@@ -167,13 +168,13 @@ class AssemblerDirectives:
         cls.add_bytes(size, bytearray(size), context)
 
     @classmethod
-    def add_bytes(cls, size: int, content: Union[None, int, bytearray], context: ParseContext, unsigned=False):
+    def add_bytes(cls, size: int, content: Union[None, int, bytearray], context: ParseContext):
         ASSERT_IN_SECTION_TYPE(context, MemorySectionType.Data)
 
         if content is None:
             content = bytearray(size)
         if isinstance(content, int):
-            content = bytearray(content.to_bytes(size, 'little', signed=not unsigned))
+            content = Int32(content).to_bytes(size)
 
         context.section.data += content
 
