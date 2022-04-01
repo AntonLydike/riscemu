@@ -29,7 +29,7 @@ class ProgramLoader(ABC):
 
     @classmethod
     @abstractmethod
-    def get_options(cls, argv: list[str]) -> [List[str], T_ParserOpts]:
+    def get_options(cls, argv: List[str]) -> [List[str], T_ParserOpts]:
         """
         parse command line args into an options dictionary
 

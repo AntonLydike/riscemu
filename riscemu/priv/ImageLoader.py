@@ -22,7 +22,7 @@ class MemoryImageLoader(ProgramLoader):
         return 0
 
     @classmethod
-    def get_options(cls, argv: list[str]) -> [List[str], T_ParserOpts]:
+    def get_options(cls, argv: List[str]) -> [List[str], T_ParserOpts]:
         return argv, {}
 
     def parse(self) -> Iterable[Program]:
