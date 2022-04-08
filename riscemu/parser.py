@@ -15,7 +15,9 @@ from .types.exceptions import ParseException
 
 
 def parse_instruction(token: Token, args: Tuple[str], context: ParseContext):
-    if context.section is None or context.section.type != MemorySectionType.Instructions:
+    if context.section is None:
+        context.new_section('.text', MemorySectionType.Instructions)
+    if context.section.type != MemorySectionType.Instructions:
         raise ParseException("{} {} encountered in invalid context: {}".format(token, args, context))
     ins = SimpleInstruction(token.value, args, context.context, context.section.current_address())
     context.section.data.append(ins)
