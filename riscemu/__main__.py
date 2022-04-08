@@ -121,9 +121,10 @@ if __name__ == '__main__':
 
         # launch the last loaded program
         cpu.launch(cpu.mmu.programs[-1], verbose=cfg.verbosity > 1)
+        sys.exit(cpu.exit_code)
 
     except RiscemuBaseException as e:
         print("Error: {}".format(e.message()))
         e.print_stacktrace()
 
-        sys.exit(1)
+        sys.exit(-1)

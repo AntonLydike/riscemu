@@ -1,3 +1,5 @@
+import sys
+
 from riscemu import RunConfig
 from riscemu.types import InstructionMemorySection, SimpleInstruction, Program
 
@@ -22,3 +24,5 @@ if __name__ == '__main__':
     cpu.setup_stack()
 
     cpu.launch(program)
+
+    sys.exit(cpu.exit_code)
