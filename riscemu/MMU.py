@@ -129,7 +129,7 @@ class MMU:
         if sec is None:
             print(FMT_MEM + "[MMU] No section containing addr 0x{:08X}".format(addr) + FMT_NONE)
             return
-        sec.dump(addr, *args, **kwargs)
+        sec.dump(addr - sec.base, *args, **kwargs)
 
     def label(self, symb: str):
         """
