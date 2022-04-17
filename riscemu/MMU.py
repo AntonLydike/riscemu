@@ -163,7 +163,7 @@ class MMU:
             name, val = x
             return address - val
 
-        best_fit = iter(sorted(filter(lambda x: x[1] <= address, sec.context.labels.items()), key=key))
+        best_fit = sorted(filter(lambda x: x[1] <= address, sec.context.labels.items()), key=key)
 
         best = ('', float('inf'))
         for name, val in best_fit:
@@ -178,7 +178,10 @@ class MMU:
         name, val = best
 
         if not name:
-            return "unknown at 0x{:0x}".format(address)
+            return "{}:{} + 0x{:x} (0x{:x})".format(
+                sec.owner, sec.name,
+                address - sec.base, address
+            )
 
         return str('{}:{} at {} (0x{:0x}) + 0x{:0x}'.format(
             sec.owner, sec.name, name, val, address - val
