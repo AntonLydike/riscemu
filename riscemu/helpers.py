@@ -7,8 +7,8 @@ SPDX-License-Identifier: MIT
 from math import log10, ceil
 from typing import Iterable, Iterator, TypeVar, Generic, List, Optional
 
-from .types.exceptions import *
 from .types import Int32, UInt32
+from .types.exceptions import *
 
 
 def align_addr(addr: int, to_bytes: int = 8) -> int:
@@ -23,7 +23,7 @@ def parse_numeric_argument(arg: str) -> int:
     parse hex or int strings
     """
     try:
-        if '0x' in arg or '0X' in arg:
+        if arg.lower().startswith('0x'):
             return int(arg, 16)
         return int(arg)
     except ValueError as ex:
