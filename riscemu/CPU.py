@@ -12,7 +12,7 @@ from typing import List, Type
 import riscemu
 from .config import RunConfig
 from .MMU import MMU
-from .colors import FMT_CPU, FMT_NONE
+from .colors import FMT_CPU, FMT_NONE, FMT_ERROR
 from .debug import launch_debug_session
 from .types.exceptions import RiscemuBaseException, LaunchDebuggerException
 from .syscall import SyscallInterface, get_syscall_symbols
@@ -87,7 +87,8 @@ class UserModeCPU(CPU):
         while not self.halted:
             self.step(verbose)
 
-        print(FMT_CPU + "[CPU] Program exited with code {}".format(self.exit_code) + FMT_NONE)
+        if self.conf.verbosity > 0:
+            print(FMT_CPU + "[CPU] Program exited with code {}".format(self.exit_code) + FMT_NONE)
 
     def setup_stack(self, stack_size=1024 * 4) -> bool:
         """
@@ -104,9 +105,16 @@ class UserModeCPU(CPU):
         )
 
         if not self.mmu.load_section(stack_sec, fixed_position=False):
+            print(FMT_ERROR + "[CPU] Could not insert stack section!" + FMT_NONE)
             return False
 
         self.regs.set('sp', Int32(stack_sec.base + stack_sec.size))
+
+        if self.conf.verbosity > 1:
+            print(FMT_CPU + "[CPU] Created stack of size {} at 0x{:x}".format(
+                stack_size, stack_sec.base
+            ) + FMT_NONE)
+
         return True
 
     @classmethod

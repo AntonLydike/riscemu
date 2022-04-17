@@ -4,7 +4,7 @@ from typing import List, Type, Callable, Set, Dict
 
 from ..registers import Registers
 from ..config import RunConfig
-from ..colors import FMT_RED, FMT_NONE
+from ..colors import FMT_RED, FMT_NONE, FMT_ERROR, FMT_CPU
 from . import T_AbsoluteAddress, Instruction, Program, ProgramLoader
 
 
@@ -84,9 +84,13 @@ class CPU(ABC):
 
     def launch(self, program: Program, verbose: bool = False):
         if program not in self.mmu.programs:
-            print(FMT_RED + '[CPU] Cannot launch program that\'s not loaded!' + FMT_NONE)
+            print(FMT_ERROR + '[CPU] Cannot launch program that\'s not loaded!' + FMT_NONE)
             return
-
+        if self.conf.verbosity > 0:
+            print(FMT_CPU + "[CPU] Started running from {}".format(
+                self.mmu.translate_address(program.entrypoint)
+            ) + FMT_NONE)
+            print(program)
         self.pc = program.entrypoint
         self.run(verbose)
 
