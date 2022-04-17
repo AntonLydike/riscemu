@@ -44,8 +44,8 @@ def apply_highlight(item, ind, hi_ind):
     return item
 
 
-def highlight_in_list(items, hi_ind):
-    return " ".join([apply_highlight(item, i, hi_ind) for i, item in enumerate(items)])
+def highlight_in_list(items, hi_ind, joiner=" "):
+    return joiner.join([apply_highlight(item, i, hi_ind) for i, item in enumerate(items)])
 
 
 def format_bytes(byte_arr: bytearray, fmt: str, group: int = 1, highlight: int = -1):
@@ -60,21 +60,8 @@ def format_bytes(byte_arr: bytearray, fmt: str, group: int = 1, highlight: int =
         spc = str(ceil(log10(2 ** (group * 8))))
         return highlight_in_list([('{:0' + spc + 'd}').format(UInt32(ch)) for ch in chunks],
                                  highlight)
-    if fmt == 'ascii':
-        return "".join(repr(chr(b))[1:-1] for b in byte_arr)
-
-
-def bind_twos_complement(val):
-    """
-    does over/underflows for 32 bit two's complement numbers
-    :param val:
-    :return:
-    """
-    if val < -2147483648:
-        return val + 4294967296
-    elif val > 2147483647:
-        return val - 4294967296
-    return val
+    if fmt == 'char':
+        return highlight_in_list((repr(chr(b))[1:-1] for b in byte_arr), highlight, "")
 
 
 T = TypeVar('T')

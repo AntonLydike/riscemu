@@ -2,9 +2,9 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Optional
 
-from ..colors import FMT_MEM, FMT_NONE, FMT_UNDERLINE, FMT_ORANGE
+from ..colors import FMT_MEM, FMT_NONE, FMT_UNDERLINE, FMT_ORANGE, FMT_ERROR
 from ..helpers import format_bytes
-from . import MemoryFlags, T_AbsoluteAddress, InstructionContext, T_RelativeAddress, Instruction
+from . import MemoryFlags, T_AbsoluteAddress, InstructionContext, T_RelativeAddress, Instruction, Int32
 
 
 @dataclass
@@ -32,17 +32,55 @@ class MemorySection(ABC):
     def read_ins(self, offset: T_RelativeAddress) -> Instruction:
         pass
 
-    def dump(self, start: T_RelativeAddress, end: Optional[T_RelativeAddress] = None, fmt: str = 'hex',
-             bytes_per_row: int = 16, rows: int = 10, group: int = 4):
-        if self.flags.executable:
+    def dump(self, start: T_RelativeAddress, end: Optional[T_RelativeAddress] = None, fmt: str = None,
+             bytes_per_row: int = None, rows: int = 10, group: int = None, highlight: int = None):
+        """
+        Dump the section. If no end is given, the rows around start are printed and start is highlighted.
+
+        :param start: The address to start at
+        :param end: The end of the printed space
+        :param fmt: either hex, int, char or asm
+        :param bytes_per_row: the number of bytes displayed per row
+        :param rows: the number of rows displayed
+        :param group: Group this many bytes into one when displaying
+        :param highlight: Highligh the group containing this address
+        :return:
+        """
+        if isinstance(start, Int32):
+            start = start.value
+        if isinstance(end, Int32):
+            end = end.value
+
+        if fmt is None:
+            if self.flags.executable and self.flags.read_only:
+                bytes_per_row = 4
+                fmt = 'asm'
+            else:
+                fmt = 'hex'
+
+        if fmt == 'char':
+            if bytes_per_row is None:
+                bytes_per_row = 4
+            if group is None:
+                group = 1
+
+        if group is None:
+            group = 4
+
+        if bytes_per_row is None:
             bytes_per_row = 4
-        highlight = None
+
+        if fmt not in ('asm', 'hex', 'int', 'char'):
+            print(FMT_ERROR + '[MemorySection] Unknown format {}, known formats are {}'.format(
+                fmt, ", ".join(('asm', 'hex', 'int', 'char'))
+            ) + FMT_NONE)
+
         if end is None:
-            end = min(start + (bytes_per_row * (rows // 2)), self.size - 1)
+            end = min(start + (bytes_per_row * (rows // 2)), self.size)
             highlight = start
             start = max(0, start - (bytes_per_row * (rows // 2)))
 
-        if self.flags.executable:
+        if fmt == 'asm':
             print(FMT_MEM + "{}, viewing {} instructions:".format(
                 self, (end - start) // 4
             ) + FMT_NONE)
