@@ -19,7 +19,7 @@ def parse_instruction(token: Token, args: Tuple[str], context: ParseContext):
         context.new_section('.text', MemorySectionType.Instructions)
     if context.section.type != MemorySectionType.Instructions:
         raise ParseException("{} {} encountered in invalid context: {}".format(token, args, context))
-    ins = SimpleInstruction(token.value, args, context.context, context.section.current_address())
+    ins = SimpleInstruction(token.value, args, context.context, context.current_address())
     context.section.data.append(ins)
 
 
@@ -27,11 +27,11 @@ def parse_label(token: Token, args: Tuple[str], context: ParseContext):
     name = token.value[:-1]
     if re.match(r'^\d+$', name):
         # relative label:
-        context.context.numbered_labels[name].append(context.section.current_address())
+        context.context.numbered_labels[name].append(context.current_address())
     else:
         if name in context.context.labels:
             print(FMT_PARSE + 'Warn: Symbol {} defined twice!'.format(name))
-        context.add_label(name, context.section.current_address(), is_relative=True)
+        context.add_label(name, context.current_address(), is_relative=True)
 
 
 PARSERS: Dict[TokenType, Callable[[Token, Tuple[str], ParseContext], None]] = {

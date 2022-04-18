@@ -69,6 +69,7 @@ class ParseContext:
     def _finalize_section(self):
         if self.section is None:
             return
+
         if self.section.type == MemorySectionType.Data:
             section = BinaryDataMemorySection(
                 self.section.data, self.section.name, self.context, self.program.name, self.section.base
@@ -79,12 +80,12 @@ class ParseContext:
                 self.section.data, self.section.name, self.context, self.program.name, self.section.base
             )
             self.program.add_section(section)
+
         self.section = None
 
     def new_section(self, name: str, type: MemorySectionType, alignment: int = 4):
-        base = 0
-        if self.section is not None:
-            base = align_addr(self.section.current_address(), alignment)
+        base = align_addr(self.current_address(), alignment)
+
         self._finalize_section()
         self.section = CurrentSection(name, type, base)
 
@@ -94,6 +95,11 @@ class ParseContext:
             self.program.global_labels.add(name)
         if is_relative:
             self.program.relative_labels.add(name)
+
+    def current_address(self):
+        if self.section:
+            return self.section.current_address()
+        return self.program.base if self.program.base is not None else 0
 
     def __repr__(self):
         return "{}(\n\tsetion={},\n\tprogram={}\n)".format(
@@ -123,7 +129,7 @@ class AssemblerDirectives:
         ASSERT_LEN(args, 1)
         ASSERT_IN_SECTION_TYPE(context, MemorySectionType.Data)
         align_to = parse_numeric_argument(args[0])
-        current_mod = context.section.current_address() % align_to
+        current_mod = context.current_address() % align_to
         if current_mod == 0:
             return
         context.section.data += bytearray(align_to - current_mod)
