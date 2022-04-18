@@ -45,3 +45,6 @@ Requires flag `--scall-fs` to be set to True
 * `a0`: file descriptor to close
 * `return in a0`: 0 if closed correctly or -1
 
+# Extending these syscalls
+
+You can implement your own syscall by adding its code to the `SYSCALLS` dict in the [riscemu/syscalls.py](./riscemu/syscalls.py) file, creating a mapping of a syscall code to a name, and then implementing that syscall name in the SyscallInterface class further down that same file. Each syscall method should have the same signature: `read(self, scall: Syscall)`. The `Syscall` object gives you access to the cpu, through which you can access registers and memory. You can look at the `read` or `write` syscalls for further examples. 

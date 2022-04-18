@@ -8,10 +8,9 @@ import sys
 from dataclasses import dataclass
 from typing import Dict, IO
 
-from .helpers import *
-
-if typing.TYPE_CHECKING:
-    from riscemu.CPU import UserModeCPU
+from .colors import FMT_SYSCALL, FMT_NONE
+from .types import Int32, CPU
+from .types.exceptions import InvalidSyscallException
 
 SYSCALLS = {
     63: 'read',
@@ -20,7 +19,13 @@ SYSCALLS = {
     1024: 'open',
     1025: 'close',
 }
-"""All available syscalls (mapped id->name)"""
+"""
+This dict contains a mapping for all available syscalls (code->name)
+
+If you wish to add a syscall to the built-in system, you can extend this 
+dictionary and implement a method with the same name on the SyscallInterface
+class.
+"""
 
 OPEN_MODES = {
     0: 'rb',
@@ -39,7 +44,7 @@ class Syscall:
     """
     id: int
     """The syscall number (e.g. 64 - write)"""
-    cpu: 'UserModeCPU'
+    cpu: CPU
     """The CPU object that created the syscall"""
 
     @property
@@ -95,7 +100,7 @@ class SyscallInterface:
         addr = scall.cpu.regs.get('a1').unsigned_value
         size = scall.cpu.regs.get('a2').unsigned_value
         if fileno not in self.open_files:
-            scall.cpu.regs.set('a0', -1)
+            scall.ret(-1)
             return
 
         chars = self.open_files[fileno].readline(size)
@@ -142,7 +147,7 @@ class SyscallInterface:
 
         Requires running with flag scall-fs
         """
-        # FIXME: this should be toggleable in a global setting or somethign
+        # FIXME: this should be toggleable in a global setting or something
         if True:
             print(FMT_SYSCALL + '[Syscall] open: opening files not supported without scall-fs flag!' + FMT_NONE)
             return scall.ret(-1)
