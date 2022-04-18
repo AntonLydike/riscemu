@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.0.3 - 2022-04-18
+
+ - Syscalls: cleaned up formatting and added instructions for extensions
+ - Parser: fixed error when labels where used outside of sections
+ - Cleaned up and improved memory dumping code
+ - Fixed a bug with hex literal recognition in instruction parse code
+ - Fixed bug where wrong parts of section would be printed in mmu.dump()
+ - Removed tests for bind_twos_complement as the function is now redundant with the introduction of Int32
+ - Fixed address translation error for sections without symbols
+ - Changed verbosity level at which start and end of CPU are printed, added prints for start and stack loading 
+
 ## 2.0.2
 
  - Added implicit declaration of .text section when a file starts with assembly instructions without declaring a section first
