@@ -78,7 +78,7 @@ class InstructionSet(ABC):
         if signed:
             return ins.get_reg(0), \
                    Int32(self.get_reg_content(ins, 1)), \
-                   Int32(ins.get_imm(2))
+                   Int32(self.get_reg_content(ins, 2))
         else:
             return ins.get_reg(0), \
                    UInt32(self.get_reg_content(ins, 1)), \
