@@ -67,6 +67,7 @@ jobs:
         run: |
           mkdir content
           cp riscemu/docs/* content -r
+          cp riscemu/examples content -r
           
           rm -rf pyodide/pyodide
           mkdir pyodide/pyodide
