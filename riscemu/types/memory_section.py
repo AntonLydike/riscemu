@@ -43,7 +43,7 @@ class MemorySection(ABC):
         :param bytes_per_row: the number of bytes displayed per row
         :param rows: the number of rows displayed
         :param group: Group this many bytes into one when displaying
-        :param highlight: Highligh the group containing this address
+        :param highlight: Highlight the group containing this address
         :return:
         """
         if isinstance(start, Int32):
