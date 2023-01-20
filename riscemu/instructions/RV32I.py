@@ -295,9 +295,9 @@ class RV32I(InstructionSet):
 
     def instruction_sbreak(self, ins: 'Instruction'):
         ASSERT_LEN(ins.args, 0)
-
-        print(FMT_DEBUG + "Debug instruction encountered at 0x{:08X}".format(self.pc - 1) + FMT_NONE)
-        raise LaunchDebuggerException()
+        if self.cpu.conf.debug_instruction:
+            print(FMT_DEBUG + "Debug instruction encountered at 0x{:08X}".format(self.pc - 1) + FMT_NONE)
+            raise LaunchDebuggerException()
 
     def instruction_nop(self, ins: 'Instruction'):
         ASSERT_LEN(ins.args, 0)
