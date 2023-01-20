@@ -31,6 +31,8 @@ Hello world
 Program exited with code 0
 ```
 
+If you want to run it from a python script, here is [an online demo](https://AntonLydike.github.io/riscemu/lab/index.html?path=PythonDemo.ipynb).
+
 The [`read` syscall](docs/syscalls.md) defaults to readline behaviour. Reading "true chunks" (ignoring newlines) is currently not supported.  
 
 See the docs on [asembly](docs/assembly.md) for more detail on how to write assembly code for this emulator.
