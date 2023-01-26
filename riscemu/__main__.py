@@ -57,12 +57,19 @@ if __name__ == '__main__':
             setattr(namespace, self.dest, d)
 
 
-    parser = argparse.ArgumentParser(description='RISC-V Userspace parser and emulator', prog='riscemu')
+    parser = argparse.ArgumentParser(description='RISC-V Userspace parser and emulator', prog='riscemu',
+                                     formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('files', metavar='file.asm', type=str, nargs='+',
                         help='The assembly files to load, the last one will be run')
 
     parser.add_argument('--options', '-o', action=OptionStringAction,
-                        keys=('disable_debug', 'no_syscall_symbols', 'fail_on_ex', 'add_accept_imm'))
+                        keys=('disable_debug', 'no_syscall_symbols', 'fail_on_ex', 'add_accept_imm', 'unlimited_regs'),
+                        help="""Toggle options. Available options are:
+disable_debug:        Disable ebreak instructions
+no_syscall_symbols:   Don't add symbols for SCALL_EXIT and others
+fail_on_ex:           If set, exceptions won't trigger the debugger
+add_accept_imm:       Accept "add rd, rs, imm" instruction (instead of addi)
+unlimited_regs:       Allow an unlimited number of registers""")
 
     parser.add_argument('--syscall-opts', '-so', action=OptionStringAction,
                         keys=('fs_access', 'disable_input'))
@@ -88,6 +95,7 @@ if __name__ == '__main__':
         include_scall_symbols=not args.options['no_syscall_symbols'],
         debug_on_exception=not args.options['fail_on_ex'],
         add_accept_imm=args.options['add_accept_imm'],
+        unlimited_registers=args.options['unlimited_regs'],
         scall_fs=args.syscall_opts['fs_access'],
         scall_input=not args.syscall_opts['disable_input'],
         verbosity=args.verbose

@@ -17,11 +17,22 @@ class Registers:
     Represents a bunch of registers
     """
 
-    def __init__(self):
+    valid_regs = {
+        'zero', 'ra', 'sp', 'gp', 'tp', 's0', 'fp',
+        't0', 't1', 't2', 't3', 't4', 't5', 't6',
+        's1', 's2', 's3', 's4', 's5', 's6', 's7', 's8', 's9', 's10', 's11',
+        'a0', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7',
+        'ft0', 'ft1', 'ft2', 'ft3', 'ft4', 'ft5', 'ft6', 'ft7',
+        'fs0', 'fs1', 'fs2', 'fs3', 'fs4', 'fs5', 'fs6', 'fs7', 'fs8', 'fs9', 'fs10', 'fs11',
+        'fa0', 'fa1', 'fa2', 'fa3', 'fa4', 'fa5', 'fa6', 'fa7'
+    }
+
+    def __init__(self, infinite_regs: bool = False):
         from .types import Int32
         self.vals = defaultdict(lambda: Int32(0))
         self.last_set = None
         self.last_read = None
+        self.infinite_regs = infinite_regs
 
     def dump(self, full=False):
         """
@@ -108,7 +119,10 @@ class Registers:
             reg = 's1'
         if mark_set:
             self.last_set = reg
-        # check 32 bit signed bounds
+
+        if not self.infinite_regs and reg not in self.valid_regs:
+            raise RuntimeError("Invalid register: {}".format(reg))
+
         self.vals[reg] = val.unsigned()
         return True
 
@@ -123,6 +137,10 @@ class Registers:
         #    raise InvalidRegisterException(reg)
         if reg == 'fp':
             reg = 's0'
+
+        if not self.infinite_regs and reg not in self.valid_regs:
+            raise RuntimeError("Invalid register: {}".format(reg))
+
         if mark_read:
             self.last_read = reg
         return self.vals[reg]

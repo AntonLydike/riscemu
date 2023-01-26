@@ -20,6 +20,7 @@ class RunConfig:
     scall_fs: bool = False
     verbosity: int = 0
     slowdown: float = 1
+    unlimited_registers: bool = False
 
 
 CONFIG = RunConfig()

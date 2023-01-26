@@ -31,7 +31,7 @@ class CPU(ABC):
 
     def __init__(self, mmu: 'MMU', instruction_sets: List[Type['InstructionSet']], conf: RunConfig):
         self.mmu = mmu
-        self.regs = Registers()
+        self.regs = Registers(conf.unlimited_registers)
         self.conf = conf
 
         self.instruction_sets = set()
