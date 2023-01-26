@@ -25,4 +25,4 @@ from .parser import tokenize, parse_tokens, AssemblyFileLoader
 
 __author__ = "Anton Lydike <Anton@Lydike.com>"
 __copyright__ = "Copyright 2022 Anton Lydike"
-__version__ = '2.0.3'
+__version__ = '2.0.4'
