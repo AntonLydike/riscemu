@@ -10,7 +10,8 @@ from .instruction_set import InstructionSet, Instruction
 from .RV32M import RV32M
 from .RV32I import RV32I
 from .RV32A import RV32A
+from .RV_Debug import RV_Debug
 
 InstructionSetDict = {
-    v.__name__: v for v in [RV32I, RV32M, RV32A]
+    v.__name__: v for v in [RV32I, RV32M, RV32A, RV_Debug]
 }
