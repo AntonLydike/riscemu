@@ -129,6 +129,13 @@ unlimited_regs:       Allow an unlimited number of registers""",
         action="store_true",
     )
 
+    parser.add_argument(
+        "--ignore-exit-code",
+        help="Ignore exit code of the program and always return 0 if the program ran to completion.",
+        action="store_true",
+        default=False
+    )
+
     args = parser.parse_args()
 
     # create a RunConfig from the cli args
@@ -170,7 +177,7 @@ unlimited_regs:       Allow an unlimited number of registers""",
 
         # launch the last loaded program
         cpu.launch(cpu.mmu.programs[-1], verbose=cfg.verbosity > 1)
-        sys.exit(cpu.exit_code)
+        sys.exit(cpu.exit_code if not args.ignore_exit_code else 0)
 
     except RiscemuBaseException as e:
         print("Error: {}".format(e.message()))

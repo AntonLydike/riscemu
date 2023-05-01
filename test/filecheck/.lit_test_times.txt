@@ -1,1 +1,2 @@
-8.836818e-02 hello-world.asm
+8.096814e-02 hello-world.asm
+9.465098e-02 fibs.asm
