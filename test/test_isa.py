@@ -38,36 +38,44 @@ def get_arg_from_ins(ins: Instruction, num: int, cpu: CPU):
 
 
 assert_ops = {
-    '==': assert_equals,
-    '!=': _not(assert_equals),
-    'in': assert_in,
-    'not_in': _not(assert_in),
+    "==": assert_equals,
+    "!=": _not(assert_equals),
+    "in": assert_in,
+    "not_in": _not(assert_in),
 }
 
 
 class Z_test(InstructionSet):
-    def __init__(self, cpu: 'CPU'):
-        print('[Test] loading testing ISA, this is only meant for running testcases and is not part of the RISC-V ISA!')
+    def __init__(self, cpu: "CPU"):
+        print(
+            "[Test] loading testing ISA, this is only meant for running testcases and is not part of the RISC-V ISA!"
+        )
         self.failed = False
         super().__init__(cpu)
 
     def instruction_assert(self, ins: Instruction):
         if len(ins.args) < 3:
-            print(FMT_ERROR + '[Test] Unknown assert statement: {}'.format(ins) + FMT_NONE)
+            print(
+                FMT_ERROR + "[Test] Unknown assert statement: {}".format(ins) + FMT_NONE
+            )
             return
         op = ins.args[1]
         if op not in assert_ops:
-            print(FMT_ERROR + '[Test] Unknown operation statement: {} in {}'.format(op, ins) + FMT_NONE)
+            print(
+                FMT_ERROR
+                + "[Test] Unknown operation statement: {} in {}".format(op, ins)
+                + FMT_NONE
+            )
             return
 
         if assert_ops[op](ins, self.cpu):
-            print(FMT_SUCCESS + '[TestCase] 🟢 passed assertion {}'.format(ins))
+            print(FMT_SUCCESS + "[TestCase] 🟢 passed assertion {}".format(ins))
         else:
-            print(FMT_ERROR + '[TestCase] 🔴 failed assertion {}'.format(ins))
+            print(FMT_ERROR + "[TestCase] 🔴 failed assertion {}".format(ins))
             self.cpu.halted = True
             self.failed = True
 
     def instruction_fail(self, ins: Instruction):
-            print(FMT_ERROR + '[TestCase] 🔴 reached fail instruction! {}'.format(ins))
-            self.cpu.halted = True
-            self.failed = True
+        print(FMT_ERROR + "[TestCase] 🔴 reached fail instruction! {}".format(ins))
+        self.cpu.halted = True
+        self.failed = True

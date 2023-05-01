@@ -1,4 +1,4 @@
-if __name__ == '__main__':
+if __name__ == "__main__":
     import code
     import readline
     import rlcompleter
@@ -14,4 +14,6 @@ if __name__ == '__main__':
     readline.set_completer(rlcompleter.Completer(sess_vars).complete)
     readline.set_completer(rlcompleter.Completer(sess_vars).complete)
     readline.parse_and_bind("tab: complete")
-    code.InteractiveConsole(sess_vars).interact(banner="Interaktive decoding session started...", exitmsg="Closing...")
+    code.InteractiveConsole(sess_vars).interact(
+        banner="Interaktive decoding session started...", exitmsg="Closing..."
+    )

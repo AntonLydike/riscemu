@@ -8,7 +8,7 @@ T_AbsoluteAddress = int
 # parser options are just dictionaries with arbitrary values
 T_ParserOpts = Dict[str, any]
 
-NUMBER_SYMBOL_PATTERN = re.compile(r'^\d+[fb]$')
+NUMBER_SYMBOL_PATTERN = re.compile(r"^\d+[fb]$")
 
 # base classes
 from .flags import MemoryFlags
@@ -24,6 +24,16 @@ from .instruction_memory_section import InstructionMemorySection
 from .binary_data_memory_section import BinaryDataMemorySection
 
 # exceptions
-from .exceptions import ParseException, NumberFormatException, MemoryAccessException, OutOfMemoryException, \
-    LinkerException, LaunchDebuggerException, RiscemuBaseException, InvalidRegisterException, \
-    InvalidAllocationException, InvalidSyscallException, UnimplementedInstruction
+from .exceptions import (
+    ParseException,
+    NumberFormatException,
+    MemoryAccessException,
+    OutOfMemoryException,
+    LinkerException,
+    LaunchDebuggerException,
+    RiscemuBaseException,
+    InvalidRegisterException,
+    InvalidAllocationException,
+    InvalidSyscallException,
+    UnimplementedInstruction,
+)

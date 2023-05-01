@@ -16,28 +16,32 @@ from .types.exceptions import ParseException
 
 def parse_instruction(token: Token, args: Tuple[str], context: ParseContext):
     if context.section is None:
-        context.new_section('.text', MemorySectionType.Instructions)
+        context.new_section(".text", MemorySectionType.Instructions)
     if context.section.type != MemorySectionType.Instructions:
-        raise ParseException("{} {} encountered in invalid context: {}".format(token, args, context))
-    ins = SimpleInstruction(token.value, args, context.context, context.current_address())
+        raise ParseException(
+            "{} {} encountered in invalid context: {}".format(token, args, context)
+        )
+    ins = SimpleInstruction(
+        token.value, args, context.context, context.current_address()
+    )
     context.section.data.append(ins)
 
 
 def parse_label(token: Token, args: Tuple[str], context: ParseContext):
     name = token.value[:-1]
-    if re.match(r'^\d+$', name):
+    if re.match(r"^\d+$", name):
         # relative label:
         context.context.numbered_labels[name].append(context.current_address())
     else:
         if name in context.context.labels:
-            print(FMT_PARSE + 'Warn: Symbol {} defined twice!'.format(name))
+            print(FMT_PARSE + "Warn: Symbol {} defined twice!".format(name))
         context.add_label(name, context.current_address(), is_relative=True)
 
 
 PARSERS: Dict[TokenType, Callable[[Token, Tuple[str], ParseContext], None]] = {
     TokenType.PSEUDO_OP: AssemblerDirectives.handle_instruction,
     TokenType.LABEL: parse_label,
-    TokenType.INSTRUCTION_NAME: parse_instruction
+    TokenType.INSTRUCTION_NAME: parse_instruction,
 }
 
 
@@ -58,7 +62,9 @@ def parse_tokens(name: str, tokens_iter: Iterable[Token]) -> Program:
     return context.finalize()
 
 
-def composite_tokenizer(tokens_iter: Iterable[Token]) -> Iterable[Tuple[Token, Tuple[str]]]:
+def composite_tokenizer(
+    tokens_iter: Iterable[Token],
+) -> Iterable[Tuple[Token, Tuple[str]]]:
     """
     Convert an iterator over tokens into an iterator over tuples: (token, list(token))
 
@@ -71,7 +77,11 @@ def composite_tokenizer(tokens_iter: Iterable[Token]) -> Iterable[Tuple[Token, T
 
     while not tokens.is_empty():
         token = next(tokens)
-        if token.type in (TokenType.PSEUDO_OP, TokenType.LABEL, TokenType.INSTRUCTION_NAME):
+        if token.type in (
+            TokenType.PSEUDO_OP,
+            TokenType.LABEL,
+            TokenType.INSTRUCTION_NAME,
+        ):
             yield token, tuple(take_arguments(tokens))
 
 
@@ -106,8 +116,9 @@ class AssemblyFileLoader(ProgramLoader):
 
     The AssemblyFileLoader loads .asm, .S and .s files by default, and acts as a weak fallback to all other filetypes.
     """
+
     def parse(self) -> Program:
-        with open(self.source_path, 'r') as f:
+        with open(self.source_path, "r") as f:
             return parse_tokens(self.filename, tokenize(f))
 
     def parse_io(self, io):
@@ -123,7 +134,7 @@ class AssemblyFileLoader(ProgramLoader):
         :return:
         """
         # gcc recognizes these line endings as assembly. So we will do too.
-        if source_path.split('.')[-1] in ('asm', 'S', 's'):
+        if source_path.split(".")[-1] in ("asm", "S", "s"):
             return 1
         return 0.01
 

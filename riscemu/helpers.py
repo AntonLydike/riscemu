@@ -25,16 +25,19 @@ def parse_numeric_argument(arg: str) -> int:
     parse hex or int strings
     """
     try:
-        if arg.lower().startswith('0x'):
+        if arg.lower().startswith("0x"):
             return int(arg, 16)
         return int(arg)
     except ValueError as ex:
-        raise ParseException('Invalid immediate argument \"{}\", maybe missing symbol?'.format(arg), (arg, ex))
+        raise ParseException(
+            'Invalid immediate argument "{}", maybe missing symbol?'.format(arg),
+            (arg, ex),
+        )
 
 
 def create_chunks(my_list, chunk_size):
     """Split a list like [a,b,c,d,e,f,g,h,i,j,k,l,m] into e.g. [[a,b,c,d],[e,f,g,h],[i,j,k,l],[m]]"""
-    return [my_list[i:i + chunk_size] for i in range(0, len(my_list), chunk_size)]
+    return [my_list[i : i + chunk_size] for i in range(0, len(my_list), chunk_size)]
 
 
 def apply_highlight(item, ind, hi_ind):
@@ -47,26 +50,31 @@ def apply_highlight(item, ind, hi_ind):
 
 
 def highlight_in_list(items, hi_ind, joiner=" "):
-    return joiner.join([apply_highlight(item, i, hi_ind) for i, item in enumerate(items)])
+    return joiner.join(
+        [apply_highlight(item, i, hi_ind) for i, item in enumerate(items)]
+    )
 
 
 def format_bytes(byte_arr: bytearray, fmt: str, group: int = 1, highlight: int = -1):
     """Format byte array as per fmt. Group into groups of size `group`, and highlight index `highlight`."""
     chunks = create_chunks(byte_arr, group)
-    if fmt == 'hex':
-        return highlight_in_list(['0x{}'.format(ch.hex()) for ch in chunks], highlight)
-    if fmt == 'int':
+    if fmt == "hex":
+        return highlight_in_list(["0x{}".format(ch.hex()) for ch in chunks], highlight)
+    if fmt == "int":
         spc = str(ceil(log10(2 ** (group * 8 - 1))) + 1)
-        return highlight_in_list([('{:0' + spc + 'd}').format(Int32(ch)) for ch in chunks], highlight)
-    if fmt == 'uint':
+        return highlight_in_list(
+            [("{:0" + spc + "d}").format(Int32(ch)) for ch in chunks], highlight
+        )
+    if fmt == "uint":
         spc = str(ceil(log10(2 ** (group * 8))))
-        return highlight_in_list([('{:0' + spc + 'd}').format(UInt32(ch)) for ch in chunks],
-                                 highlight)
-    if fmt == 'char':
+        return highlight_in_list(
+            [("{:0" + spc + "d}").format(UInt32(ch)) for ch in chunks], highlight
+        )
+    if fmt == "char":
         return highlight_in_list((repr(chr(b))[1:-1] for b in byte_arr), highlight, "")
 
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class Peekable(Generic[T], Iterator[T]):
@@ -100,6 +108,10 @@ class Peekable(Generic[T], Iterator[T]):
 
 
 def get_section_base_name(section_name: str) -> str:
-    if '.' not in section_name:
-        print(FMT_PARSE + f"Invalid section {section_name}, not starting with a dot!" + FMT_NONE)
-    return '.' + section_name.split('.')[1]
+    if "." not in section_name:
+        print(
+            FMT_PARSE
+            + f"Invalid section {section_name}, not starting with a dot!"
+            + FMT_NONE
+        )
+    return "." + section_name.split(".")[1]

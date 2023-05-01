@@ -39,7 +39,7 @@ class ProgramLoader(ABC):
         pass
 
     @classmethod
-    def instantiate(cls, source_path: str, options: T_ParserOpts) -> 'ProgramLoader':
+    def instantiate(cls, source_path: str, options: T_ParserOpts) -> "ProgramLoader":
         """
         Instantiate a loader for the given source file with the required arguments
 

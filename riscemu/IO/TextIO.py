@@ -8,7 +8,9 @@ class TextIO(IOModule):
         raise InstructionAccessFault(self.base + offset)
 
     def __init__(self, base: int, buflen: int = 128):
-        super(TextIO, self).__init__('TextIO', MemoryFlags(False, False), buflen + 4, base=base)
+        super(TextIO, self).__init__(
+            "TextIO", MemoryFlags(False, False), buflen + 4, base=base
+        )
         self.buff = bytearray(buflen)
         self.current_line = ""
 
@@ -23,15 +25,15 @@ class TextIO(IOModule):
                 self._print()
                 return
         buff_start = addr - 4
-        self.buff[buff_start:buff_start + size] = data[0:size]
+        self.buff[buff_start : buff_start + size] = data[0:size]
 
     def _print(self):
         buff = self.buff
         self.buff = bytearray(self.size)
-        if b'\x00' in buff:
-            buff = buff.split(b'\x00')[0]
-        text = buff.decode('ascii')
-        if '\n' in text:
+        if b"\x00" in buff:
+            buff = buff.split(b"\x00")[0]
+        text = buff.decode("ascii")
+        if "\n" in text:
             lines = text.split("\n")
             lines[0] = self.current_line + lines[0]
             for line in lines[:-1]:

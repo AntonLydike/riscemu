@@ -33,21 +33,32 @@ class InstructionContext:
         self.base_address = 0
         self.global_symbol_dict = dict()
 
-    def resolve_label(self, symbol: str, address_at: Optional[T_RelativeAddress] = None) -> Optional[T_AbsoluteAddress]:
+    def resolve_label(
+        self, symbol: str, address_at: Optional[T_RelativeAddress] = None
+    ) -> Optional[T_AbsoluteAddress]:
         if NUMBER_SYMBOL_PATTERN.match(symbol):
             if address_at is None:
-                raise ParseException("Cannot resolve relative symbol {} without an address!".format(symbol))
+                raise ParseException(
+                    "Cannot resolve relative symbol {} without an address!".format(
+                        symbol
+                    )
+                )
 
             direction = symbol[-1]
             values = self.numbered_labels.get(symbol[:-1], [])
-            if direction == 'b':
-                return max((addr + self.base_address for addr in values if addr < address_at), default=None)
+            if direction == "b":
+                return max(
+                    (addr + self.base_address for addr in values if addr < address_at),
+                    default=None,
+                )
             else:
-                return min((addr + self.base_address for addr in values if addr > address_at), default=None)
+                return min(
+                    (addr + self.base_address for addr in values if addr > address_at),
+                    default=None,
+                )
         else:
             # if it's not a local symbol, try the globals
             if symbol not in self.labels:
                 return self.global_symbol_dict.get(symbol, None)
             # otherwise return the local symbol
             return self.labels.get(symbol, None)
-

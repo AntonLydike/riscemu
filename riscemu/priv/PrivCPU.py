@@ -87,7 +87,11 @@ class PrivCPU(CPU):
 
         if self.halted:
             print()
-            print(FMT_CPU + "[CPU] System halted with code {}".format(self.exit_code) + FMT_NONE)
+            print(
+                FMT_CPU
+                + "[CPU] System halted with code {}".format(self.exit_code)
+                + FMT_NONE
+            )
             sys.exit(self.exit_code)
 
         elif launch_debug:
@@ -96,55 +100,68 @@ class PrivCPU(CPU):
                 self.run(verbose)
         else:
             print()
-            print(FMT_CPU + "[CPU] System stopped without halting - perhaps you stopped the debugger?" + FMT_NONE)
+            print(
+                FMT_CPU
+                + "[CPU] System stopped without halting - perhaps you stopped the debugger?"
+                + FMT_NONE
+            )
 
     def launch(self, program: Optional[Program] = None, verbose: bool = False):
-        print(FMT_CPU + '[CPU] Started running from 0x{:08X} ({})'.format(self.pc, "kernel") + FMT_NONE)
+        print(
+            FMT_CPU
+            + "[CPU] Started running from 0x{:08X} ({})".format(self.pc, "kernel")
+            + FMT_NONE
+        )
         self._time_start = time.perf_counter_ns() // self.TIME_RESOLUTION_NS
 
         self.run(self.conf.verbosity > 1 or verbose)
 
     def load_program(self, program: Program):
-        if program.name == 'kernel':
+        if program.name == "kernel":
             self.pc = program.entrypoint
         super().load_program(program)
 
     def _init_csr(self):
         # set up CSR
         self.csr = CSR()
-        self.csr.set('mhartid', UInt32(0))  # core id
+        self.csr.set("mhartid", UInt32(0))  # core id
         # TODO: set correct value
-        self.csr.set('mimpid', UInt32(0))  # implementation id
+        self.csr.set("mimpid", UInt32(0))  # implementation id
         # set mxl to 1 (32 bit) and set bits for i and m isa
-        self.csr.set('misa', UInt32((1 << 30) + (1 << 8) + (1 << 12)))  # available ISA
+        self.csr.set("misa", UInt32((1 << 30) + (1 << 8) + (1 << 12)))  # available ISA
 
         # CSR write callbacks:
 
-        @self.csr.callback('halt')
+        @self.csr.callback("halt")
         def halt(old: UInt32, new: UInt32):
             if new != 0:
                 self.halted = True
                 self.exit_code = new.value
 
-        @self.csr.callback('mtimecmp')
+        @self.csr.callback("mtimecmp")
         def mtimecmp(old: UInt32, new: UInt32):
-            self._time_timecmp = (self.csr.get('mtimecmph') << 32) + new
+            self._time_timecmp = (self.csr.get("mtimecmph") << 32) + new
             self._time_interrupt_enabled = True
 
-        @self.csr.callback('mtimecmph')
+        @self.csr.callback("mtimecmph")
         def mtimecmph(old: UInt32, new: UInt32):
-            self._time_timecmp = (new << 32) + self.csr.get('mtimecmp')
+            self._time_timecmp = (new << 32) + self.csr.get("mtimecmp")
             self._time_interrupt_enabled = True
 
         # virtual CSR registers:
 
-        @self.csr.virtual_register('time')
+        @self.csr.virtual_register("time")
         def get_time():
-            return UInt32(time.perf_counter_ns() // self.TIME_RESOLUTION_NS - self._time_start)
+            return UInt32(
+                time.perf_counter_ns() // self.TIME_RESOLUTION_NS - self._time_start
+            )
 
-        @self.csr.virtual_register('timeh')
+        @self.csr.virtual_register("timeh")
         def get_timeh():
-            return UInt32((time.perf_counter_ns() // self.TIME_RESOLUTION_NS - self._time_start) >> 32)
+            return UInt32(
+                (time.perf_counter_ns() // self.TIME_RESOLUTION_NS - self._time_start)
+                >> 32
+            )
 
         # add minstret and mcycle counters
 
@@ -160,17 +177,21 @@ class PrivCPU(CPU):
             self._check_interrupt()
             ins = self.mmu.read_ins(self.pc)
             if verbose and (self.mode == PrivModes.USER or self.conf.verbosity > 4):
-                print(FMT_CPU + "   Running 0x{:08X}:{} {}".format(self.pc, FMT_NONE, ins))
+                print(
+                    FMT_CPU + "   Running 0x{:08X}:{} {}".format(self.pc, FMT_NONE, ins)
+                )
             self.run_instruction(ins)
             self.pc += self.INS_XLEN
         except CpuTrap as trap:
             self._handle_trap(trap)
             if trap.interrupt == 0 and not isinstance(trap, EcallTrap):
-                print(FMT_CPU + "[CPU] Trap {} encountered at {} (0x{:x})".format(
-                    trap,
-                    self.mmu.translate_address(self.pc),
-                    self.pc
-                ) + FMT_NONE)
+                print(
+                    FMT_CPU
+                    + "[CPU] Trap {} encountered at {} (0x{:x})".format(
+                        trap, self.mmu.translate_address(self.pc), self.pc
+                    )
+                    + FMT_NONE
+                )
                 breakpoint()
                 if self.conf.debug_on_exception:
                     raise LaunchDebuggerException()
@@ -179,12 +200,15 @@ class PrivCPU(CPU):
     def _timer_step(self):
         if not self._time_interrupt_enabled:
             return
-        if self._time_timecmp <= (time.perf_counter_ns() // self.TIME_RESOLUTION_NS) - self._time_start:
+        if (
+            self._time_timecmp
+            <= (time.perf_counter_ns() // self.TIME_RESOLUTION_NS) - self._time_start
+        ):
             self.pending_traps.append(TimerInterrupt())
             self._time_interrupt_enabled = False
 
     def _check_interrupt(self):
-        if not (len(self.pending_traps) > 0 and self.csr.get_mstatus('mie')):
+        if not (len(self.pending_traps) > 0 and self.csr.get_mstatus("mie")):
             return
         # select best interrupt
         # FIXME: actually select based on the official ranking
@@ -194,24 +218,30 @@ class PrivCPU(CPU):
             self.regs.dump_reg_a()
 
         if trap.priv != PrivModes.MACHINE:
-            print(FMT_CPU + "[CPU] Trap not targeting machine mode encountered! - undefined behaviour!" + FMT_NONE)
+            print(
+                FMT_CPU
+                + "[CPU] Trap not targeting machine mode encountered! - undefined behaviour!"
+                + FMT_NONE
+            )
             raise Exception("Undefined behaviour!")
 
         if self.mode != PrivModes.USER:
             print(FMT_CPU + "[CPU] Trap triggered outside of user mode?!" + FMT_NONE)
 
-        self.csr.set_mstatus('mpie', self.csr.get_mstatus('mie'))
-        self.csr.set_mstatus('mpp', self.mode.value)
-        self.csr.set_mstatus('mie', UInt32(0))
-        self.csr.set('mcause', trap.mcause)
-        self.csr.set('mepc', self.pc - self.INS_XLEN)
-        self.csr.set('mtval', trap.mtval)
+        self.csr.set_mstatus("mpie", self.csr.get_mstatus("mie"))
+        self.csr.set_mstatus("mpp", self.mode.value)
+        self.csr.set_mstatus("mie", UInt32(0))
+        self.csr.set("mcause", trap.mcause)
+        self.csr.set("mepc", self.pc - self.INS_XLEN)
+        self.csr.set("mtval", trap.mtval)
         self.mode = trap.priv
-        mtvec = self.csr.get('mtvec')
+        mtvec = self.csr.get("mtvec")
         if mtvec & 0b11 == 0:
             self.pc = mtvec.value
         if mtvec & 0b11 == 1:
-            self.pc = ((mtvec & 0b11111111111111111111111111111100) + (trap.code * 4)).value
+            self.pc = (
+                (mtvec & 0b11111111111111111111111111111100) + (trap.code * 4)
+            ).value
         self.record_perf_profile()
         if len(self._perf_counters) > 100:
             self.show_perf()
@@ -232,7 +262,10 @@ class PrivCPU(CPU):
             cycled = cycle
             timed = time_ns
             cps_list.append(cps)
-        print("    on average {:.0f} instructions/s".format(sum(cps_list) / len(cps_list)) + FMT_NONE)
+        print(
+            "    on average {:.0f} instructions/s".format(sum(cps_list) / len(cps_list))
+            + FMT_NONE
+        )
         self._perf_counters = list()
 
     def record_perf_profile(self):
@@ -240,6 +273,4 @@ class PrivCPU(CPU):
 
     @classmethod
     def get_loaders(cls) -> typing.Iterable[Type[ProgramLoader]]:
-        return [
-            AssemblyFileLoader, MemoryImageLoader, ElfBinaryFileLoader
-        ]
+        return [AssemblyFileLoader, MemoryImageLoader, ElfBinaryFileLoader]

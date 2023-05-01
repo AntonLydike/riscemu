@@ -8,6 +8,5 @@ class MemoryFlags:
 
     def __repr__(self):
         return "r{}{}".format(
-            '-' if self.read_only else 'w',
-            'x' if self.executable else '-'
+            "-" if self.read_only else "w", "x" if self.executable else "-"
         )

@@ -9,7 +9,6 @@ if typing.TYPE_CHECKING:
 
 
 class PrivMMU(MMU):
-
     def get_sec_containing(self, addr: T_AbsoluteAddress) -> MemorySection:
         # try to get an existing section
         existing_sec = super().get_sec_containing(addr)
@@ -18,7 +17,9 @@ class PrivMMU(MMU):
             return existing_sec
 
         # get section preceding empty space at addr
-        sec_before = next((sec for sec in reversed(self.sections) if sec.end < addr), None)
+        sec_before = next(
+            (sec for sec in reversed(self.sections) if sec.end < addr), None
+        )
         # get sec succeeding empty space at addr
         sec_after = next((sec for sec in self.sections if sec.base > addr), None)
 
@@ -31,7 +32,14 @@ class PrivMMU(MMU):
         # end at the start of the next section, or address + 0xFFFF (aligned to 16 byte boundary)
         end = min(next_sec_start, align_addr(addr + 0xFFFF, 16))
 
-        sec = ElfMemorySection(bytearray(end - start), '.empty', self.global_instruction_context(), '', start, MemoryFlags(False, True))
+        sec = ElfMemorySection(
+            bytearray(end - start),
+            ".empty",
+            self.global_instruction_context(),
+            "",
+            start,
+            MemoryFlags(False, True),
+        )
         self.sections.append(sec)
         self._update_state()
 

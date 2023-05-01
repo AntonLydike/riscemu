@@ -8,7 +8,7 @@ This file holds the logic for starting the emulator from the CLI
 from riscemu import RiscemuBaseException, __copyright__, __version__
 from riscemu.CPU import UserModeCPU
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from .config import RunConfig
     from .instructions import InstructionSetDict
     from .colors import FMT_BOLD, FMT_MAGENTA
@@ -18,11 +18,12 @@ if __name__ == '__main__':
 
     all_ins_names = list(InstructionSetDict.keys())
 
-    if '--version' in sys.argv:
-        print("riscemu version {}\n{}\n\nAvailable ISA: {}".format(
-            __version__, __copyright__,
-            ", ".join(InstructionSetDict.keys())
-        ))
+    if "--version" in sys.argv:
+        print(
+            "riscemu version {}\n{}\n\nAvailable ISA: {}".format(
+                __version__, __copyright__, ", ".join(InstructionSetDict.keys())
+            )
+        )
         sys.exit()
 
     class OptionStringAction(argparse.Action):
@@ -49,56 +50,98 @@ if __name__ == '__main__':
             d = {}
             if not self.omit_empty:
                 d.update(self.keys)
-            for x in values.split(','):
+            for x in values.split(","):
                 if x in self.keys:
                     d[x] = True
                 else:
-                    raise ValueError('Invalid parameter supplied: ' + x)
+                    raise ValueError("Invalid parameter supplied: " + x)
             setattr(namespace, self.dest, d)
 
+    parser = argparse.ArgumentParser(
+        description="RISC-V Userspace parser and emulator",
+        prog="riscemu",
+        formatter_class=argparse.RawTextHelpFormatter,
+    )
+    parser.add_argument(
+        "files",
+        metavar="file.asm",
+        type=str,
+        nargs="+",
+        help="The assembly files to load, the last one will be run",
+    )
 
-    parser = argparse.ArgumentParser(description='RISC-V Userspace parser and emulator', prog='riscemu',
-                                     formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument('files', metavar='file.asm', type=str, nargs='+',
-                        help='The assembly files to load, the last one will be run')
-
-    parser.add_argument('--options', '-o', action=OptionStringAction,
-                        keys=('disable_debug', 'no_syscall_symbols', 'fail_on_ex', 'add_accept_imm', 'unlimited_regs'),
-                        help="""Toggle options. Available options are:
+    parser.add_argument(
+        "--options",
+        "-o",
+        action=OptionStringAction,
+        keys=(
+            "disable_debug",
+            "no_syscall_symbols",
+            "fail_on_ex",
+            "add_accept_imm",
+            "unlimited_regs",
+        ),
+        help="""Toggle options. Available options are:
 disable_debug:        Disable ebreak instructions
 no_syscall_symbols:   Don't add symbols for SCALL_EXIT and others
 fail_on_ex:           If set, exceptions won't trigger the debugger
 add_accept_imm:       Accept "add rd, rs, imm" instruction (instead of addi)
-unlimited_regs:       Allow an unlimited number of registers""")
+unlimited_regs:       Allow an unlimited number of registers""",
+    )
 
-    parser.add_argument('--syscall-opts', '-so', action=OptionStringAction,
-                        keys=('fs_access', 'disable_input'))
+    parser.add_argument(
+        "--syscall-opts",
+        "-so",
+        action=OptionStringAction,
+        keys=("fs_access", "disable_input"),
+    )
 
-    parser.add_argument('--instruction-sets', '-is', action=OptionStringAction,
-                        help="Instruction sets to load, available are: {}. All are enabled by default"
-                        .format(", ".join(all_ins_names)), keys={k: True for k in all_ins_names}, omit_empty=True)
+    parser.add_argument(
+        "--instruction-sets",
+        "-is",
+        action=OptionStringAction,
+        help="Instruction sets to load, available are: {}. All are enabled by default".format(
+            ", ".join(all_ins_names)
+        ),
+        keys={k: True for k in all_ins_names},
+        omit_empty=True,
+    )
 
-    parser.add_argument('--stack_size', type=int, help='Stack size of loaded programs, defaults to 8MB', nargs='?')
+    parser.add_argument(
+        "--stack_size",
+        type=int,
+        help="Stack size of loaded programs, defaults to 8MB",
+        nargs="?",
+    )
 
-    parser.add_argument('-v', '--verbose', help="Verbosity level (can be used multiple times)", action='count',
-                        default=0)
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        help="Verbosity level (can be used multiple times)",
+        action="count",
+        default=0,
+    )
 
-    parser.add_argument('--interactive', help="Launch the interactive debugger instantly instead of loading any "
-                                              "programs", action='store_true')
+    parser.add_argument(
+        "--interactive",
+        help="Launch the interactive debugger instantly instead of loading any "
+        "programs",
+        action="store_true",
+    )
 
     args = parser.parse_args()
 
     # create a RunConfig from the cli args
     cfg_dict = dict(
         stack_size=args.stack_size,
-        debug_instruction=not args.options['disable_debug'],
-        include_scall_symbols=not args.options['no_syscall_symbols'],
-        debug_on_exception=not args.options['fail_on_ex'],
-        add_accept_imm=args.options['add_accept_imm'],
-        unlimited_registers=args.options['unlimited_regs'],
-        scall_fs=args.syscall_opts['fs_access'],
-        scall_input=not args.syscall_opts['disable_input'],
-        verbosity=args.verbose
+        debug_instruction=not args.options["disable_debug"],
+        include_scall_symbols=not args.options["no_syscall_symbols"],
+        debug_on_exception=not args.options["fail_on_ex"],
+        add_accept_imm=args.options["add_accept_imm"],
+        unlimited_registers=args.options["unlimited_regs"],
+        scall_fs=args.syscall_opts["fs_access"],
+        scall_input=not args.syscall_opts["disable_input"],
+        verbosity=args.verbose,
     )
     for k, v in dict(cfg_dict).items():
         if v is None:
@@ -106,15 +149,13 @@ unlimited_regs:       Allow an unlimited number of registers""")
 
     cfg = RunConfig(**cfg_dict)
 
-    if not hasattr(args, 'ins'):
-        setattr(args, 'ins', {k: True for k in all_ins_names})
+    if not hasattr(args, "ins"):
+        setattr(args, "ins", {k: True for k in all_ins_names})
 
     FMT_PRINT = FMT_BOLD + FMT_MAGENTA
 
     # parse required instruction sets
-    ins_to_load = [
-        InstructionSetDict[name] for name, b in args.ins.items() if b
-    ]
+    ins_to_load = [InstructionSetDict[name] for name, b in args.ins.items() if b]
 
     try:
         cpu = UserModeCPU(ins_to_load, cfg)

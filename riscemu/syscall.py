@@ -13,11 +13,11 @@ from .types import Int32, CPU
 from .types.exceptions import InvalidSyscallException
 
 SYSCALLS = {
-    63: 'read',
-    64: 'write',
-    93: 'exit',
-    1024: 'open',
-    1025: 'close',
+    63: "read",
+    64: "write",
+    93: "exit",
+    1024: "open",
+    1025: "close",
 }
 """
 This dict contains a mapping for all available syscalls (code->name)
@@ -28,11 +28,11 @@ class.
 """
 
 OPEN_MODES = {
-    0: 'rb',
-    1: 'wb',
-    2: 'r+b',
-    3: 'x',
-    4: 'ab',
+    0: "rb",
+    1: "wb",
+    2: "r+b",
+    3: "x",
+    4: "ab",
 }
 """All available file open modes"""
 
@@ -42,6 +42,7 @@ class Syscall:
     """
     Represents a syscall
     """
+
     id: int
     """The syscall number (e.g. 64 - write)"""
     cpu: CPU
@@ -52,12 +53,10 @@ class Syscall:
         return SYSCALLS.get(self.id, "unknown")
 
     def __repr__(self):
-        return "Syscall(id={}, name={})".format(
-            self.id, self.name
-        )
+        return "Syscall(id={}, name={})".format(self.id, self.name)
 
     def ret(self, code):
-        self.cpu.regs.set('a0', Int32(code))
+        self.cpu.regs.set("a0", Int32(code))
 
 
 def get_syscall_symbols():
@@ -66,25 +65,20 @@ def get_syscall_symbols():
 
     :return: dictionary of all syscall symbols (SCALL_<name> -> id)
     """
-    return {
-        ('SCALL_' + name.upper()): num for num, name in SYSCALLS.items()
-    }
+    return {("SCALL_" + name.upper()): num for num, name in SYSCALLS.items()}
 
 
 class SyscallInterface:
     """
     Handles syscalls
     """
+
     open_files: Dict[int, IO]
     next_open_handle: int
 
     def handle_syscall(self, scall: Syscall):
         self.next_open_handle = 3
-        self.open_files = {
-            0: sys.stdin,
-            1: sys.stdout,
-            2: sys.stderr
-        }
+        self.open_files = {0: sys.stdin, 1: sys.stdout, 2: sys.stderr}
 
         if getattr(self, scall.name):
             getattr(self, scall.name)(scall)
@@ -96,21 +90,25 @@ class SyscallInterface:
         read syscall (63): read from file no a0, into addr a1, at most a2 bytes
         on return a0 will be the number of read bytes or -1 if an error occured
         """
-        fileno = scall.cpu.regs.get('a0').unsigned_value
-        addr = scall.cpu.regs.get('a1').unsigned_value
-        size = scall.cpu.regs.get('a2').unsigned_value
+        fileno = scall.cpu.regs.get("a0").unsigned_value
+        addr = scall.cpu.regs.get("a1").unsigned_value
+        size = scall.cpu.regs.get("a2").unsigned_value
         if fileno not in self.open_files:
             scall.ret(-1)
             return
 
         chars = self.open_files[fileno].readline(size)
         try:
-            data = bytearray(chars, 'ascii')
+            data = bytearray(chars, "ascii")
             scall.cpu.mmu.write(addr, len(data), data)
             return scall.ret(len(data))
 
         except UnicodeEncodeError:
-            print(FMT_SYSCALL + '[Syscall] read: UnicodeError - invalid input "{}"'.format(chars) + FMT_NONE)
+            print(
+                FMT_SYSCALL
+                + '[Syscall] read: UnicodeError - invalid input "{}"'.format(chars)
+                + FMT_NONE
+            )
             return scall.ret(-1)
 
     def write(self, scall: Syscall):
@@ -118,19 +116,23 @@ class SyscallInterface:
         write syscall (64): write a2 bytes from addr a1 into fileno a0
         on return a0 will hold the number of bytes written or -1 if an error occured
         """
-        fileno = scall.cpu.regs.get('a0').unsigned_value
-        addr = scall.cpu.regs.get('a1').unsigned_value
-        size = scall.cpu.regs.get('a2').unsigned_value
+        fileno = scall.cpu.regs.get("a0").unsigned_value
+        addr = scall.cpu.regs.get("a1").unsigned_value
+        size = scall.cpu.regs.get("a2").unsigned_value
         if fileno not in self.open_files:
             return scall.ret(-1)
 
         data = scall.cpu.mmu.read(addr, size)
 
         if not isinstance(data, bytearray):
-            print(FMT_SYSCALL + '[Syscall] write: writing from .text region not supported.' + FMT_NONE)
+            print(
+                FMT_SYSCALL
+                + "[Syscall] write: writing from .text region not supported."
+                + FMT_NONE
+            )
             return scall.ret(-1)
 
-        self.open_files[fileno].write(data.decode('ascii'))
+        self.open_files[fileno].write(data.decode("ascii"))
         return scall.ret(size)
 
     def open(self, scall: Syscall):
@@ -149,19 +151,29 @@ class SyscallInterface:
         """
         # FIXME: this should be toggleable in a global setting or something
         if True:
-            print(FMT_SYSCALL + '[Syscall] open: opening files not supported without scall-fs flag!' + FMT_NONE)
+            print(
+                FMT_SYSCALL
+                + "[Syscall] open: opening files not supported without scall-fs flag!"
+                + FMT_NONE
+            )
             return scall.ret(-1)
 
-        mode = scall.cpu.regs.get('a0').unsigned_value
-        addr = scall.cpu.regs.get('a1').unsigned_value
-        size = scall.cpu.regs.get('a2').unsigned_value
+        mode = scall.cpu.regs.get("a0").unsigned_value
+        addr = scall.cpu.regs.get("a1").unsigned_value
+        size = scall.cpu.regs.get("a2").unsigned_value
 
-        mode_st = OPEN_MODES.get(mode, )
+        mode_st = OPEN_MODES.get(
+            mode,
+        )
         if mode_st == -1:
-            print(FMT_SYSCALL + '[Syscall] open: unknown opening mode {}!'.format(mode) + FMT_NONE)
+            print(
+                FMT_SYSCALL
+                + "[Syscall] open: unknown opening mode {}!".format(mode)
+                + FMT_NONE
+            )
             return scall.ret(-1)
 
-        path = scall.cpu.mmu.read(addr, size).decode('ascii')
+        path = scall.cpu.mmu.read(addr, size).decode("ascii")
 
         fileno = self.next_open_handle
         self.next_open_handle += 1
@@ -169,10 +181,18 @@ class SyscallInterface:
         try:
             self.open_files[fileno] = open(path, mode_st)
         except OSError as err:
-            print(FMT_SYSCALL + '[Syscall] open: encountered error during {}!'.format(err.strerror) + FMT_NONE)
+            print(
+                FMT_SYSCALL
+                + "[Syscall] open: encountered error during {}!".format(err.strerror)
+                + FMT_NONE
+            )
             return scall.ret(-1)
 
-        print(FMT_SYSCALL + '[Syscall] open: opened fd {} to {}!'.format(fileno, path) + FMT_NONE)
+        print(
+            FMT_SYSCALL
+            + "[Syscall] open: opened fd {} to {}!".format(fileno, path)
+            + FMT_NONE
+        )
         return scall.ret(fileno)
 
     def close(self, scall: Syscall):
@@ -181,13 +201,17 @@ class SyscallInterface:
 
         return -1 if an error was encountered, otherwise returns 0
         """
-        fileno = scall.cpu.regs.get('a0').unsigned_value
+        fileno = scall.cpu.regs.get("a0").unsigned_value
         if fileno not in self.open_files:
-            print(FMT_SYSCALL + '[Syscall] close: unknown fileno {}!'.format(fileno) + FMT_NONE)
+            print(
+                FMT_SYSCALL
+                + "[Syscall] close: unknown fileno {}!".format(fileno)
+                + FMT_NONE
+            )
             return scall.ret(-1)
 
         self.open_files[fileno].close()
-        print(FMT_SYSCALL + '[Syscall] close: closed fd {}!'.format(fileno) + FMT_NONE)
+        print(FMT_SYSCALL + "[Syscall] close: closed fd {}!".format(fileno) + FMT_NONE)
         del self.open_files[fileno]
         return scall.ret(0)
 
@@ -196,10 +220,7 @@ class SyscallInterface:
         Exit syscall. Exits the system with status code a0
         """
         scall.cpu.halted = True
-        scall.cpu.exit_code = scall.cpu.regs.get('a0').value
+        scall.cpu.exit_code = scall.cpu.regs.get("a0").value
 
     def __repr__(self):
-        return "{}(\n\tfiles={}\n)".format(
-            self.__class__.__name__,
-            self.open_files
-        )
+        return "{}(\n\tfiles={}\n)".format(self.__class__.__name__, self.open_files)

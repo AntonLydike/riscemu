@@ -10,52 +10,52 @@ class RV32A(InstructionSet):
     for this?
     """
 
-    def instruction_lr_w(self, ins: 'Instruction'):
+    def instruction_lr_w(self, ins: "Instruction"):
         INS_NOT_IMPLEMENTED(ins)
 
-    def instruction_sc_w(self, ins: 'Instruction'):
+    def instruction_sc_w(self, ins: "Instruction"):
         INS_NOT_IMPLEMENTED(ins)
 
-    def instruction_amoswap_w(self, ins: 'Instruction'):
+    def instruction_amoswap_w(self, ins: "Instruction"):
         dest, addr, val = self.parse_rd_rs_rs(ins)
-        if dest == 'zero':
+        if dest == "zero":
             self.mmu.write(addr, val.to_bytes())
         else:
             old = Int32(self.mmu.read(addr, 4))
             self.mmu.write(addr, val.to_bytes())
             self.regs.set(dest, old)
 
-    def instruction_amoadd_w(self, ins: 'Instruction'):
+    def instruction_amoadd_w(self, ins: "Instruction"):
         dest, addr, val = self.parse_rd_rs_rs(ins)
         old = Int32(self.mmu.read(addr, 4))
         self.mmu.write(addr, (old + val).to_bytes(4))
         self.regs.set(dest, old)
 
-    def instruction_amoand_w(self, ins: 'Instruction'):
+    def instruction_amoand_w(self, ins: "Instruction"):
         dest, addr, val = self.parse_rd_rs_rs(ins)
         old = Int32(self.mmu.read(addr, 4))
         self.mmu.write(addr, (old & val).to_bytes(4))
         self.regs.set(dest, old)
 
-    def instruction_amoor_w(self, ins: 'Instruction'):
+    def instruction_amoor_w(self, ins: "Instruction"):
         dest, addr, val = self.parse_rd_rs_rs(ins)
         old = Int32(self.mmu.read(addr, 4))
         self.mmu.write(addr, (old | val).to_bytes(4))
         self.regs.set(dest, old)
 
-    def instruction_amoxor_w(self, ins: 'Instruction'):
+    def instruction_amoxor_w(self, ins: "Instruction"):
         dest, addr, val = self.parse_rd_rs_rs(ins)
         old = Int32(self.mmu.read(addr, 4))
         self.mmu.write(addr, (old ^ val).to_bytes(4))
         self.regs.set(dest, old)
 
-    def instruction_amomax_w(self, ins: 'Instruction'):
+    def instruction_amomax_w(self, ins: "Instruction"):
         dest, addr, val = self.parse_rd_rs_rs(ins)
         old = Int32(self.mmu.read(addr, 4))
         self.mmu.write(addr, max(old, val).to_bytes(4))
         self.regs.set(dest, old)
 
-    def instruction_amomaxu_w(self, ins: 'Instruction'):
+    def instruction_amomaxu_w(self, ins: "Instruction"):
         val: UInt32
         dest, addr, val = self.parse_rd_rs_rs(ins, signed=False)
         old = UInt32(self.mmu.read(addr, 4))
@@ -63,13 +63,13 @@ class RV32A(InstructionSet):
         self.mmu.write(addr, max(old, val).to_bytes())
         self.regs.set(dest, old)
 
-    def instruction_amomin_w(self, ins: 'Instruction'):
+    def instruction_amomin_w(self, ins: "Instruction"):
         dest, addr, val = self.parse_rd_rs_rs(ins)
         old = Int32(self.mmu.read(addr, 4))
         self.mmu.write(addr, min(old, val).to_bytes(4))
         self.regs.set(dest, old)
 
-    def instruction_amominu_w(self, ins: 'Instruction'):
+    def instruction_amominu_w(self, ins: "Instruction"):
         val: UInt32
         dest, addr, val = self.parse_rd_rs_rs(ins, signed=False)
         old = UInt32(self.mmu.read(addr, 4))

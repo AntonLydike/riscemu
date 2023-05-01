@@ -18,17 +18,72 @@ class Registers:
     """
 
     valid_regs = {
-        'zero', 'ra', 'sp', 'gp', 'tp', 's0', 'fp',
-        't0', 't1', 't2', 't3', 't4', 't5', 't6',
-        's1', 's2', 's3', 's4', 's5', 's6', 's7', 's8', 's9', 's10', 's11',
-        'a0', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7',
-        'ft0', 'ft1', 'ft2', 'ft3', 'ft4', 'ft5', 'ft6', 'ft7',
-        'fs0', 'fs1', 'fs2', 'fs3', 'fs4', 'fs5', 'fs6', 'fs7', 'fs8', 'fs9', 'fs10', 'fs11',
-        'fa0', 'fa1', 'fa2', 'fa3', 'fa4', 'fa5', 'fa6', 'fa7'
+        "zero",
+        "ra",
+        "sp",
+        "gp",
+        "tp",
+        "s0",
+        "fp",
+        "t0",
+        "t1",
+        "t2",
+        "t3",
+        "t4",
+        "t5",
+        "t6",
+        "s1",
+        "s2",
+        "s3",
+        "s4",
+        "s5",
+        "s6",
+        "s7",
+        "s8",
+        "s9",
+        "s10",
+        "s11",
+        "a0",
+        "a1",
+        "a2",
+        "a3",
+        "a4",
+        "a5",
+        "a6",
+        "a7",
+        "ft0",
+        "ft1",
+        "ft2",
+        "ft3",
+        "ft4",
+        "ft5",
+        "ft6",
+        "ft7",
+        "fs0",
+        "fs1",
+        "fs2",
+        "fs3",
+        "fs4",
+        "fs5",
+        "fs6",
+        "fs7",
+        "fs8",
+        "fs9",
+        "fs10",
+        "fs11",
+        "fa0",
+        "fa1",
+        "fa2",
+        "fa3",
+        "fa4",
+        "fa5",
+        "fa6",
+        "fa7",
     }
 
     def __init__(self, infinite_regs: bool = False):
         from .types import Int32
+
         self.vals = defaultdict(lambda: Int32(0))
         self.last_set = None
         self.last_read = None
@@ -43,28 +98,30 @@ class Registers:
 
         lines = [[] for i in range(12)]
         if not full:
-            regs = [('a', 8), ('s', 12), ('t', 7)]
+            regs = [("a", 8), ("s", 12), ("t", 7)]
         else:
             regs = [
-                ('a', 8),
-                ('s', 12),
-                ('t', 7),
-                ('ft', 8),
-                ('fa', 8),
-                ('fs', 12),
+                ("a", 8),
+                ("s", 12),
+                ("t", 7),
+                ("ft", 8),
+                ("fa", 8),
+                ("fs", 12),
             ]
         for name, s in regs:
             for i in range(12):
                 if i >= s:
                     lines[i].append(" " * 15)
                 else:
-                    reg = '{}{}'.format(name, i)
+                    reg = "{}{}".format(name, i)
                     lines[i].append(self._reg_repr(reg))
 
-        print("Registers[{},{}](".format(
-            FMT_ORANGE + FMT_UNDERLINE + 'read' + FMT_NONE,
-            FMT_ORANGE + FMT_BOLD + 'written' + FMT_NONE
-        ))
+        print(
+            "Registers[{},{}](".format(
+                FMT_ORANGE + FMT_UNDERLINE + "read" + FMT_NONE,
+                FMT_ORANGE + FMT_BOLD + "written" + FMT_NONE,
+            )
+        )
         if not full:
             print("\t" + " ".join(named_regs[0:3]))
             print("\t" + " ".join(named_regs[3:]))
@@ -80,23 +137,26 @@ class Registers:
         """
         Dump the a registers
         """
-        print("Registers[a]:" + " ".join(self._reg_repr('a{}'.format(i)) for i in range(8)))
+        print(
+            "Registers[a]:"
+            + " ".join(self._reg_repr("a{}".format(i)) for i in range(8))
+        )
 
     def _reg_repr(self, reg):
-        txt = '{:4}=0x{:08X}'.format(reg, self.get(reg, False))
-        if reg == 'fp':
-            reg = 's0'
+        txt = "{:4}=0x{:08X}".format(reg, self.get(reg, False))
+        if reg == "fp":
+            reg = "s0"
         if reg == self.last_set:
             return FMT_ORANGE + FMT_BOLD + txt + FMT_NONE
         if reg == self.last_read:
             return FMT_ORANGE + FMT_UNDERLINE + txt + FMT_NONE
-        if reg == 'zero':
+        if reg == "zero":
             return txt
         if self.get(reg, False) == 0 and reg not in Registers.named_registers():
             return FMT_GRAY + txt + FMT_NONE
         return txt
 
-    def set(self, reg, val: 'Int32', mark_set=True) -> bool:
+    def set(self, reg, val: "Int32", mark_set=True) -> bool:
         """
         Set a register content to val
         :param reg: The register to set
@@ -106,17 +166,20 @@ class Registers:
         """
 
         from .types import Int32
+
         # remove after refactoring is complete
         if not isinstance(val, Int32):
-            raise RuntimeError("Setting register to non-Int32 value! Please refactor your code!")
+            raise RuntimeError(
+                "Setting register to non-Int32 value! Please refactor your code!"
+            )
 
-        if reg == 'zero':
+        if reg == "zero":
             return False
         # if reg not in Registers.all_registers():
         #    raise InvalidRegisterException(reg)
         # replace fp register with s1, as these are the same register
-        if reg == 'fp':
-            reg = 's1'
+        if reg == "fp":
+            reg = "s1"
         if mark_set:
             self.last_set = reg
 
@@ -126,7 +189,7 @@ class Registers:
         self.vals[reg] = val.unsigned()
         return True
 
-    def get(self, reg, mark_read=True) -> 'Int32':
+    def get(self, reg, mark_read=True) -> "Int32":
         """
         Retuns the contents of register reg
         :param reg: The register name
@@ -135,8 +198,8 @@ class Registers:
         """
         # if reg not in Registers.all_registers():
         #    raise InvalidRegisterException(reg)
-        if reg == 'fp':
-            reg = 's0'
+        if reg == "fp":
+            reg = "s0"
 
         if not self.infinite_regs and reg not in self.valid_regs:
             raise RuntimeError("Invalid register: {}".format(reg))
@@ -151,13 +214,69 @@ class Registers:
         Return a list of all valid registers
         :return: The list
         """
-        return ['zero', 'ra', 'sp', 'gp', 'tp', 's0', 'fp',
-                't0', 't1', 't2', 't3', 't4', 't5', 't6',
-                's1', 's2', 's3', 's4', 's5', 's6', 's7', 's8', 's9', 's10', 's11',
-                'a0', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7',
-                'ft0', 'ft1', 'ft2', 'ft3', 'ft4', 'ft5', 'ft6', 'ft7',
-                'fs0', 'fs1', 'fs2', 'fs3', 'fs4', 'fs5', 'fs6', 'fs7', 'fs8', 'fs9', 'fs10', 'fs11',
-                'fa0', 'fa1', 'fa2', 'fa3', 'fa4', 'fa5', 'fa6', 'fa7']
+        return [
+            "zero",
+            "ra",
+            "sp",
+            "gp",
+            "tp",
+            "s0",
+            "fp",
+            "t0",
+            "t1",
+            "t2",
+            "t3",
+            "t4",
+            "t5",
+            "t6",
+            "s1",
+            "s2",
+            "s3",
+            "s4",
+            "s5",
+            "s6",
+            "s7",
+            "s8",
+            "s9",
+            "s10",
+            "s11",
+            "a0",
+            "a1",
+            "a2",
+            "a3",
+            "a4",
+            "a5",
+            "a6",
+            "a7",
+            "ft0",
+            "ft1",
+            "ft2",
+            "ft3",
+            "ft4",
+            "ft5",
+            "ft6",
+            "ft7",
+            "fs0",
+            "fs1",
+            "fs2",
+            "fs3",
+            "fs4",
+            "fs5",
+            "fs6",
+            "fs7",
+            "fs8",
+            "fs9",
+            "fs10",
+            "fs11",
+            "fa0",
+            "fa1",
+            "fa2",
+            "fa3",
+            "fa4",
+            "fa5",
+            "fa6",
+            "fa7",
+        ]
 
     @staticmethod
     def named_registers():
@@ -165,4 +284,4 @@ class Registers:
         Return all named registers
         :return: The list
         """
-        return ['zero', 'ra', 'sp', 'gp', 'tp', 'fp']
+        return ["zero", "ra", "sp", "gp", "tp", "fp"]

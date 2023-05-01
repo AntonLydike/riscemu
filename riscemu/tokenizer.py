@@ -12,9 +12,11 @@ from typing import List, Iterable
 from riscemu.decoder import RISCV_REGS
 from riscemu.types.exceptions import ParseException
 
-LINE_COMMENT_STARTERS = ('#', ';', '//')
-WHITESPACE_PATTERN = re.compile(r'\s+')
-MEMORY_ADDRESS_PATTERN = re.compile(r'^(0[xX][A-f0-9]+|\d+|0b[0-1]+|[A-z0-9_-]+)\(([A-z]+[0-9]{0,2})\)$')
+LINE_COMMENT_STARTERS = ("#", ";", "//")
+WHITESPACE_PATTERN = re.compile(r"\s+")
+MEMORY_ADDRESS_PATTERN = re.compile(
+    r"^(0[xX][A-f0-9]+|\d+|0b[0-1]+|[A-z0-9_-]+)\(([A-z]+[0-9]{0,2})\)$"
+)
 REGISTER_NAMES = RISCV_REGS
 
 
@@ -34,22 +36,22 @@ class Token:
 
     def __str__(self):
         if self.type == TokenType.NEWLINE:
-            return '\\n'
+            return "\\n"
         if self.type == TokenType.COMMA:
-            return ', '
-        return '{}({})'.format(self.type.name[0:3], self.value)
+            return ", "
+        return "{}({})".format(self.type.name[0:3], self.value)
 
 
-NEWLINE = Token(TokenType.NEWLINE, '\n')
-COMMA = Token(TokenType.COMMA, ',')
+NEWLINE = Token(TokenType.NEWLINE, "\n")
+COMMA = Token(TokenType.COMMA, ",")
 
 
 def tokenize(input: Iterable[str]) -> Iterable[Token]:
     for line in input:
         for line_comment_start in LINE_COMMENT_STARTERS:
             if line_comment_start in line:
-                line = line[:line.index(line_comment_start)]
-        line.strip(' \t\n')
+                line = line[: line.index(line_comment_start)]
+        line.strip(" \t\n")
         if not line:
             continue
 
@@ -64,9 +66,9 @@ def parse_line(parts: List[str]) -> Iterable[Token]:
         return ()
     first_token = parts[0]
 
-    if first_token[0] == '.':
+    if first_token[0] == ".":
         yield Token(TokenType.PSEUDO_OP, first_token)
-    elif first_token[-1] == ':':
+    elif first_token[-1] == ":":
         yield Token(TokenType.LABEL, first_token)
         yield from parse_line(parts[1:])
         return
@@ -74,14 +76,14 @@ def parse_line(parts: List[str]) -> Iterable[Token]:
         yield Token(TokenType.INSTRUCTION_NAME, first_token)
 
     for part in parts[1:]:
-        if part == ',':
+        if part == ",":
             yield COMMA
             continue
         yield from parse_arg(part)
 
 
 def parse_arg(arg: str) -> Iterable[Token]:
-    comma = arg[-1] == ','
+    comma = arg[-1] == ","
     arg = arg[:-1] if comma else arg
     mem_match_resul = re.match(MEMORY_ADDRESS_PATTERN, arg)
     if mem_match_resul:
@@ -98,7 +100,7 @@ def parse_arg(arg: str) -> Iterable[Token]:
 
 def print_tokens(tokens: Iterable[Token]):
     for token in tokens:
-        print(token, end='\n' if token == NEWLINE else '')
+        print(token, end="\n" if token == NEWLINE else "")
     print("", flush=True, end="")
 
 
@@ -123,7 +125,7 @@ def split_whitespace_respecting_quotes(line: str) -> Iterable[str]:
             part = ""
             continue
 
-        if c in ' \t\n':
+        if c in " \t\n":
             if part:
                 yield part
             part = ""

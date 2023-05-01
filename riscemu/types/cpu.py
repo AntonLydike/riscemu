@@ -14,7 +14,7 @@ class CPU(ABC):
 
     # housekeeping variables
     regs: Registers
-    mmu: 'MMU'
+    mmu: "MMU"
     pc: T_AbsoluteAddress
     cycle: int
     halted: bool
@@ -24,12 +24,17 @@ class CPU(ABC):
 
     # instruction information
     instructions: Dict[str, Callable[[Instruction], None]]
-    instruction_sets: Set['InstructionSet']
+    instruction_sets: Set["InstructionSet"]
 
     # configuration
     conf: RunConfig
 
-    def __init__(self, mmu: 'MMU', instruction_sets: List[Type['InstructionSet']], conf: RunConfig):
+    def __init__(
+        self,
+        mmu: "MMU",
+        instruction_sets: List[Type["InstructionSet"]],
+        conf: RunConfig,
+    ):
         self.mmu = mmu
         self.regs = Registers(conf.unlimited_registers)
         self.conf = conf
@@ -71,7 +76,7 @@ class CPU(ABC):
             self.pc,
             self.cycle,
             self.halted,
-            " ".join(s.name for s in self.instruction_sets)
+            " ".join(s.name for s in self.instruction_sets),
         )
 
     @abstractmethod
@@ -84,12 +89,18 @@ class CPU(ABC):
 
     def launch(self, program: Program, verbose: bool = False):
         if program not in self.mmu.programs:
-            print(FMT_ERROR + '[CPU] Cannot launch program that\'s not loaded!' + FMT_NONE)
+            print(
+                FMT_ERROR + "[CPU] Cannot launch program that's not loaded!" + FMT_NONE
+            )
             return
         if self.conf.verbosity > 0:
-            print(FMT_CPU + "[CPU] Started running from {}".format(
-                self.mmu.translate_address(program.entrypoint)
-            ) + FMT_NONE)
+            print(
+                FMT_CPU
+                + "[CPU] Started running from {}".format(
+                    self.mmu.translate_address(program.entrypoint)
+                )
+                + FMT_NONE
+            )
             print(program)
         self.pc = program.entrypoint
         self.run(verbose)

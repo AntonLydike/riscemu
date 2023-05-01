@@ -4,7 +4,14 @@ from typing import Optional
 
 from ..colors import FMT_MEM, FMT_NONE, FMT_UNDERLINE, FMT_ORANGE, FMT_ERROR
 from ..helpers import format_bytes
-from . import MemoryFlags, T_AbsoluteAddress, InstructionContext, T_RelativeAddress, Instruction, Int32
+from . import (
+    MemoryFlags,
+    T_AbsoluteAddress,
+    InstructionContext,
+    T_RelativeAddress,
+    Instruction,
+    Int32,
+)
 
 
 @dataclass
@@ -32,8 +39,16 @@ class MemorySection(ABC):
     def read_ins(self, offset: T_RelativeAddress) -> Instruction:
         pass
 
-    def dump(self, start: T_RelativeAddress, end: Optional[T_RelativeAddress] = None, fmt: str = None,
-             bytes_per_row: int = None, rows: int = 10, group: int = None, highlight: int = None):
+    def dump(
+        self,
+        start: T_RelativeAddress,
+        end: Optional[T_RelativeAddress] = None,
+        fmt: str = None,
+        bytes_per_row: int = None,
+        rows: int = 10,
+        group: int = None,
+        highlight: int = None,
+    ):
         """
         Dump the section. If no end is given, the rows around start are printed and start is highlighted.
 
@@ -54,11 +69,11 @@ class MemorySection(ABC):
         if fmt is None:
             if self.flags.executable and self.flags.read_only:
                 bytes_per_row = 4
-                fmt = 'asm'
+                fmt = "asm"
             else:
-                fmt = 'hex'
+                fmt = "hex"
 
-        if fmt == 'char':
+        if fmt == "char":
             if bytes_per_row is None:
                 bytes_per_row = 4
             if group is None:
@@ -70,47 +85,72 @@ class MemorySection(ABC):
         if bytes_per_row is None:
             bytes_per_row = 4
 
-        if fmt not in ('asm', 'hex', 'int', 'char'):
-            print(FMT_ERROR + '[MemorySection] Unknown format {}, known formats are {}'.format(
-                fmt, ", ".join(('asm', 'hex', 'int', 'char'))
-            ) + FMT_NONE)
+        if fmt not in ("asm", "hex", "int", "char"):
+            print(
+                FMT_ERROR
+                + "[MemorySection] Unknown format {}, known formats are {}".format(
+                    fmt, ", ".join(("asm", "hex", "int", "char"))
+                )
+                + FMT_NONE
+            )
 
         if end is None:
             end = min(start + (bytes_per_row * (rows // 2)), self.size)
             highlight = start
             start = max(0, start - (bytes_per_row * (rows // 2)))
 
-        if fmt == 'asm':
-            print(FMT_MEM + "{}, viewing {} instructions:".format(
-                self, (end - start) // 4
-            ) + FMT_NONE)
+        if fmt == "asm":
+            print(
+                FMT_MEM
+                + "{}, viewing {} instructions:".format(self, (end - start) // 4)
+                + FMT_NONE
+            )
 
             for addr in range(start, end, 4):
                 if addr == highlight:
-                    print(FMT_UNDERLINE + FMT_ORANGE, end='')
-                print("0x{:04x}: {}{}".format(
-                    self.base + addr, self.read_ins(addr), FMT_NONE
-                ))
+                    print(FMT_UNDERLINE + FMT_ORANGE, end="")
+                print(
+                    "0x{:04x}: {}{}".format(
+                        self.base + addr, self.read_ins(addr), FMT_NONE
+                    )
+                )
         else:
-            print(FMT_MEM + "{}, viewing {} bytes:".format(
-                self, (end - start)
-            ) + FMT_NONE)
+            print(
+                FMT_MEM + "{}, viewing {} bytes:".format(self, (end - start)) + FMT_NONE
+            )
 
-            aligned_end = end - (end % bytes_per_row) if end % bytes_per_row != 0 else end
+            aligned_end = (
+                end - (end % bytes_per_row) if end % bytes_per_row != 0 else end
+            )
 
             for addr in range(start, aligned_end, bytes_per_row):
                 hi_ind = (highlight - addr) // group if highlight is not None else -1
-                print("0x{:04x}: {}{}".format(
-                    self.base + addr, format_bytes(self.read(addr, bytes_per_row), fmt, group, hi_ind), FMT_NONE
-                ))
+                print(
+                    "0x{:04x}: {}{}".format(
+                        self.base + addr,
+                        format_bytes(
+                            self.read(addr, bytes_per_row), fmt, group, hi_ind
+                        ),
+                        FMT_NONE,
+                    )
+                )
 
             if aligned_end != end:
-                hi_ind = (highlight - aligned_end) // group if highlight is not None else -1
-                print("0x{:04x}: {}{}".format(
-                    self.base + aligned_end, format_bytes(
-                        self.read(aligned_end, end % bytes_per_row), fmt, group, hi_ind
-                    ), FMT_NONE
-                ))
+                hi_ind = (
+                    (highlight - aligned_end) // group if highlight is not None else -1
+                )
+                print(
+                    "0x{:04x}: {}{}".format(
+                        self.base + aligned_end,
+                        format_bytes(
+                            self.read(aligned_end, end % bytes_per_row),
+                            fmt,
+                            group,
+                            hi_ind,
+                        ),
+                        FMT_NONE,
+                    )
+                )
 
     def dump_all(self, *args, **kwargs):
         self.dump(0, self.size, *args, **kwargs)
@@ -122,5 +162,5 @@ class MemorySection(ABC):
             self.base,
             self.size,
             self.flags,
-            self.owner
+            self.owner,
         )

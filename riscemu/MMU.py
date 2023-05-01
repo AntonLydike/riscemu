@@ -8,8 +8,15 @@ from typing import Dict, List, Optional, Union
 
 from .colors import *
 from .helpers import align_addr
-from .types import Instruction, MemorySection, MemoryFlags, T_AbsoluteAddress, \
-    Program, InstructionContext, Int32
+from .types import (
+    Instruction,
+    MemorySection,
+    MemoryFlags,
+    T_AbsoluteAddress,
+    Program,
+    InstructionContext,
+    Int32,
+)
 from .types.exceptions import InvalidAllocationException, MemoryAccessException
 
 
@@ -80,8 +87,14 @@ class MMU:
         """
         sec = self.get_sec_containing(addr)
         if sec is None:
-            print(FMT_MEM + "[MMU] Trying to read instruction form invalid region! (read at {}) ".format(addr)
-                  + "Have you forgotten an exit syscall or ret statement?" + FMT_NONE)
+            print(
+                FMT_MEM
+                + "[MMU] Trying to read instruction form invalid region! (read at {}) ".format(
+                    addr
+                )
+                + "Have you forgotten an exit syscall or ret statement?"
+                + FMT_NONE
+            )
             raise RuntimeError("No next instruction available!")
         return sec.read_ins(addr - sec.base)
 
@@ -97,8 +110,16 @@ class MMU:
             addr = addr.unsigned_value
         sec = self.get_sec_containing(addr)
         if sec is None:
-            print(FMT_MEM + "[MMU] Trying to read data form invalid region at 0x{:x}! ".format(addr) + FMT_NONE)
-            raise MemoryAccessException("region is non-initialized!", addr, size, 'read')
+            print(
+                FMT_MEM
+                + "[MMU] Trying to read data form invalid region at 0x{:x}! ".format(
+                    addr
+                )
+                + FMT_NONE
+            )
+            raise MemoryAccessException(
+                "region is non-initialized!", addr, size, "read"
+            )
         return sec.read(addr - sec.base, size)
 
     def write(self, addr: int, size: int, data: bytearray):
@@ -111,8 +132,16 @@ class MMU:
         """
         sec = self.get_sec_containing(addr)
         if sec is None:
-            print(FMT_MEM + '[MMU] Invalid write into non-initialized region at 0x{:08X}'.format(addr) + FMT_NONE)
-            raise MemoryAccessException("region is non-initialized!", addr, size, 'write')
+            print(
+                FMT_MEM
+                + "[MMU] Invalid write into non-initialized region at 0x{:08X}".format(
+                    addr
+                )
+                + FMT_NONE
+            )
+            raise MemoryAccessException(
+                "region is non-initialized!", addr, size, "write"
+            )
 
         return sec.write(addr - sec.base, size, data)
 
@@ -126,7 +155,11 @@ class MMU:
         """
         sec = self.get_sec_containing(addr)
         if sec is None:
-            print(FMT_MEM + "[MMU] No section containing addr 0x{:08X}".format(addr) + FMT_NONE)
+            print(
+                FMT_MEM
+                + "[MMU] No section containing addr 0x{:08X}".format(addr)
+                + FMT_NONE
+            )
             return
         sec.dump(addr - sec.base, *args, **kwargs)
 
@@ -138,10 +171,18 @@ class MMU:
         """
         print(FMT_MEM + "[MMU] Lookup for symbol {}:".format(symb) + FMT_NONE)
         if symb in self.global_symbols:
-            print("   Found global symbol {}: 0x{:X}".format(symb, self.global_symbols[symb]))
+            print(
+                "   Found global symbol {}: 0x{:X}".format(
+                    symb, self.global_symbols[symb]
+                )
+            )
         for bin in self.programs:
             if symb in bin.context.labels:
-                print("   Found local labels {}: 0x{:X} in {}".format(symb, bin.context.labels[symb], bin.name))
+                print(
+                    "   Found local labels {}: 0x{:X} in {}".format(
+                        symb, bin.context.labels[symb], bin.name
+                    )
+                )
 
     def read_int(self, addr: int) -> Int32:
         return Int32(self.read(addr, 4))
@@ -154,17 +195,27 @@ class MMU:
         bin = self.get_bin_containing(address)
         secs = set(sec.name for sec in bin.sections) if bin else []
         elf_markers = {
-            '__global_pointer$', '_fdata', '_etext', '_gp',
-            '_bss_start', '_bss_end', '_ftext', '_edata', '_end', '_fbss'
+            "__global_pointer$",
+            "_fdata",
+            "_etext",
+            "_gp",
+            "_bss_start",
+            "_bss_end",
+            "_ftext",
+            "_edata",
+            "_end",
+            "_fbss",
         }
 
         def key(x):
             name, val = x
             return address - val
 
-        best_fit = sorted(filter(lambda x: x[1] <= address, sec.context.labels.items()), key=key)
+        best_fit = sorted(
+            filter(lambda x: x[1] <= address, sec.context.labels.items()), key=key
+        )
 
-        best = ('', float('inf'))
+        best = ("", float("inf"))
         for name, val in best_fit:
             if address - val < best[1]:
                 best = (name, val)
@@ -178,13 +229,14 @@ class MMU:
 
         if not name:
             return "{}:{} + 0x{:x} (0x{:x})".format(
-                sec.owner, sec.name,
-                address - sec.base, address
+                sec.owner, sec.name, address - sec.base, address
             )
 
-        return str('{}:{} at {} (0x{:0x}) + 0x{:0x}'.format(
-            sec.owner, sec.name, name, val, address - val
-        ))
+        return str(
+            "{}:{} at {} (0x{:0x}) + 0x{:0x}".format(
+                sec.owner, sec.name, name, val, address - val
+            )
+        )
 
     def has_continous_free_region(self, start: int, end: int) -> bool:
         # if we have no sections we are all good
@@ -210,13 +262,24 @@ class MMU:
 
     def load_program(self, program: Program, align_to: int = 4):
         if program.base is not None:
-            if not self.has_continous_free_region(program.base, program.base + program.size):
-                print(FMT_MEM + "Cannot load program {} into desired space (0x{:0x}-0x{:0x}), area occupied.".format(
-                    program.name, program.base, program.base + program.size
-                ) + FMT_NONE)
-                raise InvalidAllocationException("Area occupied".format(
-                    program.name, program.base, program.base + program.size
-                ), program.name, program.size, MemoryFlags(False, True))
+            if not self.has_continous_free_region(
+                program.base, program.base + program.size
+            ):
+                print(
+                    FMT_MEM
+                    + "Cannot load program {} into desired space (0x{:0x}-0x{:0x}), area occupied.".format(
+                        program.name, program.base, program.base + program.size
+                    )
+                    + FMT_NONE
+                )
+                raise InvalidAllocationException(
+                    "Area occupied".format(
+                        program.name, program.base, program.base + program.size
+                    ),
+                    program.name,
+                    program.size,
+                    MemoryFlags(False, True),
+                )
 
             at_addr = program.base
         else:
@@ -244,7 +307,12 @@ class MMU:
                 self.sections.append(sec)
                 self._update_state()
             else:
-                print(FMT_MEM + '[MMU] Cannot place section {} at {}, space is occupied!'.format(sec, sec.base))
+                print(
+                    FMT_MEM
+                    + "[MMU] Cannot place section {} at {}, space is occupied!".format(
+                        sec, sec.base
+                    )
+                )
                 return False
         else:
             at_addr = align_addr(self.get_guaranteed_free_address(), 8)
@@ -269,8 +337,7 @@ class MMU:
 
     def __repr__(self):
         return "{}(\n\t{}\n)".format(
-            self.__class__.__name__,
-            "\n\t".join(repr(x) for x in self.programs)
+            self.__class__.__name__, "\n\t".join(repr(x) for x in self.programs)
         )
 
     def context_for(self, addr: T_AbsoluteAddress) -> InstructionContext:

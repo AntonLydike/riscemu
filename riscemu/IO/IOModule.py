@@ -5,12 +5,21 @@ from riscemu.types import MemorySection, MemoryFlags, T_RelativeAddress
 
 
 class IOModule(MemorySection, ABC):
-    def __init__(self, name: str, flags: MemoryFlags, size: int, owner: str = 'system', base: int = 0):
+    def __init__(
+        self,
+        name: str,
+        flags: MemoryFlags,
+        size: int,
+        owner: str = "system",
+        base: int = 0,
+    ):
         super(IOModule, self).__init__(name, flags, size, base, owner, None)
 
     def contains(self, addr, size: int = 0):
-        return self.base <= addr < self.base + self.size and \
-               self.base <= addr + size <= self.base + self.size
+        return (
+            self.base <= addr < self.base + self.size
+            and self.base <= addr + size <= self.base + self.size
+        )
 
     def dump(self, *args, **kwargs):
         print(self)

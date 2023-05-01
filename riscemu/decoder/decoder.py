@@ -5,13 +5,14 @@ from typing import Tuple, List
 def print_ins(ins: int):
     print("  f7      rs2   rs1   f3  rd    op")
     print(
-        f"0b{ins >> 25 :07b}_{(ins >> 20) & 0b11111:05b}_{(ins >> 15) & 0b11111:05b}_{(ins >> 12) & 0b111:03b}_{(ins >> 7) & 0b11111:05b}_{ins & 0b1111111:07b}");
+        f"0b{ins >> 25 :07b}_{(ins >> 20) & 0b11111:05b}_{(ins >> 15) & 0b11111:05b}_{(ins >> 12) & 0b111:03b}_{(ins >> 7) & 0b11111:05b}_{ins & 0b1111111:07b}"
+    )
 
 
 STATIC_INSN: Dict[int, Tuple[str, List[int], int]] = {
     0x00000013: ("nop", [], 0x00000013),
     0x00008067: ("ret", [], 0x00008067),
-    0xfe010113: ("addi", [2, 2, -32], 0xfe010113),
+    0xFE010113: ("addi", [2, 2, -32], 0xFE010113),
     0x02010113: ("addi", [2, 2, 32], 0x02010113),
     0x00100073: ("ebreak", [], 0x00100073),
     0x00000073: ("ecall", [], 0x00000073),
@@ -23,7 +24,7 @@ STATIC_INSN: Dict[int, Tuple[str, List[int], int]] = {
 
 
 def int_from_ins(insn: bytearray):
-    return int.from_bytes(insn, 'little')
+    return int.from_bytes(insn, "little")
 
 
 def name_from_insn(ins: int):
@@ -45,7 +46,7 @@ def name_from_insn(ins: int):
     if isinstance(dec, str):
         return dec
 
-    if opcode == 0x1c and fun3 == 0:
+    if opcode == 0x1C and fun3 == 0:
         # we have ecall/ebreak
         token = imm110(ins)
         if token in dec:

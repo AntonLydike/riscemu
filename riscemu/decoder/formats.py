@@ -1,6 +1,7 @@
 from typing import Dict, Callable, List, Union
 from .regs import RISCV_REGS
 
+
 def op(ins: int):
     return (ins >> 2) & 31
 
@@ -46,7 +47,12 @@ def imm_b(ins: int):
     lower = rd(ins)
     higher = funct7(ins)
 
-    num = (lower & 0b11110) + ((higher & 0b0111111) << 5) + ((lower & 1) << 11) + ((higher >> 6) << 12)
+    num = (
+        (lower & 0b11110)
+        + ((higher & 0b0111111) << 5)
+        + ((lower & 1) << 11)
+        + ((higher >> 6) << 12)
+    )
     return sign_extend(num, 13)
 
 
@@ -56,10 +62,11 @@ def imm_u(ins: int):
 
 def imm_j(ins: int):
     return sign_extend(
-        (((ins >> 21) & 0b1111111111) << 1) +
-        (((ins >> 20) & 1) << 11) +
-        (((ins >> 12) & 0b11111111) << 12) +
-        (((ins >> 31) & 1) << 20), 21
+        (((ins >> 21) & 0b1111111111) << 1)
+        + (((ins >> 20) & 1) << 11)
+        + (((ins >> 12) & 0b11111111) << 12)
+        + (((ins >> 31) & 1) << 20),
+        21,
     )
 
 
@@ -111,7 +118,7 @@ INSTRUCTION_ARGS_DECODER: Dict[int, Callable[[int], List[int]]] = {
     0x0D: decode_u,
     0x18: decode_b,
     0x19: decode_i,
-    0x1b: decode_j,
-    0x1c: decode_i_unsigned,
-    0b1011: decode_r
+    0x1B: decode_j,
+    0x1C: decode_i_unsigned,
+    0b1011: decode_r,
 }

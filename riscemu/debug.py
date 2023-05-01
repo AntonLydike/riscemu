@@ -11,10 +11,10 @@ from .helpers import *
 if typing.TYPE_CHECKING:
     from riscemu import CPU, Registers
 
-HIST_FILE = os.path.join(os.path.expanduser('~'), '.riscemu_history')
+HIST_FILE = os.path.join(os.path.expanduser("~"), ".riscemu_history")
 
 
-def launch_debug_session(cpu: 'CPU', prompt=""):
+def launch_debug_session(cpu: "CPU", prompt=""):
     if cpu.debugger_active:
         return
     import code
@@ -39,7 +39,7 @@ def launch_debug_session(cpu: 'CPU', prompt=""):
             mmu.dump(what, *args, **kwargs)
 
     def dump_stack(*args, **kwargs):
-        mmu.dump(regs.get('sp'), *args, **kwargs)
+        mmu.dump(regs.get("sp"), *args, **kwargs)
 
     def ins():
         print("Current instruction at 0x{:08X}:".format(cpu.pc))
@@ -51,11 +51,7 @@ def launch_debug_session(cpu: 'CPU', prompt=""):
             return
         context = mmu.context_for(cpu.pc)
 
-        ins = SimpleInstruction(
-            name,
-            tuple(args),
-            context,
-            cpu.pc)
+        ins = SimpleInstruction(name, tuple(args), context, cpu.pc)
         print(FMT_DEBUG + "Running instruction {}".format(ins) + FMT_NONE)
         cpu.run_instruction(ins)
 
@@ -63,7 +59,7 @@ def launch_debug_session(cpu: 'CPU', prompt=""):
         try:
             cpu.run(verbose)
         except LaunchDebuggerException:
-            print(FMT_DEBUG + 'Returning to debugger...')
+            print(FMT_DEBUG + "Returning to debugger...")
             return
 
     def step():
@@ -92,4 +88,3 @@ def launch_debug_session(cpu: 'CPU', prompt=""):
     finally:
         cpu.debugger_active = False
         readline.write_history_file(HIST_FILE)
-

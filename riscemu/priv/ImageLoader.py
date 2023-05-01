@@ -14,10 +14,9 @@ from ..types import MemoryFlags, ProgramLoader, Program, T_ParserOpts
 
 
 class MemoryImageLoader(ProgramLoader):
-
     @classmethod
     def can_parse(cls, source_path: str) -> float:
-        if source_path.split('.')[-1] == 'img':
+        if source_path.split(".")[-1] == "img":
             return 1
         return 0
 
@@ -26,14 +25,14 @@ class MemoryImageLoader(ProgramLoader):
         return argv, {}
 
     def parse(self) -> Iterable[Program]:
-        if 'debug' not in self.options:
+        if "debug" not in self.options:
             yield self.parse_no_debug()
             return
 
-        with open(self.options.get('debug'), 'r') as debug_file:
+        with open(self.options.get("debug"), "r") as debug_file:
             debug_info = MemoryImageDebugInfos.load(debug_file.read())
 
-        with open(self.source_path, 'rb') as source_file:
+        with open(self.source_path, "rb") as source_file:
             data: bytearray = bytearray(source_file.read())
 
         for name, sections in debug_info.sections.items():
@@ -43,11 +42,15 @@ class MemoryImageLoader(ProgramLoader):
                 if program.base is None:
                     program.base = start
 
-                #in_code_sec = get_section_base_name(sec_name) in INSTRUCTION_SECTION_NAMES
+                # in_code_sec = get_section_base_name(sec_name) in INSTRUCTION_SECTION_NAMES
                 program.add_section(
                     ElfMemorySection(
-                        data[start:start+size], sec_name, program.context,
-                        name, start, MemoryFlags(False, True)
+                        data[start : start + size],
+                        sec_name,
+                        program.context,
+                        name,
+                        start,
+                        MemoryFlags(False, True),
                     )
                 )
 
@@ -57,19 +60,27 @@ class MemoryImageLoader(ProgramLoader):
             yield program
 
     def parse_no_debug(self) -> Program:
-        print(FMT_PARSE + "[MemoryImageLoader] Warning: loading memory image without debug information!" + FMT_NONE)
+        print(
+            FMT_PARSE
+            + "[MemoryImageLoader] Warning: loading memory image without debug information!"
+            + FMT_NONE
+        )
 
-        with open(self.source_path, 'rb') as source_file:
+        with open(self.source_path, "rb") as source_file:
             data: bytes = source_file.read()
 
         p = Program(self.filename)
-        p.add_section(ElfMemorySection(
-            bytearray(data), '.text', p.context, p.name, 0, MemoryFlags(False, True)
-        ))
+        p.add_section(
+            ElfMemorySection(
+                bytearray(data), ".text", p.context, p.name, 0, MemoryFlags(False, True)
+            )
+        )
         return p
 
     @classmethod
-    def instantiate(cls, source_path: str, options: T_ParserOpts) -> 'ProgramLoader':
-        if os.path.isfile(source_path + '.dbg'):
-            return MemoryImageLoader(source_path, dict(**options, debug=source_path + '.dbg'))
+    def instantiate(cls, source_path: str, options: T_ParserOpts) -> "ProgramLoader":
+        if os.path.isfile(source_path + ".dbg"):
+            return MemoryImageLoader(
+                source_path, dict(**options, debug=source_path + ".dbg")
+            )
         return MemoryImageLoader(source_path, options)

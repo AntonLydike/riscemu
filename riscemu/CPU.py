@@ -30,7 +30,9 @@ class UserModeCPU(CPU):
     It is initialized with a configuration and a list of instruction sets.
     """
 
-    def __init__(self, instruction_sets: List[Type['riscemu.InstructionSet']], conf: RunConfig):
+    def __init__(
+        self, instruction_sets: List[Type["riscemu.InstructionSet"]], conf: RunConfig
+    ):
         """
         Creates a CPU instance.
 
@@ -54,7 +56,11 @@ class UserModeCPU(CPU):
         Execute a single instruction, then return.
         """
         if self.halted:
-            print(FMT_CPU + "[CPU] Program exited with code {}".format(self.exit_code) + FMT_NONE)
+            print(
+                FMT_CPU
+                + "[CPU] Program exited with code {}".format(self.exit_code)
+                + FMT_NONE
+            )
             return
 
         launch_debugger = False
@@ -63,7 +69,9 @@ class UserModeCPU(CPU):
             self.cycle += 1
             ins = self.mmu.read_ins(self.pc)
             if verbose:
-                print(FMT_CPU + "   Running 0x{:08X}:{} {}".format(self.pc, FMT_NONE, ins))
+                print(
+                    FMT_CPU + "   Running 0x{:08X}:{} {}".format(self.pc, FMT_NONE, ins)
+                )
             self.pc += self.INS_XLEN
             self.run_instruction(ins)
         except RiscemuBaseException as ex:
@@ -72,12 +80,12 @@ class UserModeCPU(CPU):
                 if self.debugger_active:
                     raise ex
 
-                print(FMT_CPU + '[CPU] Debugger launch requested!' + FMT_NONE)
+                print(FMT_CPU + "[CPU] Debugger launch requested!" + FMT_NONE)
                 launch_debugger = True
             else:
                 print(ex.message())
                 ex.print_stacktrace()
-                print(FMT_CPU + '[CPU] Halting due to exception!' + FMT_NONE)
+                print(FMT_CPU + "[CPU] Halting due to exception!" + FMT_NONE)
                 self.halted = True
 
         if launch_debugger:
@@ -88,7 +96,11 @@ class UserModeCPU(CPU):
             self.step(verbose)
 
         if self.conf.verbosity > 0:
-            print(FMT_CPU + "[CPU] Program exited with code {}".format(self.exit_code) + FMT_NONE)
+            print(
+                FMT_CPU
+                + "[CPU] Program exited with code {}".format(self.exit_code)
+                + FMT_NONE
+            )
 
     def setup_stack(self, stack_size=1024 * 4) -> bool:
         """
@@ -98,22 +110,26 @@ class UserModeCPU(CPU):
         """
         stack_sec = BinaryDataMemorySection(
             bytearray(stack_size),
-            '.stack',
+            ".stack",
             None,  # FIXME: why does a binary data memory section require a context?
-            '',
-            0
+            "",
+            0,
         )
 
         if not self.mmu.load_section(stack_sec, fixed_position=False):
             print(FMT_ERROR + "[CPU] Could not insert stack section!" + FMT_NONE)
             return False
 
-        self.regs.set('sp', Int32(stack_sec.base + stack_sec.size))
+        self.regs.set("sp", Int32(stack_sec.base + stack_sec.size))
 
         if self.conf.verbosity > 1:
-            print(FMT_CPU + "[CPU] Created stack of size {} at 0x{:x}".format(
-                stack_size, stack_sec.base
-            ) + FMT_NONE)
+            print(
+                FMT_CPU
+                + "[CPU] Created stack of size {} at 0x{:x}".format(
+                    stack_size, stack_sec.base
+                )
+                + FMT_NONE
+            )
 
         return True
 

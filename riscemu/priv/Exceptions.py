@@ -45,7 +45,9 @@ class CpuTrap(BaseException):
     The privilege level this trap targets 
     """
 
-    def __init__(self, code: int, mtval, type: CpuTrapType, priv: PrivModes = PrivModes.MACHINE):
+    def __init__(
+        self, code: int, mtval, type: CpuTrapType, priv: PrivModes = PrivModes.MACHINE
+    ):
         self.interrupt = 0 if type == CpuTrapType.EXCEPTION else 1
         self.code = code
         self.mtval = UInt32(mtval)
@@ -63,7 +65,9 @@ class CpuTrap(BaseException):
         name = "Reserved interrupt({}, {})".format(self.interrupt, self.code)
 
         if (self.interrupt, self.code) in MCAUSE_TRANSLATION:
-            name = MCAUSE_TRANSLATION[(self.interrupt, self.code)] + "({}, {})".format(self.interrupt, self.code)
+            name = MCAUSE_TRANSLATION[(self.interrupt, self.code)] + "({}, {})".format(
+                self.interrupt, self.code
+            )
 
         return "{} {{priv={}, type={}, mtval={:x}}} {}".format(
             name, self.priv.name, self.type.name, self.mtval, self.message()
@@ -74,7 +78,7 @@ class CpuTrap(BaseException):
 
 
 class IllegalInstructionTrap(CpuTrap):
-    def __init__(self, ins: 'ElfInstruction'):
+    def __init__(self, ins: "ElfInstruction"):
         super().__init__(2, ins.encoded, CpuTrapType.EXCEPTION)
 
 
@@ -104,7 +108,9 @@ class InvalidElfException(RiscemuBaseException):
         self.msg = msg
 
     def message(self):
-        return FMT_PARSE + "{}(\"{}\")".format(self.__class__.__name__, self.msg) + FMT_NONE
+        return (
+            FMT_PARSE + '{}("{}")'.format(self.__class__.__name__, self.msg) + FMT_NONE
+        )
 
 
 class LoadAccessFault(CpuTrap):
@@ -117,8 +123,5 @@ class LoadAccessFault(CpuTrap):
 
     def message(self):
         return "(During {} at 0x{:08x} of size {}: {})".format(
-            self.op,
-            self.addr,
-            self.size,
-            self.msg
+            self.op, self.addr, self.size, self.msg
         )

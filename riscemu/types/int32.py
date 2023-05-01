@@ -11,13 +11,18 @@ class Int32:
     You can use it just like you would any other integer, just be careful when passing it
     to functions which actually expect an integer and not a Int32.
     """
-    _type = c_int32
-    __slots__ = ('_val',)
 
-    def __init__(self, val: Union[int, c_int32, c_uint32, 'Int32', bytes, bytearray] = 0):
+    _type = c_int32
+    __slots__ = ("_val",)
+
+    def __init__(
+        self, val: Union[int, c_int32, c_uint32, "Int32", bytes, bytearray] = 0
+    ):
         if isinstance(val, (bytes, bytearray)):
             signed = len(val) == 4 and self._type == c_int32
-            self._val = self.__class__._type(int.from_bytes(val, 'little', signed=signed))
+            self._val = self.__class__._type(
+                int.from_bytes(val, "little", signed=signed)
+            )
         elif isinstance(val, self.__class__._type):
             self._val = val
         elif isinstance(val, (c_uint32, c_int32, Int32)):
@@ -26,21 +31,23 @@ class Int32:
             self._val = self.__class__._type(val)
         else:
             raise RuntimeError(
-                "Unknonw {} input type: {} ({})".format(self.__class__.__name__, type(val), val)
+                "Unknonw {} input type: {} ({})".format(
+                    self.__class__.__name__, type(val), val
+                )
             )
 
-    def __add__(self, other: Union['Int32', int]):
+    def __add__(self, other: Union["Int32", int]):
         if isinstance(other, Int32):
             other = other.value
 
         return self.__class__(self._val.value + other)
 
-    def __sub__(self, other: Union['Int32', int]):
+    def __sub__(self, other: Union["Int32", int]):
         if isinstance(other, Int32):
             other = other.value
         return self.__class__(self._val.value - other)
 
-    def __mul__(self, other: Union['Int32', int]):
+    def __mul__(self, other: Union["Int32", int]):
         if isinstance(other, Int32):
             other = other.value
         return self.__class__(self._val.value * other)
@@ -53,37 +60,37 @@ class Int32:
             other = other.value
         return self.__class__(self.value // other)
 
-    def __mod__(self, other: Union['Int32', int]):
+    def __mod__(self, other: Union["Int32", int]):
         if isinstance(other, Int32):
             other = other.value
         return self.__class__(self._val.value % other)
 
-    def __and__(self, other: Union['Int32', int]):
+    def __and__(self, other: Union["Int32", int]):
         if isinstance(other, Int32):
             other = other.value
         return self.__class__(self._val.value & other)
 
-    def __or__(self, other: Union['Int32', int]):
+    def __or__(self, other: Union["Int32", int]):
         if isinstance(other, Int32):
             other = other.value
         return self.__class__(self._val.value | other)
 
-    def __xor__(self, other: Union['Int32', int]):
+    def __xor__(self, other: Union["Int32", int]):
         if isinstance(other, Int32):
             other = other.value
         return self.__class__(self._val.value ^ other)
 
-    def __lshift__(self, other: Union['Int32', int]):
+    def __lshift__(self, other: Union["Int32", int]):
         if isinstance(other, Int32):
             other = other.value
         return self.__class__(self.value << other)
 
-    def __rshift__(self, other: Union['Int32', int]):
+    def __rshift__(self, other: Union["Int32", int]):
         if isinstance(other, Int32):
             other = other.value
         return self.__class__(self.value >> other)
 
-    def __eq__(self, other: Union['Int32', int]):
+    def __eq__(self, other: Union["Int32", int]):
         if isinstance(other, Int32):
             other = other.value
         return self.value == other
@@ -98,7 +105,7 @@ class Int32:
         return self.to_bytes(4)
 
     def __repr__(self):
-        return '{}({})'.format(self.__class__.__name__, self.value)
+        return "{}({})".format(self.__class__.__name__, self.value)
 
     def __str__(self):
         return str(self.value)
@@ -174,7 +181,7 @@ class Int32:
         """
         return self._val.value
 
-    def unsigned(self) -> 'UInt32':
+    def unsigned(self) -> "UInt32":
         """
         Convert to an unsigned representation. See :class:Uint32
         :return:
@@ -188,9 +195,9 @@ class Int32:
         :param bytes: The length of the bytearray
         :return: A little-endian representation of the contained integer
         """
-        return bytearray(self.unsigned_value.to_bytes(4, 'little'))[0:bytes]
+        return bytearray(self.unsigned_value.to_bytes(4, "little"))[0:bytes]
 
-    def signed(self) -> 'Int32':
+    def signed(self) -> "Int32":
         """
         Convert to a signed representation. See :class:Int32
         :return:
@@ -207,7 +214,7 @@ class Int32:
         """
         return c_uint32(self.value).value
 
-    def shift_right_logical(self, ammount: Union['Int32', int]) -> 'Int32':
+    def shift_right_logical(self, ammount: Union["Int32", int]) -> "Int32":
         """
         This function implements logical right shifts, meaning that the sign bit is shifted as well.
 
@@ -237,12 +244,12 @@ class Int32:
         :return: An instance of Int32, holding the sign-extended value
         """
         if isinstance(data, (bytes, bytearray)):
-            data = int.from_bytes(data, 'little')
+            data = int.from_bytes(data, "little")
         sign = data >> (bits - 1)
         if sign > 1:
             print("overflow in Int32.sext!")
         if sign:
-            data = (data & (2 ** (bits - 1) - 1)) - 2**(bits-1)
+            data = (data & (2 ** (bits - 1) - 1)) - 2 ** (bits - 1)
         return cls(data)
 
 
@@ -250,9 +257,10 @@ class UInt32(Int32):
     """
     An unsigned version of :class:Int32.
     """
+
     _type = c_uint32
 
-    def unsigned(self) -> 'UInt32':
+    def unsigned(self) -> "UInt32":
         """
         Return a new instance representing the same bytes, but signed
         :return:
@@ -263,7 +271,7 @@ class UInt32(Int32):
     def unsigned_value(self) -> int:
         return self._val.value
 
-    def shift_right_logical(self, ammount: Union['Int32', int]) -> 'UInt32':
+    def shift_right_logical(self, ammount: Union["Int32", int]) -> "UInt32":
         """
         see :meth:`Int32.shift_right_logical <Int32.shift_right_logical>`
 

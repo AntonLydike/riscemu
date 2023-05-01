@@ -14,6 +14,7 @@ class Program:
     the offset in the program, and everything will be taken care of for you.
 
     """
+
     name: str
     context: InstructionContext
     global_labels: Set[str]
@@ -44,9 +45,13 @@ class Program:
         if self.base is not None:
             if sec.base < self.base:
                 print(
-                    FMT_RED + FMT_BOLD + "WARNING: memory section {} in {} is placed before program base (0x{:x})".format(
+                    FMT_RED
+                    + FMT_BOLD
+                    + "WARNING: memory section {} in {} is placed before program base (0x{:x})".format(
                         sec, self.name, self.base
-                    ) + FMT_NONE)
+                    )
+                    + FMT_NONE
+                )
 
         self.sections.append(sec)
         # keep section list ordered
@@ -54,18 +59,21 @@ class Program:
 
     def __repr__(self):
         return "{}(name={},sections={},base={})".format(
-            self.__class__.__name__, self.name, self.global_labels,
-            [s.name for s in self.sections], self.base
+            self.__class__.__name__,
+            self.name,
+            self.global_labels,
+            [s.name for s in self.sections],
+            self.base,
         )
 
     @property
     def entrypoint(self):
-        if '_start' in self.context.labels:
-            return self.context.labels.get('_start')
-        if 'main' in self.context.labels:
-            return self.context.labels.get('main')
+        if "_start" in self.context.labels:
+            return self.context.labels.get("_start")
+        if "main" in self.context.labels:
+            return self.context.labels.get("main")
         for sec in self.sections:
-            if get_section_base_name(sec.name) == '.text' and sec.flags.executable:
+            if get_section_base_name(sec.name) == ".text" and sec.flags.executable:
                 return sec.base
 
     def loaded_trigger(self, at_addr: T_AbsoluteAddress):
@@ -81,12 +89,17 @@ class Program:
         """
         if self.is_loaded:
             if at_addr != self.base:
-                raise RuntimeError("Program loaded twice at different addresses! This will probably break things!")
+                raise RuntimeError(
+                    "Program loaded twice at different addresses! This will probably break things!"
+                )
             return
 
         if self.base is not None and self.base != at_addr:
-            print(FMT_MEM + 'WARNING: Program loaded at different address then expected! (loaded at {}, '
-                            'but expects to be loaded at {})'.format(at_addr, self.base) + FMT_NONE)
+            print(
+                FMT_MEM
+                + "WARNING: Program loaded at different address then expected! (loaded at {}, "
+                "but expects to be loaded at {})".format(at_addr, self.base) + FMT_NONE
+            )
 
         # check if we are relocating
         if self.base != at_addr:

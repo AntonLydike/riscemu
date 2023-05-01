@@ -1,5 +1,15 @@
-from .formats import INSTRUCTION_ARGS_DECODER, op, decode_i, decode_r, decode_u, decode_b, decode_j, decode_s, \
-    decode_i_shamt, decode_i_unsigned
+from .formats import (
+    INSTRUCTION_ARGS_DECODER,
+    op,
+    decode_i,
+    decode_r,
+    decode_u,
+    decode_b,
+    decode_j,
+    decode_s,
+    decode_i_shamt,
+    decode_i_unsigned,
+)
 from .regs import RISCV_REGS
 
 
@@ -9,9 +19,9 @@ def int_to_hex(num: int):
     return f"0x{num:x}"
 
 
-def format_ins(ins: int, name: str, fmt: str = 'int'):
+def format_ins(ins: int, name: str, fmt: str = "int"):
     opcode = op(ins)
-    if fmt == 'hex':
+    if fmt == "hex":
         fmt = int_to_hex
     else:
         fmt = str
@@ -20,7 +30,7 @@ def format_ins(ins: int, name: str, fmt: str = 'int'):
         return f"{name} <unknown op>"
 
     decoder = INSTRUCTION_ARGS_DECODER[opcode]
-    if name in ('ecall', 'ebreak', 'mret', 'sret', 'uret'):
+    if name in ("ecall", "ebreak", "mret", "sret", "uret"):
         return name
     if opcode in (0x8, 0x0):
         r1, r2, imm = decoder(ins)

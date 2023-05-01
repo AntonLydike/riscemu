@@ -5,8 +5,13 @@ from ..helpers import parse_numeric_argument
 
 
 class SimpleInstruction(Instruction):
-    def __init__(self, name: str, args: Union[Tuple[()], Tuple[str], Tuple[str, str], Tuple[str, str, str]],
-                 context: InstructionContext, addr: T_RelativeAddress):
+    def __init__(
+        self,
+        name: str,
+        args: Union[Tuple[()], Tuple[str], Tuple[str, str], Tuple[str, str, str]],
+        context: InstructionContext,
+        addr: T_RelativeAddress,
+    ):
         self.context = context
         self.name = name
         self.args = args
@@ -23,4 +28,3 @@ class SimpleInstruction(Instruction):
 
     def get_reg(self, num: int) -> str:
         return self.args[num]
-

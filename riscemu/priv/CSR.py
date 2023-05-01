@@ -12,6 +12,7 @@ class CSR:
     """
     This holds all Control and Status Registers (CSR)
     """
+
     regs: Dict[int, UInt32]
     """
     All Control and Status Registers are stored here
@@ -52,7 +53,9 @@ class CSR:
             return self.virtual_regs[addr]()
         return self.regs[addr]
 
-    def set_listener(self, addr: Union[str, int], listener: Callable[[UInt32, UInt32], None]):
+    def set_listener(
+        self, addr: Union[str, int], listener: Callable[[UInt32, UInt32], None]
+    ):
         addr = self._name_to_addr(addr)
         if addr is None:
             print("unknown csr address name: {}".format(addr))
@@ -73,11 +76,11 @@ class CSR:
         """
         size = 2 if name in MSTATUS_LEN_2 else 1
         off = MSTATUS_OFFSETS[name]
-        mask = (2 ** size - 1) << off
-        old_val = self.get('mstatus')
+        mask = (2**size - 1) << off
+        old_val = self.get("mstatus")
         erased = old_val & (~mask)
         new_val = erased | (val << off)
-        self.set('mstatus', new_val)
+        self.set("mstatus", new_val)
 
     def get_mstatus(self, name) -> UInt32:
         if not self.mstatus_cache_dirty and name in self.mstatus_cache:
@@ -85,8 +88,8 @@ class CSR:
 
         size = 2 if name in MSTATUS_LEN_2 else 1
         off = MSTATUS_OFFSETS[name]
-        mask = (2 ** size - 1) << off
-        val = (self.get('mstatus') & mask) >> off
+        mask = (2**size - 1) << off
+        val = (self.get("mstatus") & mask) >> off
         if self.mstatus_cache_dirty:
             self.mstatus_cache = dict(name=val)
         else:
