@@ -37,7 +37,7 @@ uses the `ebreak` instruction to open the debugger. Let's run it and see what ha
 [MMU] Successfully loaded: LoadedExecutable[examples/fibs.asm](base=0x00000100, size=72bytes, sections=data text, run_ptr=0x00000138)
 [CPU] Started running from 0x00000138 (examples/fibs.asm)
 Debug instruction encountered at 0x0000013C
->>> 
+>>>
 ```
 
 In this interactive session, you have access to the cpu, registers, memory and syscall interface. You can look into everything,
@@ -58,8 +58,8 @@ and most common tasks should have helper methods for them.
   * `get(name)` get register content
   * `set(name, val)` set register content
 * `cpu`:
-  * The CPU has the `pc` attribute and `cycle` attribute. Others won't be useful in this context. 
-  
+  * The CPU has the `pc` attribute and `cycle` attribute. Others won't be useful in this context.
+
 **Available helpers are:**
 
 * `dump(regs | addr)` dumps either registers or memory address

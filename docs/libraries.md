@@ -13,4 +13,3 @@ You can include the libraries by adding them as arguments (before your main asse
 ```
 
 These libraries are no where near a stable state, so documentation will be scarce. Your best bet would be to `grep` for functionality. Sorry!
-

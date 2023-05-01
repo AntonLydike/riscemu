@@ -42,7 +42,7 @@ class CpuTrap(BaseException):
 
     priv: PrivModes
     """
-    The privilege level this trap targets 
+    The privilege level this trap targets
     """
 
     def __init__(

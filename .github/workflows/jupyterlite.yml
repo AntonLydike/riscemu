@@ -27,7 +27,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install jupyterlite[all] libarchive-c build pyodide-build
-          
+
       - name: Build RiscEmu source distribution
         run: |
           cd riscemu
@@ -42,7 +42,7 @@ jobs:
         with:
           path: pyodide
           key: pyodide
-          
+
       - name: Clone pyodide if not cached
         if: steps.cache-pyodide.outputs.cache-hit != 'true'
         run: git clone https://github.com/pyodide/pyodide.git
@@ -51,16 +51,16 @@ jobs:
       # and do the necessary updates before building.
       - name: Build custom Pyodide distribution
         run: |
-          
+
           cd pyodide
           git fetch --all
           git checkout 0.22.0a3
           python -m pip install -r requirements.txt
           sudo apt update && sudo apt install f2c
-          
+
           rm -rf packages/riscemu
           pyodide skeleton pypi riscemu
-          
+
           PYODIDE_PACKAGES="riscemu" make
 
       - name: Build the JupyterLite site
@@ -68,11 +68,11 @@ jobs:
           mkdir content
           cp riscemu/docs/* content -r
           cp riscemu/examples content -r
-          
+
           rm -rf pyodide/pyodide
           mkdir pyodide/pyodide
           mv pyodide/dist pyodide/pyodide/pyodide
-          
+
           python -m jupyter lite build --contents content --pyodide pyodide/pyodide
 
       - name: Upload artifact
@@ -96,5 +96,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v1
-
-

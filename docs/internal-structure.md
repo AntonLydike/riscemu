@@ -1,19 +1,19 @@
 # Internal Structure
 
 ## Loading assembly files:
-In order to load an assembly file, you need to instantiate a CPU with the capabilities you want. Loading an assembly 
+In order to load an assembly file, you need to instantiate a CPU with the capabilities you want. Loading an assembly
 file is the done in multiple steps:
 
 
 * An `RiscVInput` is created, this represents the file internally
 * An `RiscVTokenizer` is created by calling `cpu.get_tokenizer()`.
 * The input is tokenized by calling `.tokenize()` on the tokenizer.
-* The tokens can then be converted to an Executable, this will then 
+* The tokens can then be converted to an Executable, this will then
   hold all the information such as name, sections, symbols, etc.
   This is done by creating an `ExecutableParser(tk: RiscVTokenizer)`
   and the calling `parse()`.
 * Now you have a representation of the assembly file that can be loaded
-  into memory by calling `cpu.load(executable)`, this will internally 
+  into memory by calling `cpu.load(executable)`, this will internally
   construct a `LoadedExecutable`, which represents the actual memory
   regions the executable contains (and some meta information such as
   symbols).
@@ -30,4 +30,3 @@ Creating a cpu with certain instruction sets is done by passing the CPU construc
 ```
 cpu = CPU(config, [RV32I, RV32M])
 ```
-

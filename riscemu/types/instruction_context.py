@@ -18,8 +18,8 @@ class InstructionContext:
 
     numbered_labels: Dict[str, List[T_RelativeAddress]]
     """
-    This dictionary maps numbered labels (which can occur multiple times) to a list of (block-relative) addresses where 
-    the label was placed 
+    This dictionary maps numbered labels (which can occur multiple times) to a list of (block-relative) addresses where
+    the label was placed
     """
 
     global_symbol_dict: Dict[str, T_AbsoluteAddress]

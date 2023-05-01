@@ -150,5 +150,3 @@ __memset_loop:
             j    __memset_loop
 __memset_ret:
             ret
-
-

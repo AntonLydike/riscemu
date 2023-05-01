@@ -9,7 +9,7 @@
  - Fixed bug where wrong parts of section would be printed in mmu.dump()
  - Removed tests for bind_twos_complement as the function is now redundant with the introduction of Int32
  - Fixed address translation error for sections without symbols
- - Changed verbosity level at which start and end of CPU are printed, added prints for start and stack loading 
+ - Changed verbosity level at which start and end of CPU are printed, added prints for start and stack loading
 
 ## 2.0.2
 
@@ -23,6 +23,6 @@
 
 ## 2.0.0
 
- - Correct handling of 32 bit overflows and underflows 
+ - Correct handling of 32 bit overflows and underflows
  - Complete revamp of internal data structures
  - Completely reworked how assembly is parsed

@@ -22,7 +22,7 @@ SYSCALLS = {
 """
 This dict contains a mapping for all available syscalls (code->name)
 
-If you wish to add a syscall to the built-in system, you can extend this 
+If you wish to add a syscall to the built-in system, you can extend this
 dictionary and implement a method with the same name on the SyscallInterface
 class.
 """

@@ -30,8 +30,8 @@ The following pseudo-ops are implemented as of yet:
 * `.global <name>` mark symbol `<name>` as a global symbol. It is available from all loaded programs
 * `.align <bytes>` currently a nop as cpu does not care about alignment as of now
 
-## Sections: 
-Currently only these three sections are supported: 
+## Sections:
+Currently only these three sections are supported:
 * `data` read-write data (non-executable)
 * `rodata` read-only data (non-executable)
 * `text` executable data (read-only)
