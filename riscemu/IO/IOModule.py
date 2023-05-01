@@ -12,8 +12,7 @@ class IOModule(MemorySection, ABC):
         return self.base <= addr < self.base + self.size and \
                self.base <= addr + size <= self.base + self.size
 
-    def dump(self, start: T_RelativeAddress, end: Optional[T_RelativeAddress] = None, fmt: str = 'hex',
-             bytes_per_row: int = 16, rows: int = 10, group: int = 4):
+    def dump(self, *args, **kwargs):
         print(self)
 
     def __repr__(self):

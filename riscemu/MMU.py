@@ -94,7 +94,6 @@ class MMU:
         :return: The bytearray at addr
         """
         if isinstance(addr, Int32):
-            breakpoint()
             addr = addr.unsigned_value
         sec = self.get_sec_containing(addr)
         if sec is None:
