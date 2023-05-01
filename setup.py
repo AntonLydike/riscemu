@@ -23,9 +23,14 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     package_dir={"": "."},
-    packages=["riscemu", "riscemu.decoder", "riscemu.instructions", "riscemu.IO", "riscemu.priv", "riscemu.types"],
+    packages=[
+        "riscemu",
+        "riscemu.decoder",
+        "riscemu.instructions",
+        "riscemu.IO",
+        "riscemu.priv",
+        "riscemu.types",
+    ],
     python_requires=">=3.6",
-    install_requires=[
-        "pyelftools~=0.27"
-    ]
+    install_requires=["pyelftools~=0.27"],
 )
