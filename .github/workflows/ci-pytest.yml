@@ -39,6 +39,9 @@ jobs:
     - name: Test with pytest
       run: |
         pytest -W error
+    - name: Test with lit
+      run: |
+        lit -v test/filecheck
 
     #- name: Execute lit tests
     #  run: |
