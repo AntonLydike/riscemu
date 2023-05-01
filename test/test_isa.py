@@ -45,7 +45,7 @@ assert_ops = {
 }
 
 
-class TestIS(InstructionSet):
+class Z_test(InstructionSet):
     def __init__(self, cpu: 'CPU'):
         print('[Test] loading testing ISA, this is only meant for running testcases and is not part of the RISC-V ISA!')
         self.failed = False
@@ -71,5 +71,3 @@ class TestIS(InstructionSet):
             print(FMT_ERROR + '[TestCase] 🔴 reached fail instruction! {}'.format(ins))
             self.cpu.halted = True
             self.failed = True
-
-    def assert_mem(self, ins: Instruction):

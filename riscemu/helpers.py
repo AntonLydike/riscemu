@@ -14,6 +14,8 @@ from .types.exceptions import *
 def align_addr(addr: int, to_bytes: int = 8) -> int:
     """
     align an address to `to_bytes` (meaning addr & to_bytes = 0)
+
+    This will increase the address
     """
     return addr + (-addr % to_bytes)
 
