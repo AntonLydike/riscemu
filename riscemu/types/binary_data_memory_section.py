@@ -16,15 +16,10 @@ class BinaryDataMemorySection(MemorySection):
         context: InstructionContext,
         owner: str,
         base: int = 0,
-        flags: MemoryFlags = None,
+        flags: Optional[MemoryFlags] = None,
     ):
-        self.name = name
-        self.base = base
-        self.context = context
-        self.size = len(data)
-        self.flags = flags if flags is not None else MemoryFlags(False, False)
+        super().__init__(name, flags if flags is not None else MemoryFlags(False, False), len(data), base, owner, context)
         self.data = data
-        self.owner = owner
 
     def read(self, offset: T_RelativeAddress, size: int) -> bytearray:
         if offset + size > self.size:

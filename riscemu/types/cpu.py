@@ -7,6 +7,9 @@ from ..config import RunConfig
 from ..colors import FMT_RED, FMT_NONE, FMT_ERROR, FMT_CPU
 from . import T_AbsoluteAddress, Instruction, Program, ProgramLoader
 
+if typing.TYPE_CHECKING:
+    from ..MMU import MMU
+    from ..instructions import InstructionSet
 
 class CPU(ABC):
     # static cpu configuration
@@ -80,11 +83,11 @@ class CPU(ABC):
         )
 
     @abstractmethod
-    def step(self, verbose=False):
+    def step(self, verbose: bool =False):
         pass
 
     @abstractmethod
-    def run(self, verbose=False):
+    def run(self, verbose: bool =False):
         pass
 
     def launch(self, program: Program, verbose: bool = False):
