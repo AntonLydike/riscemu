@@ -134,7 +134,7 @@ unlimited_regs:       Allow an unlimited number of registers""",
         "--ignore-exit-code",
         help="Ignore exit code of the program and always return 0 if the program ran to completion.",
         action="store_true",
-        default=False
+        default=False,
     )
 
     args = parser.parse_args()

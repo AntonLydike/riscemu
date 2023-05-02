@@ -94,6 +94,7 @@ To generate your local documentation, first install everything in `sphinx-docs/r
 generate and make all doc files for you. Finally, you can open the docs locall by runnint `open sphinx-docs/build/html/index.html`.
 
 ## Resources:
+  * RISC-V Programmers Handbook: https://github.com/riscv-non-isa/riscv-asm-manual/blob/master/riscv-asm.md
   * Pseudo ops: https://www.codetd.com/article/8981522
   * detailed instruction definition: https://msyksphinz-self.github.io/riscv-isadoc/html/rvi.html#add
   * RISC-V reference card: https://www.cl.cam.ac.uk/teaching/1617/ECAD+Arch/files/docs/RISCVGreenCardv8-20151013.pdf
