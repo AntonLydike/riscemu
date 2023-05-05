@@ -51,7 +51,7 @@ class UserModeCPU(CPU):
         syscall_symbols.update(self.mmu.global_symbols)
         self.mmu.global_symbols.update(syscall_symbols)
 
-    def step(self, verbose: bool=False):
+    def step(self, verbose: bool = False):
         """
         Execute a single instruction, then return.
         """
@@ -91,7 +91,7 @@ class UserModeCPU(CPU):
         if launch_debugger:
             launch_debug_session(self)
 
-    def run(self, verbose: bool=False):
+    def run(self, verbose: bool = False):
         while not self.halted:
             self.step(verbose)
 
@@ -102,7 +102,7 @@ class UserModeCPU(CPU):
                 + FMT_NONE
             )
 
-    def setup_stack(self, stack_size: int=1024 * 4) -> bool:
+    def setup_stack(self, stack_size: int = 1024 * 4) -> bool:
         """
         Create program stack and populate stack pointer
         :param stack_size: the size of the required stack, defaults to 4Kib

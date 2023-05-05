@@ -89,7 +89,7 @@ class Registers:
         self.last_read = None
         self.infinite_regs = infinite_regs
 
-    def dump(self, full: bool=False):
+    def dump(self, full: bool = False):
         """
         Dump all registers to stdout
         :param full: If True, floating point registers are dumped too
@@ -156,7 +156,7 @@ class Registers:
             return FMT_GRAY + txt + FMT_NONE
         return txt
 
-    def set(self, reg: str, val: "Int32", mark_set: bool=True) -> bool:
+    def set(self, reg: str, val: "Int32", mark_set: bool = True) -> bool:
         """
         Set a register content to val
         :param reg: The register to set
@@ -189,7 +189,7 @@ class Registers:
         self.vals[reg] = val.unsigned()
         return True
 
-    def get(self, reg: str, mark_read: bool=True) -> "Int32":
+    def get(self, reg: str, mark_read: bool = True) -> "Int32":
         """
         Retuns the contents of register reg
         :param reg: The register name

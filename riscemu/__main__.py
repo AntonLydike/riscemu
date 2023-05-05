@@ -27,7 +27,6 @@ if __name__ == "__main__":
         sys.exit()
 
     class OptionStringAction(argparse.Action):
-
         def __init__(self, option_strings, dest, keys=None, omit_empty=False, **kwargs):
             if keys is None:
                 raise ValueError('must define "keys" argument')

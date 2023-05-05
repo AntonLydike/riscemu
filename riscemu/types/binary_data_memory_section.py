@@ -19,7 +19,14 @@ class BinaryDataMemorySection(MemorySection):
         base: int = 0,
         flags: Optional[MemoryFlags] = None,
     ):
-        super().__init__(name, flags if flags is not None else MemoryFlags(False, False), len(data), base, owner, context)
+        super().__init__(
+            name,
+            flags if flags is not None else MemoryFlags(False, False),
+            len(data),
+            base,
+            owner,
+            context,
+        )
         self.data = data
 
     def read(self, offset: T_RelativeAddress, size: int) -> bytearray:

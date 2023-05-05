@@ -152,9 +152,14 @@ class MemorySection(ABC):
                     )
                 )
 
-    def dump_all(self, fmt: Optional[str] = None, bytes_per_row: Optional[int] = None,
-             rows: int = 10, group: Optional[int] = None,
-             highlight: Optional[int] = None):
+    def dump_all(
+        self,
+        fmt: Optional[str] = None,
+        bytes_per_row: Optional[int] = None,
+        rows: int = 10,
+        group: Optional[int] = None,
+        highlight: Optional[int] = None,
+    ):
         self.dump(0, self.size, fmt, bytes_per_row, rows, group, highlight)
 
     def __repr__(self):

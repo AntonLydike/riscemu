@@ -11,6 +11,7 @@ if typing.TYPE_CHECKING:
     from ..MMU import MMU
     from ..instructions import InstructionSet
 
+
 class CPU(ABC):
     # static cpu configuration
     INS_XLEN: int = 4
@@ -83,11 +84,11 @@ class CPU(ABC):
         )
 
     @abstractmethod
-    def step(self, verbose: bool =False):
+    def step(self, verbose: bool = False):
         pass
 
     @abstractmethod
-    def run(self, verbose: bool =False):
+    def run(self, verbose: bool = False):
         pass
 
     def launch(self, program: Program, verbose: bool = False):
