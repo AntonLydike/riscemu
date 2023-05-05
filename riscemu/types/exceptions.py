@@ -15,7 +15,7 @@ if typing.TYPE_CHECKING:
 class RiscemuBaseException(BaseException):
     @abstractmethod
     def message(self) -> str:
-        ...
+        raise NotImplemented
 
     def print_stacktrace(self):
         import traceback
