@@ -84,19 +84,19 @@ class Registers:
     def __init__(self, infinite_regs: bool = False):
         from .types import Int32
 
-        self.vals = defaultdict(lambda: Int32(0))
+        self.vals: defaultdict[str, Int32] = defaultdict(lambda: Int32(0))
         self.last_set = None
         self.last_read = None
         self.infinite_regs = infinite_regs
 
-    def dump(self, full=False):
+    def dump(self, full: bool = False):
         """
         Dump all registers to stdout
         :param full: If True, floating point registers are dumped too
         """
         named_regs = [self._reg_repr(reg) for reg in Registers.named_registers()]
 
-        lines = [[] for i in range(12)]
+        lines: list[list[str]] = [[] for _ in range(12)]
         if not full:
             regs = [("a", 8), ("s", 12), ("t", 7)]
         else:
@@ -142,7 +142,7 @@ class Registers:
             + " ".join(self._reg_repr("a{}".format(i)) for i in range(8))
         )
 
-    def _reg_repr(self, reg):
+    def _reg_repr(self, reg: str):
         txt = "{:4}=0x{:08X}".format(reg, self.get(reg, False))
         if reg == "fp":
             reg = "s0"
@@ -156,7 +156,7 @@ class Registers:
             return FMT_GRAY + txt + FMT_NONE
         return txt
 
-    def set(self, reg, val: "Int32", mark_set=True) -> bool:
+    def set(self, reg: str, val: "Int32", mark_set: bool = True) -> bool:
         """
         Set a register content to val
         :param reg: The register to set
@@ -189,7 +189,7 @@ class Registers:
         self.vals[reg] = val.unsigned()
         return True
 
-    def get(self, reg, mark_read=True) -> "Int32":
+    def get(self, reg: str, mark_read: bool = True) -> "Int32":
         """
         Retuns the contents of register reg
         :param reg: The register name

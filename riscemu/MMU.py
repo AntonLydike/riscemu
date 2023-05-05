@@ -319,7 +319,7 @@ class MMU:
             sec.base = at_addr
             self.sections.append(sec)
             self._update_state()
-            return True
+        return True
 
     def _update_state(self):
         """

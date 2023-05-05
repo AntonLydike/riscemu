@@ -43,11 +43,11 @@ class MemorySection(ABC):
         self,
         start: T_RelativeAddress,
         end: Optional[T_RelativeAddress] = None,
-        fmt: str = None,
-        bytes_per_row: int = None,
+        fmt: Optional[str] = None,
+        bytes_per_row: Optional[int] = None,
         rows: int = 10,
-        group: int = None,
-        highlight: int = None,
+        group: Optional[int] = None,
+        highlight: Optional[int] = None,
     ):
         """
         Dump the section. If no end is given, the rows around start are printed and start is highlighted.
@@ -152,8 +152,15 @@ class MemorySection(ABC):
                     )
                 )
 
-    def dump_all(self, *args, **kwargs):
-        self.dump(0, self.size, *args, **kwargs)
+    def dump_all(
+        self,
+        fmt: Optional[str] = None,
+        bytes_per_row: Optional[int] = None,
+        rows: int = 10,
+        group: Optional[int] = None,
+        highlight: Optional[int] = None,
+    ):
+        self.dump(0, self.size, fmt, bytes_per_row, rows, group, highlight)
 
     def __repr__(self):
         return "{}[{}] at 0x{:08X} (size={}bytes, flags={}, owner={})".format(

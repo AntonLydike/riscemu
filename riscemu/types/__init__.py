@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Any
 import re
 
 # define some base type aliases so we can keep track of absolute and relative addresses
@@ -6,7 +6,7 @@ T_RelativeAddress = int
 T_AbsoluteAddress = int
 
 # parser options are just dictionaries with arbitrary values
-T_ParserOpts = Dict[str, any]
+T_ParserOpts = Dict[str, Any]
 
 NUMBER_SYMBOL_PATTERN = re.compile(r"^\d+[fb]$")
 

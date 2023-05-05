@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Any, Union
 from ctypes import c_int32, c_uint32
 
 
@@ -52,10 +52,10 @@ class Int32:
             other = other.value
         return self.__class__(self._val.value * other)
 
-    def __truediv__(self, other):
+    def __truediv__(self, other: Any):
         return self // other
 
-    def __floordiv__(self, other):
+    def __floordiv__(self, other: Any):
         if isinstance(other, Int32):
             other = other.value
         return self.__class__(self.value // other)
@@ -90,10 +90,12 @@ class Int32:
             other = other.value
         return self.__class__(self.value >> other)
 
-    def __eq__(self, other: Union["Int32", int]):
-        if isinstance(other, Int32):
-            other = other.value
-        return self.value == other
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, int):
+            return self.value == other
+        elif isinstance(other, Int32):
+            return self.value == other.value
+        return False
 
     def __neg__(self):
         return self.__class__(-self._val.value)
@@ -110,28 +112,28 @@ class Int32:
     def __str__(self):
         return str(self.value)
 
-    def __format__(self, format_spec):
+    def __format__(self, format_spec: str):
         return self.value.__format__(format_spec)
 
     def __hash__(self):
         return hash(self.value)
 
-    def __gt__(self, other):
+    def __gt__(self, other: Any):
         if isinstance(other, Int32):
             other = other.value
         return self.value > other
 
-    def __lt__(self, other):
+    def __lt__(self, other: Any):
         if isinstance(other, Int32):
             other = other.value
         return self.value < other
 
-    def __le__(self, other):
+    def __le__(self, other: Any):
         if isinstance(other, Int32):
             other = other.value
         return self.value <= other
 
-    def __ge__(self, other):
+    def __ge__(self, other: Any):
         if isinstance(other, Int32):
             other = other.value
         return self.value >= other
@@ -139,38 +141,38 @@ class Int32:
     def __bool__(self):
         return bool(self.value)
 
-    def __cmp__(self, other):
+    def __cmp__(self, other: Any):
         if isinstance(other, Int32):
             other = other.value
         return self.value.__cmp__(other)
 
     # right handed binary operators
 
-    def __radd__(self, other):
+    def __radd__(self, other: Any):
         return self + other
 
-    def __rsub__(self, other):
+    def __rsub__(self, other: Any):
         return self.__class__(other) - self
 
-    def __rmul__(self, other):
+    def __rmul__(self, other: Any):
         return self * other
 
-    def __rtruediv__(self, other):
+    def __rtruediv__(self, other: Any):
         return self.__class__(other) // self
 
-    def __rfloordiv__(self, other):
+    def __rfloordiv__(self, other: Any):
         return self.__class__(other) // self
 
-    def __rmod__(self, other):
+    def __rmod__(self, other: Any):
         return self.__class__(other) % self
 
-    def __rand__(self, other):
+    def __rand__(self, other: Any):
         return self.__class__(other) & self
 
-    def __ror__(self, other):
+    def __ror__(self, other: Any):
         return self.__class__(other) | self
 
-    def __rxor__(self, other):
+    def __rxor__(self, other: Any):
         return self.__class__(other) ^ self
 
     @property
@@ -278,4 +280,6 @@ class UInt32(Int32):
         :param ammount: Number of positions to shift
         :return: A new Int32 object representing the shifted value (keeps the signed-ness of the source)
         """
-        return self >> ammount
+        if isinstance(ammount, Int32):
+            ammount = ammount.value
+        return UInt32(self.value >> ammount)

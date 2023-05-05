@@ -14,8 +14,8 @@ if typing.TYPE_CHECKING:
 
 class RiscemuBaseException(BaseException):
     @abstractmethod
-    def message(self):
-        pass
+    def message(self) -> str:
+        raise NotImplemented
 
     def print_stacktrace(self):
         import traceback
@@ -27,7 +27,7 @@ class RiscemuBaseException(BaseException):
 
 
 class ParseException(RiscemuBaseException):
-    def __init__(self, msg, data=None):
+    def __init__(self, msg: str, data=None):
         super().__init__(msg, data)
         self.msg = msg
         self.data = data
@@ -77,7 +77,7 @@ def ASSERT_IN(a1, a2):
 
 
 class LinkerException(RiscemuBaseException):
-    def __init__(self, msg, data):
+    def __init__(self, msg: str, data):
         self.msg = msg
         self.data = data
 
@@ -93,7 +93,7 @@ class LinkerException(RiscemuBaseException):
 
 
 class MemoryAccessException(RiscemuBaseException):
-    def __init__(self, msg, addr, size, op):
+    def __init__(self, msg: str, addr, size, op):
         super(MemoryAccessException, self).__init__()
         self.msg = msg
         self.addr = addr
@@ -196,5 +196,5 @@ class NumberFormatException(RiscemuBaseException):
 
 # this exception is not printed and simply signals that an interactive debugging session is
 class LaunchDebuggerException(RiscemuBaseException):
-    def message(self):
+    def message(self) -> str:
         return ""
