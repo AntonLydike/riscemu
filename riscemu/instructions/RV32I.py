@@ -214,9 +214,10 @@ class RV32I(InstructionSet):
     def instruction_jalr(self, ins: "Instruction"):
         ASSERT_LEN(ins.args, 2)
         reg = ins.get_reg(0)
-        addr = ins.get_imm(1)
+        base = ins.get_reg(1)
+        addr = ins.get_imm(2)
         self.regs.set(reg, Int32(self.pc))
-        self.pc = addr
+        self.pc = self.regs.get(base).unsigned_value + addr
 
     def instruction_ret(self, ins: "Instruction"):
         ASSERT_LEN(ins.args, 0)
