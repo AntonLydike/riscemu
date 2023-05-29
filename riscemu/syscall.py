@@ -6,8 +6,10 @@ SPDX-License-Identifier: MIT
 
 import sys
 from dataclasses import dataclass
+from math import log2, ceil
 from typing import Dict, IO
 
+from .types import BinaryDataMemorySection, MemoryFlags
 from .colors import FMT_SYSCALL, FMT_NONE
 from .types import Int32, CPU
 from .types.exceptions import InvalidSyscallException
@@ -16,6 +18,7 @@ SYSCALLS = {
     63: "read",
     64: "write",
     93: "exit",
+    192: "mmap2",
     1024: "open",
     1025: "close",
 }
@@ -25,6 +28,18 @@ This dict contains a mapping for all available syscalls (code->name)
 If you wish to add a syscall to the built-in system, you can extend this
 dictionary and implement a method with the same name on the SyscallInterface
 class.
+"""
+
+ADDITIONAL_SYMBOLS = {
+    'MAP_PRIVATE': 1<<0,
+    'MAP_SHARED': 1<<1,
+    'MAP_ANON': 1<<2,
+    'MAP_ANONYMOUS': 1<<2,
+    'PROT_READ': 1<<0,
+    'PROT_WRITE': 1<<1,
+}
+"""
+A set of additional symbols that are used by various syscalls.
 """
 
 OPEN_MODES = {
@@ -55,7 +70,7 @@ class Syscall:
     def __repr__(self):
         return "Syscall(id={}, name={})".format(self.id, self.name)
 
-    def ret(self, code):
+    def ret(self, code: int | Int32):
         self.cpu.regs.set("a0", Int32(code))
 
 
@@ -65,7 +80,11 @@ def get_syscall_symbols():
 
     :return: dictionary of all syscall symbols (SCALL_<name> -> id)
     """
-    return {("SCALL_" + name.upper()): num for num, name in SYSCALLS.items()}
+    items: Dict[str, int] = {("SCALL_" + name.upper()): num for num, name in SYSCALLS.items()}
+
+    items.update(ADDITIONAL_SYMBOLS)
+
+    return items
 
 
 class SyscallInterface:
@@ -221,6 +240,54 @@ class SyscallInterface:
         """
         scall.cpu.halted = True
         scall.cpu.exit_code = scall.cpu.regs.get("a0").value
+
+    def mmap2(self, scall: Syscall):
+        """
+        mmap2 syscall:
+
+        void *mmap(void *addr, size_t length, int prot, int flags,
+                  int fd, off_t offset);
+
+        Only supported modes:
+        addr  = <any>
+        prot  = either PROT_READ or PROT_READ | PROT_WRITE
+        flags = MAP_PRIVATE | MAP_ANONYMOUS
+        fd    = <ignored>
+        off_t = <ignored>
+        """
+        addr = scall.cpu.regs.get('a0').unsigned_value
+        size = scall.cpu.regs.get('a1').unsigned_value
+        prot = scall.cpu.regs.get('a2').unsigned_value
+        flags = scall.cpu.regs.get('a3').unsigned_value
+
+        # error out if prot is not 1 or 3:
+        # 1 = PROT_READ
+        # 3 = PROT_READ | PROT_WRITE
+        if prot != 1 and prot != 3:
+            return scall.ret(-1)
+
+        # round size up to multiple of 4096
+        size = 4096 * ceil(size / 4096)
+        section = BinaryDataMemorySection(
+            bytearray(size),
+            '.data.runtime-allocated',
+            None,
+            'system',
+            base=addr,
+            flags=MemoryFlags(read_only=prot != 3, executable=False)
+        )
+
+        # try to insert section
+        if scall.cpu.mmu.load_section(section, addr != 0):
+            return scall.ret(section.base)
+        # if that failed, and we tried to force an address,
+        # try again at any address
+        elif addr != 0:
+            section.base = 0
+            if scall.cpu.mmu.load_section(section):
+                return scall.ret(section.base)
+        # if that didn't work, return error
+        return scall.ret(-1)
 
     def __repr__(self):
         return "{}(\n\tfiles={}\n)".format(self.__class__.__name__, self.open_files)
