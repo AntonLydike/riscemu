@@ -26,6 +26,4 @@ Somewhat nice implementations of:
 
 ## Correctness:
 
-This library is 100% untested. Feel free to report bugs using github issues. I'm sure ther are many. We are working on testing!
-
-
+This library is only lightly tested, so be careful and report bugs when you find them!

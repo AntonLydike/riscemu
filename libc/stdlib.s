@@ -96,7 +96,11 @@ free:
 // s0 = &_atexit_count
 // s2 = &_atexit_calls
 // s1 = updated value of atexit
+// s3 = exit code
 exit:
+        // save exit code to s3
+        mv      s3, a0
+_exit_start:
         la      s0, _atexit_count       // s0 = &_atexit_count
         lw      s1, 0(s0)               // s1 = *(&_atexit_count)
         // exit if no atexit() calls remain
@@ -108,12 +112,12 @@ exit:
         li      s2, _atexit_calls
         add     s1, s1, s2              // s1 = &_atexit_calls + (s1)
         lw      s1, 0(s1)               // s1 = *s1
-        la      ra, exit                // set ra up to point to exit
+        la      ra, _exit_start         // set ra up to point to exit
         jalr    zero, s1, 0             // jump to address in s1
         // jalr will call the other function, which will then return back
         // to the beginning of exit.
 _exit:
-        li      a0, 0
+        mv      a0, s3
         li      a7, 93
         ecall
 

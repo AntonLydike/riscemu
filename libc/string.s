@@ -3,8 +3,9 @@
 // Copyright (c) 2023 Anton Lydike
 // SPDX-License-Identifier: MIT
 
+// Create NullPtr constant
+.equ        NULL, 0x00
 .global     NULL
-// A global constant representing zero
 
 
 .global     strlen
@@ -35,15 +36,13 @@
 // copies the character c to the first n characters of  str.
 
 
+// missing implementations
 //.global     memcmp
 //.global     memcpy
 //.global     strcat
 
-// Create NullPtr constant
-.set        NULL, 0x00
 
-
-            .text
+.text
 strlen:
 // size_t strlen(char* str)
             // push s1, s2 to the stack
@@ -101,7 +100,7 @@ __strncpy_end:
 
 
 strcpy:
-// char *strncpy(char *dest, const char *src)
+// char *strcpy(char *dest, const char *src)
             sw   s1, sp, -4     // push s1 to the stack
             sw   s2, sp, -8     // push s1 to the stack
             add  s1, a0, zero   // save dest pointer for return
@@ -124,15 +123,16 @@ __strcpy_loop:
 memchr:
 // void *memchr(const void *str, char c, size_t n)
             sw   s1, sp, -4     // push s1 to the stack
+            andi a1, a1, 0xff   // trim a1 to be byte-sized
 __memchr_loop:
             beq  a2, zero, __memchr_ret_null
             lb   s1, a0, 0
             addi a0, a0, 1  // let a0 point to the next byte
             addi a2, a2, -1 // decrement bytes to copy by 1
-            bne  s1, s2, __memchr_loop
+            bne  s1, a1, __memchr_loop
             // return pointer to prev byte (as the prev byte actually matched a1)
             addi a0, a0, -1
-            // pop s1, s2 from stack
+            // pop s1, from stack
             lw   s1, sp, -4
             ret
 __memchr_ret_null:
