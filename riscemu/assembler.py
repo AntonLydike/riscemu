@@ -227,7 +227,7 @@ class AssemblerDirectives:
             cls.op_section(token, (token.value,), context)
         elif op in ("string", "asciiz", "asciz", "ascii"):
             ASSERT_LEN(args, 1)
-            cls.add_text(args[0], context, op == "ascii")
+            cls.add_text(args[0], context, zero_terminate=(op != "ascii"))
         elif op in DATA_OP_SIZES:
             size = DATA_OP_SIZES[op]
             for arg in args:
