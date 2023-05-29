@@ -1,5 +1,21 @@
 # Changelog
 
+## Upcoming 2.0.6
+
+**Planned:**
+ - Add a floating point unit
+ - Add a crt0.s
+ - Add `mmap2` syscall with code 192
+
+## 2.0.5
+
+ - Added unlimited register mode with `-o unlimited_regs`
+
+## 2.0.4
+
+ - Bugfix: fix a sign issue in instruction parsing for `rd, rs, rs` format
+ - Bugfix: respect `conf.debug_instruction` setting
+
 ## 2.0.3 - 2022-04-18
 
  - Syscalls: cleaned up formatting and added instructions for extensions

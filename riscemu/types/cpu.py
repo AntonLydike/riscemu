@@ -1,6 +1,6 @@
 import typing
 from abc import ABC, abstractmethod
-from typing import List, Type, Callable, Set, Dict
+from typing import List, Type, Callable, Set, Dict, TYPE_CHECKING
 
 from ..registers import Registers
 from ..config import RunConfig

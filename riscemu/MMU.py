@@ -347,14 +347,3 @@ class MMU:
             return sec.context
 
         return InstructionContext()
-
-    def report_addr(self, addr: T_AbsoluteAddress):
-        sec = self.get_sec_containing(addr)
-        if not sec:
-            print("addr is in no section!")
-            return
-        owner = [b for b in self.programs if b.name == sec.owner]
-        if owner:
-            print("owned by: {}".format(owner[0]))
-
-        print("{}: 0x{:0x} + 0x{:0x}".format(name, val, addr - val))
