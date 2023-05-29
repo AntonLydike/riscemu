@@ -31,12 +31,12 @@ class.
 """
 
 ADDITIONAL_SYMBOLS = {
-    'MAP_PRIVATE': 1<<0,
-    'MAP_SHARED': 1<<1,
-    'MAP_ANON': 1<<2,
-    'MAP_ANONYMOUS': 1<<2,
-    'PROT_READ': 1<<0,
-    'PROT_WRITE': 1<<1,
+    "MAP_PRIVATE": 1 << 0,
+    "MAP_SHARED": 1 << 1,
+    "MAP_ANON": 1 << 2,
+    "MAP_ANONYMOUS": 1 << 2,
+    "PROT_READ": 1 << 0,
+    "PROT_WRITE": 1 << 1,
 }
 """
 A set of additional symbols that are used by various syscalls.
@@ -80,7 +80,9 @@ def get_syscall_symbols():
 
     :return: dictionary of all syscall symbols (SCALL_<name> -> id)
     """
-    items: Dict[str, int] = {("SCALL_" + name.upper()): num for num, name in SYSCALLS.items()}
+    items: Dict[str, int] = {
+        ("SCALL_" + name.upper()): num for num, name in SYSCALLS.items()
+    }
 
     items.update(ADDITIONAL_SYMBOLS)
 
@@ -239,7 +241,7 @@ class SyscallInterface:
         Exit syscall. Exits the system with status code a0
         """
         scall.cpu.halted = True
-        scall.cpu.exit_code = scall.cpu.regs.get("a0").value
+        scall.cpu.exit_code = scall.cpu.regs.get("a0").signed().value
 
     def mmap2(self, scall: Syscall):
         """
@@ -255,10 +257,10 @@ class SyscallInterface:
         fd    = <ignored>
         off_t = <ignored>
         """
-        addr = scall.cpu.regs.get('a0').unsigned_value
-        size = scall.cpu.regs.get('a1').unsigned_value
-        prot = scall.cpu.regs.get('a2').unsigned_value
-        flags = scall.cpu.regs.get('a3').unsigned_value
+        addr = scall.cpu.regs.get("a0").unsigned_value
+        size = scall.cpu.regs.get("a1").unsigned_value
+        prot = scall.cpu.regs.get("a2").unsigned_value
+        flags = scall.cpu.regs.get("a3").unsigned_value
 
         # error out if prot is not 1 or 3:
         # 1 = PROT_READ
@@ -270,11 +272,11 @@ class SyscallInterface:
         size = 4096 * ceil(size / 4096)
         section = BinaryDataMemorySection(
             bytearray(size),
-            '.data.runtime-allocated',
+            ".data.runtime-allocated",
             None,
-            'system',
+            "system",
             base=addr,
-            flags=MemoryFlags(read_only=prot != 3, executable=False)
+            flags=MemoryFlags(read_only=prot != 3, executable=False),
         )
 
         # try to insert section
