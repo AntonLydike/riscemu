@@ -142,8 +142,8 @@ class Registers:
             + " ".join(self._reg_repr("a{}".format(i)) for i in range(8))
         )
 
-    def _reg_repr(self, reg: str):
-        txt = "{:4}=0x{:08X}".format(reg, self.get(reg, False))
+    def _reg_repr(self, reg: str, name_len=4, fmt="08X"):
+        txt = "{:{}}=0x{:{}}".format(reg, name_len, self.get(reg, False), fmt)
         if reg == "fp":
             reg = "s0"
         if reg == self.last_set:
@@ -285,3 +285,10 @@ class Registers:
         :return: The list
         """
         return ["zero", "ra", "sp", "gp", "tp", "fp"]
+
+    def __repr__(self):
+        return "<Registers{}>".format(
+            "{"
+            + ", ".join(self._reg_repr("a{}".format(i), 2, "0x") for i in range(8))
+            + "}"
+        )
