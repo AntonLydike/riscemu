@@ -72,7 +72,7 @@ class MMU:
                 return sec
         return None
 
-    def get_bin_containing(self, addr: T_AbsoluteAddress) -> Optional[Program]:
+    def get_program_at_addr(self, addr: T_AbsoluteAddress) -> Optional[Program]:
         for program in self.programs:
             if program.base <= addr < program.base + program.size:
                 return program
@@ -192,7 +192,7 @@ class MMU:
         if not sec:
             return "unknown at 0x{:0x}".format(address)
 
-        bin = self.get_bin_containing(address)
+        bin = self.get_program_at_addr(address)
         secs = set(sec.name for sec in bin.sections) if bin else []
         elf_markers = {
             "__global_pointer$",
@@ -347,3 +347,13 @@ class MMU:
             return sec.context
 
         return InstructionContext()
+
+    def find_entrypoint(self) -> int | None:
+        # try to find the global entrypoint
+        if "_start" in self.global_symbols:
+            return self.global_symbols["_start"]
+        # otherwise find a main (that's not necessarily global)
+        for p in self.programs:
+            if "main" in p.context.labels:
+                return p.context.resolve_label("main")
+        return None

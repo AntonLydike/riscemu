@@ -1,13 +1,12 @@
-import typing
 from abc import ABC, abstractmethod
-from typing import List, Type, Callable, Set, Dict, TYPE_CHECKING
+from typing import List, Type, Callable, Set, Dict, TYPE_CHECKING, Iterable
 
 from ..registers import Registers
 from ..config import RunConfig
-from ..colors import FMT_RED, FMT_NONE, FMT_ERROR, FMT_CPU
+from ..colors import FMT_NONE, FMT_CPU
 from . import T_AbsoluteAddress, Instruction, Program, ProgramLoader
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from ..MMU import MMU
     from ..instructions import InstructionSet
 
@@ -91,27 +90,26 @@ class CPU(ABC):
     def run(self, verbose: bool = False):
         pass
 
-    def launch(self, program: Program, verbose: bool = False):
-        if program not in self.mmu.programs:
-            print(
-                FMT_ERROR + "[CPU] Cannot launch program that's not loaded!" + FMT_NONE
-            )
-            return
+    def launch(self, verbose: bool = False):
+        entrypoint = self.mmu.find_entrypoint()
+
+        if entrypoint is None:
+            entrypoint = self.mmu.programs[0].entrypoint
+
         if self.conf.verbosity > 0:
             print(
                 FMT_CPU
                 + "[CPU] Started running from {}".format(
-                    self.mmu.translate_address(program.entrypoint)
+                    self.mmu.translate_address(entrypoint)
                 )
                 + FMT_NONE
             )
-            print(program)
-        self.pc = program.entrypoint
+        self.pc = entrypoint
         self.run(verbose)
 
     @classmethod
     @abstractmethod
-    def get_loaders(cls) -> typing.Iterable[Type[ProgramLoader]]:
+    def get_loaders(cls) -> Iterable[Type[ProgramLoader]]:
         pass
 
     def get_best_loader_for(self, file_name: str) -> Type[ProgramLoader]:

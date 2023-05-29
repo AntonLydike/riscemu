@@ -176,7 +176,7 @@ unlimited_regs:       Allow an unlimited number of registers""",
         cpu.setup_stack(cfg.stack_size)
 
         # launch the last loaded program
-        cpu.launch(cpu.mmu.programs[-1], verbose=cfg.verbosity > 1)
+        cpu.launch(verbose=cfg.verbosity > 1)
         sys.exit(cpu.exit_code if not args.ignore_exit_code else 0)
 
     except RiscemuBaseException as e:

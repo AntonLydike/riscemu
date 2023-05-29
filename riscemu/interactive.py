@@ -31,6 +31,6 @@ if __name__ == "__main__":
 
     cpu.setup_stack()
 
-    cpu.launch(program)
+    cpu.launch()
 
     sys.exit(cpu.exit_code)
