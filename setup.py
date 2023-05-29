@@ -10,7 +10,7 @@ setuptools.setup(
     version=riscemu.__version__,
     author=riscemu.__author__,
     author_email="pip@antonlydike.de",
-    description="RISC-V userspace and privileged emulator",
+    description="RISC-V userspace and machine mode emulator",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/antonlydike/riscemu",
@@ -31,6 +31,10 @@ setuptools.setup(
         "riscemu.priv",
         "riscemu.types",
     ],
-    python_requires=">=3.6",
+    package_data={
+        "riscemu": ["libc/*.s"],
+    },
+    scripts=["riscemu/tools/riscemu"],
+    python_requires=">=3.8",
     install_requires=["pyelftools~=0.27"],
 )

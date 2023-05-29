@@ -1,8 +1,8 @@
-// RUN: python3 -m riscemu -v --ignore-exit-code %s || true | filecheck %s
+// RUN: python3 -m riscemu -v -o ignore_exit_code %s | filecheck %s
 .data
 fibs:   .space 1024
 
-        .text
+.text
 main:
         addi    s1, zero, 0     // storage index
         addi    s2, zero, 1024  // last storage index
@@ -15,9 +15,10 @@ loop:
         addi    t1, t2, 0       // t1 = t2
         addi    s1, s1, 4       // increment storage pointer
         blt     s1, s2, loop    // loop as long as we did not reach array length
+        ebreak
         // exit gracefully
         add     a0, zero, t2
         addi    a7, zero, 93
-        scall                   // exit with code 0
+        scall                   // exit with code fibs(n) & 2^32
 
 // CHECK: [CPU] Program exited with code 1265227608

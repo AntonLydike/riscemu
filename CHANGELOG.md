@@ -2,10 +2,13 @@
 
 ## Upcoming 2.0.6
 
+ - Added a very basic libc containing a `crt0.s`, and a few functions
+   such as `malloc`, `rand`, and `memcpy`.
+ - Added a subset of the `mmap2` syscall (code 192) to allocate new memory
+ - Refactored the launching code to improve using riscemu from code
+
 **Planned:**
  - Add a floating point unit
- - Add a crt0.s
- - Add `mmap2` syscall with code 192
 
 ## 2.0.5
 

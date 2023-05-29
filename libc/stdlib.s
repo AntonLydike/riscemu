@@ -6,7 +6,7 @@
 
 .data
 
-_rand_seed: 
+_rand_seed:
 .word   0x76767676
 _atexit_calls:
 // leave room for 8 atexit handlers here for now
@@ -152,7 +152,7 @@ _atexit_fail:
 
 
 
-        
+
 
 
 // rand, srand
@@ -176,5 +176,3 @@ srand:
         la  t1, _rand_seed
         sw  a0, 0(t1)
         ret
-
-

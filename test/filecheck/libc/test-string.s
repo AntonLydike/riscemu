@@ -1,4 +1,4 @@
-// RUN: python3 -m riscemu -v %s libc/string.s libc/stdlib.s libc/crt0.s | filecheck %s
+// RUN: python3 -m riscemu -v %s -o libc | filecheck %s
 
 .data
 
