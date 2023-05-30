@@ -2,7 +2,7 @@ import argparse
 import glob
 import os
 import sys
-from typing import List, Type
+from typing import Type, Dict, List, Optional
 
 from riscemu import AssemblyFileLoader, __version__, __copyright__
 from riscemu.types import CPU, ProgramLoader, Program
@@ -17,21 +17,21 @@ class RiscemuMain:
     interoperability.
     """
 
-    available_ins_sets: dict[str, type[InstructionSet]]
-    available_file_loaders: list[type[ProgramLoader]]
+    available_ins_sets: Dict[str, Type[InstructionSet]]
+    available_file_loaders: List[Type[ProgramLoader]]
 
-    cfg: RunConfig | None
-    cpu: CPU | None
+    cfg: Optional[RunConfig]
+    cpu: Optional[CPU]
 
-    input_files: list[str]
-    selected_ins_sets: list[Type[InstructionSet]]
+    input_files: List[str]
+    selected_ins_sets: List[Type[InstructionSet]]
 
     def __init__(self):
         self.available_ins_sets = dict()
         self.selected_ins_sets = []
         self.available_file_loaders = []
-        self.cfg: RunConfig | None = None
-        self.cpu: CPU | None = None
+        self.cfg: Optional[RunConfig] = None
+        self.cpu: Optional[CPU] = None
         self.input_files = []
         self.selected_ins_sets = []
 
@@ -129,7 +129,7 @@ class RiscemuMain:
     def register_all_program_loaders(self):
         self.available_file_loaders.append(AssemblyFileLoader)
 
-    def parse_argv(self, argv: list[str]):
+    def parse_argv(self, argv: List[str]):
         parser = argparse.ArgumentParser(
             description="RISC-V Userspace emulator",
             prog="riscemu",
@@ -153,7 +153,7 @@ class RiscemuMain:
             setattr(args, "ins", {k: True for k in self.available_ins_sets})
 
         # create RunConfig
-        self.cfg = self.config_from_parsed_args(args)
+        self.cfg = self.create_config(args)
 
         # set input files
         self.input_files = args.files
@@ -167,16 +167,23 @@ class RiscemuMain:
 
         # if use_libc is given, attach libc to path
         if self.cfg.use_libc:
-            libc_path = os.path.join(
-                os.path.dirname(__file__),
-                "..",
-                "libc",
-                "*.s",
-            )
-            for path in glob.iglob(libc_path):
+            self.add_libc_to_input_files()
+
+    def add_libc_to_input_files(self):
+        """
+        This adds the provided riscemu libc to the programs runtime.
+        """
+        libc_path = os.path.join(
+            os.path.dirname(__file__),
+            "..",
+            "libc",
+            "*.s",
+        )
+        for path in glob.iglob(libc_path):
+            if path not in self.input_files:
                 self.input_files.append(path)
 
-    def config_from_parsed_args(self, args: argparse.Namespace) -> RunConfig:
+    def create_config(self, args: argparse.Namespace) -> RunConfig:
         # create a RunConfig from the cli args
         cfg_dict = dict(
             stack_size=args.stack_size,
@@ -208,13 +215,36 @@ class RiscemuMain:
                 for p in programs:
                     self.cpu.mmu.load_program(p)
 
-    def run(self, argv: list[str]):
+    def run_from_cli(self, argv: List[str]):
         # register everything
         self.register_all_isas()
         self.register_all_program_loaders()
 
         # parse argv and set up cpu
         self.parse_argv(argv)
+        self.instantiate_cpu()
+        self.load_programs()
+
+        # run the program
+        self.cpu.launch(self.cfg.verbosity > 1)
+
+    def run(self):
+        """
+        This assumes that these values were set externally:
+
+         - available_file_loaders: A list of available file loaders.
+           Can be set using .register_all_program_loaders()
+         - cfg: The RunConfig object. Can be directly assigned to the attribute
+         - input_files: A list of assembly files to load.
+         - selected_ins_sets: A list of instruction sets the CPU should support.
+        """
+        assert self.cfg is not None, "self.cfg must be set before calling run()"
+        assert self.selected_ins_sets, "self.selected_ins_sets cannot be empty"
+        assert self.input_files, "self.input_files cannot be empty"
+
+        if self.cfg.use_libc:
+            self.add_libc_to_input_files()
+
         self.instantiate_cpu()
         self.load_programs()
 

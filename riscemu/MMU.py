@@ -348,7 +348,7 @@ class MMU:
 
         return InstructionContext()
 
-    def find_entrypoint(self) -> int | None:
+    def find_entrypoint(self) -> Optional[int]:
         # try to find the global entrypoint
         if "_start" in self.global_symbols:
             return self.global_symbols["_start"]

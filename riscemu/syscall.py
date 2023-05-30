@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 import sys
 from dataclasses import dataclass
 from math import log2, ceil
-from typing import Dict, IO
+from typing import Dict, IO, Union
 
 from .types import BinaryDataMemorySection, MemoryFlags
 from .colors import FMT_SYSCALL, FMT_NONE
@@ -70,7 +70,7 @@ class Syscall:
     def __repr__(self):
         return "Syscall(id={}, name={})".format(self.id, self.name)
 
-    def ret(self, code: int | Int32):
+    def ret(self, code: Union[int, Int32]):
         self.cpu.regs.set("a0", Int32(code))
 
 

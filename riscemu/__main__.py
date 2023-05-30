@@ -12,7 +12,7 @@ from riscemu.riscemu_main import RiscemuMain
 
 try:
     main = RiscemuMain()
-    main.run(sys.argv[1:])
+    main.run_from_cli(sys.argv[1:])
     sys.exit(main.cpu.exit_code if not main.cfg.ignore_exit_code else 0)
 
 except RiscemuBaseException as e:
