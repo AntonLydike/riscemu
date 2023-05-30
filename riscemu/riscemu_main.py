@@ -26,11 +26,11 @@ class RiscemuMain:
     input_files: List[str]
     selected_ins_sets: List[Type[InstructionSet]]
 
-    def __init__(self):
+    def __init__(self, cfg: Optional[RunConfig] = None):
         self.available_ins_sets = dict()
         self.selected_ins_sets = []
         self.available_file_loaders = []
-        self.cfg: Optional[RunConfig] = None
+        self.cfg: Optional[RunConfig] = cfg
         self.cpu: Optional[CPU] = None
         self.input_files = []
         self.selected_ins_sets = []
