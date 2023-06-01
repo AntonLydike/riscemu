@@ -32,7 +32,7 @@ setuptools.setup(
         "riscemu.types",
     ],
     package_data={
-        "riscemu": ["libc/*.s"],
+        "riscemu": ["libc/*.s", "py.typed"],
     },
     scripts=["riscemu/tools/riscemu"],
     python_requires=">=3.8",
