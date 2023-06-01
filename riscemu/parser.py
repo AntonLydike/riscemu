@@ -121,7 +121,7 @@ class AssemblyFileLoader(ProgramLoader):
         with open(self.source_path, "r") as f:
             return parse_tokens(self.filename, tokenize(f))
 
-    def parse_io(self, io):
+    def parse_io(self, io: Iterable[str]):
         return parse_tokens(self.filename, tokenize(io))
 
     @classmethod
@@ -139,5 +139,5 @@ class AssemblyFileLoader(ProgramLoader):
         return 0.01
 
     @classmethod
-    def get_options(cls, argv: List[str]) -> [List[str], T_ParserOpts]:
+    def get_options(cls, argv: List[str]) -> tuple[List[str], T_ParserOpts]:
         return argv, {}
