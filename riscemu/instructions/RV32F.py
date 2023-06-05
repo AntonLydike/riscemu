@@ -8,6 +8,7 @@ from https://msyksphinz-self.github.io/riscv-isadoc/html/rvfd.html
 (all the docstrings on the instruction methods documenting the opcodes
 and their function)
 """
+from typing import Tuple
 
 from .instruction_set import InstructionSet, Instruction
 from riscemu.types import INS_NOT_IMPLEMENTED, Float32
@@ -453,7 +454,11 @@ class RV32F(InstructionSet):
         :Implementation:
         | f[rd] = f32_{s32}(x[rs1])
         """
-        INS_NOT_IMPLEMENTED(ins)
+        rd, rs = self.parse_rd_rs(ins)
+        self.regs.set_f(
+            Float32(self.regs.get(rd).signed().value)
+        )
+
 
     def instruction_fcvt_s_wu(self, ins: Instruction):
         """
@@ -472,7 +477,10 @@ class RV32F(InstructionSet):
         :Implementation:
         | f[rd] = f32_{u32}(x[rs1])
         """
-        INS_NOT_IMPLEMENTED(ins)
+        rd, rs = self.parse_rd_rs(ins)
+        self.regs.set_f(
+            Float32(self.regs.get(rd).unsigned_value)
+        )
 
     def instruction_fmv_w_x(self, ins: Instruction):
         """
@@ -535,3 +543,7 @@ class RV32F(InstructionSet):
         rs, addr = self.parse_mem_ins(ins)
         val = self.regs.get_f(rs)
         self.mmu.write(addr, 4, bytearray(val.bytes))
+
+    def parse_rd_rs(self, ins: Instruction) -> Tuple[str, str]:
+        assert len(ins.args) == 2
+        return ins.get_reg(0), ins.get_reg(1)
