@@ -114,7 +114,11 @@ class RV32F(InstructionSet):
         :Implementation:
         | f[rd] = f[rs1] + f[rs2]
         """
-        INS_NOT_IMPLEMENTED(ins)
+        rd, rs1, rs2 = self.parse_rd_rs_rs(ins)
+        self.regs.set_f(
+            rd,
+            self.regs.get_f(rs1) + self.regs.get_f(rs2),
+        )
 
     def instruction_fsub_s(self, ins: Instruction):
         """
@@ -134,7 +138,11 @@ class RV32F(InstructionSet):
         :Implementation:
         | f[rd] = f[rs1] - f[rs2]
         """
-        INS_NOT_IMPLEMENTED(ins)
+        rd, rs1, rs2 = self.parse_rd_rs_rs(ins)
+        self.regs.set_f(
+            rd,
+            self.regs.get_f(rs1) - self.regs.get_f(rs2),
+        )
 
     def instruction_fmul_s(self, ins: Instruction):
         """
@@ -154,7 +162,11 @@ class RV32F(InstructionSet):
         :Implementation:
         | f[rd] = f[rs1] × f[rs2]
         """
-        INS_NOT_IMPLEMENTED(ins)
+        rd, rs1, rs2 = self.parse_rd_rs_rs(ins)
+        self.regs.set_f(
+            rd,
+            self.regs.get_f(rs1) * self.regs.get_f(rs2),
+        )
 
     def instruction_fdiv_s(self, ins: Instruction):
         """
@@ -174,7 +186,11 @@ class RV32F(InstructionSet):
         :Implementation:
         | f[rd] = f[rs1] / f[rs2]
         """
-        INS_NOT_IMPLEMENTED(ins)
+        rd, rs1, rs2 = self.parse_rd_rs_rs(ins)
+        self.regs.set_f(
+            rd,
+            self.regs.get_f(rs1) / self.regs.get_f(rs2),
+        )
 
     def instruction_fsqrt_s(self, ins: Instruction):
         """
@@ -194,7 +210,8 @@ class RV32F(InstructionSet):
         :Implementation:
         | f[rd] = sqrt(f[rs1])
         """
-        INS_NOT_IMPLEMENTED(ins)
+        rd, rs = self.parse_rd_rs(ins)
+        self.regs.set_f(self.regs.get_f(rs) ** 0.5)
 
     def instruction_fsgnj_s(self, ins: Instruction):
         """
