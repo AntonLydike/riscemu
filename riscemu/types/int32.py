@@ -16,7 +16,7 @@ class Int32:
     __slots__ = ("_val",)
 
     def __init__(
-        self, val: Union[int, c_int32, c_uint32, "Int32", bytes, bytearray] = 0
+        self, val: Union[int, c_int32, c_uint32, "Int32", bytes, bytearray, bool] = 0
     ):
         if isinstance(val, (bytes, bytearray)):
             signed = len(val) == 4 and self._type == c_int32
@@ -27,7 +27,7 @@ class Int32:
             self._val = val
         elif isinstance(val, (c_uint32, c_int32, Int32)):
             self._val = self.__class__._type(val.value)
-        elif isinstance(val, int):
+        elif isinstance(val, (int, bool)):
             self._val = self.__class__._type(val)
         else:
             raise RuntimeError(
