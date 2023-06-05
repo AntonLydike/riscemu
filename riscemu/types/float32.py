@@ -37,7 +37,9 @@ class Float32:
             val = int.to_bytes(byteorder="little")
         return Float32(val)
 
-    def __init__(self, val: Union[float, c_float, "Float32", bytes_t, bytearray, int]):
+    def __init__(
+        self, val: Union[float, c_float, "Float32", bytes_t, bytearray, int] = 0
+    ):
         if isinstance(val, (float, int)):
             self._val = c_float(val)
         elif isinstance(val, c_float):

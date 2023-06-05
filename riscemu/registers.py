@@ -1,15 +1,15 @@
 """
-RiscEmu (c) 2021-2022 Anton Lydike
+RiscEmu (c) 2023 Anton Lydike
 
 SPDX-License-Identifier: MIT
 """
 
 from collections import defaultdict
+from typing import Union
 
 from .helpers import *
 
-if typing.TYPE_CHECKING:
-    from .types import Int32
+from .types import Int32, Float32
 
 
 class Registers:
@@ -51,6 +51,9 @@ class Registers:
         "a5",
         "a6",
         "a7",
+    }
+
+    float_regs = {
         "ft0",
         "ft1",
         "ft2",
@@ -82,11 +85,12 @@ class Registers:
     }
 
     def __init__(self, infinite_regs: bool = False):
-        from .types import Int32
+        self.vals: dict[str, Int32] = defaultdict(UInt32)
+        self.float_vals: dict[str, Float32] = defaultdict(Float32)
 
-        self.vals: defaultdict[str, Int32] = defaultdict(lambda: Int32(0))
         self.last_set = None
         self.last_read = None
+
         self.infinite_regs = infinite_regs
 
     def dump(self, full: bool = False):
@@ -165,8 +169,6 @@ class Registers:
         :return: If the operation was successful
         """
 
-        from .types import Int32
-
         # remove after refactoring is complete
         if not isinstance(val, Int32):
             raise RuntimeError(
@@ -208,75 +210,17 @@ class Registers:
             self.last_read = reg
         return self.vals[reg]
 
-    @staticmethod
-    def all_registers():
-        """
-        Return a list of all valid registers
-        :return: The list
-        """
-        return [
-            "zero",
-            "ra",
-            "sp",
-            "gp",
-            "tp",
-            "s0",
-            "fp",
-            "t0",
-            "t1",
-            "t2",
-            "t3",
-            "t4",
-            "t5",
-            "t6",
-            "s1",
-            "s2",
-            "s3",
-            "s4",
-            "s5",
-            "s6",
-            "s7",
-            "s8",
-            "s9",
-            "s10",
-            "s11",
-            "a0",
-            "a1",
-            "a2",
-            "a3",
-            "a4",
-            "a5",
-            "a6",
-            "a7",
-            "ft0",
-            "ft1",
-            "ft2",
-            "ft3",
-            "ft4",
-            "ft5",
-            "ft6",
-            "ft7",
-            "fs0",
-            "fs1",
-            "fs2",
-            "fs3",
-            "fs4",
-            "fs5",
-            "fs6",
-            "fs7",
-            "fs8",
-            "fs9",
-            "fs10",
-            "fs11",
-            "fa0",
-            "fa1",
-            "fa2",
-            "fa3",
-            "fa4",
-            "fa5",
-            "fa6",
-            "fa7",
-        ]
+    def get_f(self, reg: str, mark_read: bool = True) -> "Float32":
+        if not self.infinite_regs and reg not in self.float_regs:
+            raise RuntimeError("Invalid float register: {}".format(reg))
+        if mark_read:
+            self.last_read = reg
+        return self.float_vals[reg]
+
+    def set_f(self, reg: str, val: Union[float, "Float32"]):
+        if not self.infinite_regs and reg not in self.float_regs:
+            raise RuntimeError("Invalid float register: {}".format(reg))
+        self.float_vals[reg] = Float32(val)
 
     @staticmethod
     def named_registers():
@@ -287,8 +231,9 @@ class Registers:
         return ["zero", "ra", "sp", "gp", "tp", "fp"]
 
     def __repr__(self):
-        return "<Registers{}>".format(
+        return "<Registers[{}]{}>".format(
+            "float" if self.supports_floats else "nofloat",
             "{"
             + ", ".join(self._reg_repr("a{}".format(i), 2, "0x") for i in range(8))
-            + "}"
+            + "}",
         )
