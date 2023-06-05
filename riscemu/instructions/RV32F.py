@@ -541,7 +541,8 @@ class RV32F(InstructionSet):
         :Implementation:
         | f[rd] = x[rs1][31:0]
         """
-        INS_NOT_IMPLEMENTED(ins)
+        rd, rs = self.parse_rd_rs(ins)
+        self.regs.set_f(rd, Float32.from_bytes(self.regs.get(rs).unsigned_value))
 
     def instruction_flw(self, ins: Instruction):
         """
