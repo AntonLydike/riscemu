@@ -139,5 +139,5 @@ class AssemblyFileLoader(ProgramLoader):
         return 0.01
 
     @classmethod
-    def get_options(cls, argv: List[str]) -> tuple[List[str], T_ParserOpts]:
+    def get_options(cls, argv: List[str]) -> Tuple[List[str], T_ParserOpts]:
         return argv, {}
