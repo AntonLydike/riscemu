@@ -459,7 +459,8 @@ class RV32F(InstructionSet):
         """
         rd, rs = self.parse_rd_rs(ins)
         self.regs.set_f(
-            Float32(self.regs.get(rd).signed().value)
+            rd,
+            Float32(self.regs.get(rs).signed().value)
         )
 
 
@@ -482,7 +483,8 @@ class RV32F(InstructionSet):
         """
         rd, rs = self.parse_rd_rs(ins)
         self.regs.set_f(
-            Float32(self.regs.get(rd).unsigned_value)
+            rd,
+            Float32(self.regs.get(rs).unsigned_value)
         )
 
     def instruction_fmv_w_x(self, ins: Instruction):
