@@ -11,7 +11,7 @@ and their function)
 from typing import Tuple
 
 from .instruction_set import InstructionSet, Instruction
-from riscemu.types import INS_NOT_IMPLEMENTED, Float32, Int32
+from riscemu.types import INS_NOT_IMPLEMENTED, Float32, Int32, UInt32
 
 
 class RV32F(InstructionSet):
@@ -312,7 +312,11 @@ class RV32F(InstructionSet):
         :Implementation:
         | x[rd] = sext(s32_{f32}(f[rs1]))
         """
-        INS_NOT_IMPLEMENTED(ins)
+        rd, rs = self.parse_rd_rs(ins)
+        self.regs.set(
+            rd,
+            Int32(self.regs.get_f(rs).value)
+        )
 
     def instruction_fcvt_wu_s(self, ins: Instruction):
         """
@@ -331,7 +335,11 @@ class RV32F(InstructionSet):
         :Implementation:
         | x[rd] = sext(u32_{f32}(f[rs1]))
         """
-        INS_NOT_IMPLEMENTED(ins)
+        rd, rs = self.parse_rd_rs(ins)
+        self.regs.set(
+            rd,
+            UInt32(self.regs.get_f(rs).value)
+        )
 
     def instruction_fmv_x_w(self, ins: Instruction):
         """
@@ -350,7 +358,11 @@ class RV32F(InstructionSet):
         :Implementation:
         | x[rd] = sext(f[rs1][31:0])
         """
-        INS_NOT_IMPLEMENTED(ins)
+        rd, rs = self.parse_rd_rs(ins)
+        self.regs.set(
+            rd,
+            UInt32(self.regs.get_f(rs).bits)
+        )
 
     def instruction_feq_s(self, ins: Instruction):
         """
@@ -526,7 +538,7 @@ class RV32F(InstructionSet):
           | f[rd] = M[x[rs1] + sext(offset)][31:0]
         """
         rd, addr = self.parse_mem_ins(ins)
-        self.regs.set_f(self.mmu.read_float(addr))
+        self.regs.set_f(rd, self.mmu.read_float(addr))
 
     def instruction_fsw(self, ins: Instruction):
         """
