@@ -13,6 +13,7 @@ NUMBER_SYMBOL_PATTERN = re.compile(r"^\d+[fb]$")
 # base classes
 from .flags import MemoryFlags
 from .int32 import UInt32, Int32
+from .float32 import Float32
 from .instruction import Instruction
 from .instruction_context import InstructionContext
 from .memory_section import MemorySection
@@ -36,4 +37,5 @@ from .exceptions import (
     InvalidAllocationException,
     InvalidSyscallException,
     UnimplementedInstruction,
+    INS_NOT_IMPLEMENTED,
 )
