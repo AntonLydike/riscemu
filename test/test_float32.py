@@ -3,7 +3,7 @@ import math
 from riscemu.types import Float32
 
 # pi encoded as a 32bit little endian float
-PI_BYTES_LE = b'\xdb\x0fI@'
+PI_BYTES_LE = b"\xdb\x0fI@"
 
 
 def test_float_serialization():
@@ -13,12 +13,9 @@ def test_float_serialization():
 
 def test_random_float_ops():
     val = Float32(5)
-    assert val ** 2 == 25
+    assert val**2 == 25
     assert val // 2 == 2
     assert val * 3 == 15
     assert val - 2 == 3
     assert val * val == 25
     assert Float32(9) ** 0.5 == 3
-
-
-
