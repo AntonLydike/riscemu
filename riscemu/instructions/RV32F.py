@@ -275,10 +275,15 @@ class RV32F(InstructionSet):
         | f[rd] = min(f[rs1], f[rs2])
         """
         rd, rs1, rs2 = self.parse_rd_rs_rs(ins)
-        self.regs.set_f(rd, Float32(min(
-            self.regs.get_f(rs1).value,
-            self.regs.get_f(rs2).value,
-        )))
+        self.regs.set_f(
+            rd,
+            Float32(
+                min(
+                    self.regs.get_f(rs1).value,
+                    self.regs.get_f(rs2).value,
+                )
+            ),
+        )
 
     def instruction_fmax_s(self, ins: Instruction):
         """
@@ -298,10 +303,15 @@ class RV32F(InstructionSet):
         | f[rd] = max(f[rs1], f[rs2])
         """
         rd, rs1, rs2 = self.parse_rd_rs_rs(ins)
-        self.regs.set_f(rd, Float32(max(
-            self.regs.get_f(rs1).value,
-            self.regs.get_f(rs2).value,
-        )))
+        self.regs.set_f(
+            rd,
+            Float32(
+                max(
+                    self.regs.get_f(rs1).value,
+                    self.regs.get_f(rs2).value,
+                )
+            ),
+        )
 
     def instruction_fcvt_w_s(self, ins: Instruction):
         """
@@ -321,10 +331,7 @@ class RV32F(InstructionSet):
         | x[rd] = sext(s32_{f32}(f[rs1]))
         """
         rd, rs = self.parse_rd_rs(ins)
-        self.regs.set(
-            rd,
-            Int32(self.regs.get_f(rs).value)
-        )
+        self.regs.set(rd, Int32(self.regs.get_f(rs).value))
 
     def instruction_fcvt_wu_s(self, ins: Instruction):
         """
@@ -344,10 +351,7 @@ class RV32F(InstructionSet):
         | x[rd] = sext(u32_{f32}(f[rs1]))
         """
         rd, rs = self.parse_rd_rs(ins)
-        self.regs.set(
-            rd,
-            UInt32(self.regs.get_f(rs).value)
-        )
+        self.regs.set(rd, UInt32(self.regs.get_f(rs).value))
 
     def instruction_fmv_x_w(self, ins: Instruction):
         """
@@ -367,10 +371,7 @@ class RV32F(InstructionSet):
         | x[rd] = sext(f[rs1][31:0])
         """
         rd, rs = self.parse_rd_rs(ins)
-        self.regs.set(
-            rd,
-            UInt32(self.regs.get_f(rs).bits)
-        )
+        self.regs.set(rd, UInt32(self.regs.get_f(rs).bits))
 
     def instruction_feq_s(self, ins: Instruction):
         """
@@ -478,11 +479,7 @@ class RV32F(InstructionSet):
         | f[rd] = f32_{s32}(x[rs1])
         """
         rd, rs = self.parse_rd_rs(ins)
-        self.regs.set_f(
-            rd,
-            Float32(self.regs.get(rs).signed().value)
-        )
-
+        self.regs.set_f(rd, Float32(self.regs.get(rs).signed().value))
 
     def instruction_fcvt_s_wu(self, ins: Instruction):
         """
@@ -502,10 +499,7 @@ class RV32F(InstructionSet):
         | f[rd] = f32_{u32}(x[rs1])
         """
         rd, rs = self.parse_rd_rs(ins)
-        self.regs.set_f(
-            rd,
-            Float32(self.regs.get(rs).unsigned_value)
-        )
+        self.regs.set_f(rd, Float32(self.regs.get(rs).unsigned_value))
 
     def instruction_fmv_w_x(self, ins: Instruction):
         """
