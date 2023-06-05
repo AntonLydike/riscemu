@@ -34,7 +34,8 @@ class RV32F(InstructionSet):
         | f[rd] = f[rs1]×f[rs2]+f[rs3]
 
         """
-        INS_NOT_IMPLEMENTED(ins)
+        rd, rs1, rs2, rs3 = self.parse_rd_rs_rs_rs(ins)
+        self.regs.set_f(rd, rs1 * rs2 + rs3)
 
     def instruction_fmsub_s(self, ins: Instruction):
         """
@@ -54,7 +55,8 @@ class RV32F(InstructionSet):
         :Implementation:
         | f[rd] = f[rs1]×f[rs2]-f[rs3]
         """
-        INS_NOT_IMPLEMENTED(ins)
+        rd, rs1, rs2, rs3 = self.parse_rd_rs_rs_rs(ins)
+        self.regs.set_f(rd, rs1 * rs2 - rs3)
 
     def instruction_fnmsub_s(self, ins: Instruction):
         """
@@ -74,7 +76,8 @@ class RV32F(InstructionSet):
         :Implementation:
         | f[rd] = -f[rs1]×f[rs2]+f[rs3]
         """
-        INS_NOT_IMPLEMENTED(ins)
+        rd, rs1, rs2, rs3 = self.parse_rd_rs_rs_rs(ins)
+        self.regs.set_f(rd, -rs1 * rs2 + rs3)
 
     def instruction_fnmadd_s(self, ins: Instruction):
         """
@@ -94,7 +97,8 @@ class RV32F(InstructionSet):
         :Implementation:
         | f[rd] = -f[rs1]×f[rs2]-f[rs3]
         """
-        INS_NOT_IMPLEMENTED(ins)
+        rd, rs1, rs2, rs3 = self.parse_rd_rs_rs_rs(ins)
+        self.regs.set_f(rd, -rs1 * rs2 - rs3)
 
     def instruction_fadd_s(self, ins: Instruction):
         """
@@ -585,8 +589,20 @@ class RV32F(InstructionSet):
         return ins.get_reg(0), ins.get_reg(1)
 
     def parse_rd_rs_rs(self, ins: Instruction) -> Tuple[str, Float32, Float32]:
+        assert len(ins.args) == 3
         return (
             ins.get_reg(0),
             self.regs.get_f(ins.get_reg(1)),
             self.regs.get_f(ins.get_reg(2)),
+        )
+
+    def parse_rd_rs_rs_rs(
+        self, ins: Instruction
+    ) -> Tuple[str, Float32, Float32, Float32]:
+        assert len(ins.args) == 4
+        return (
+            ins.get_reg(0),
+            self.regs.get_f(ins.get_reg(1)),
+            self.regs.get_f(ins.get_reg(2)),
+            self.regs.get_f(ins.get_reg(3)),
         )
