@@ -4,9 +4,9 @@ from typing import Union, Any
 
 bytes_t = bytes
 
-class Float32:
 
-    __slots__ = ('_val',)
+class Float32:
+    __slots__ = ("_val",)
 
     _val: c_float
 
@@ -22,19 +22,19 @@ class Float32:
         """
         The values bit representation (as a bytes object)
         """
-        return struct.pack('<f', self.value)
+        return struct.pack("<f", self.value)
 
     @property
     def bits(self) -> int:
         """
         The values bit representation as an int (for easy bit manipulation)
         """
-        return int.from_bytes(self.bytes, byteorder='little')
+        return int.from_bytes(self.bytes, byteorder="little")
 
     @classmethod
     def from_bytes(cls, val: Union[int, bytes_t, bytearray]):
         if isinstance(val, int):
-            val = int.to_bytes(byteorder='little')
+            val = int.to_bytes(byteorder="little")
         return Float32(val)
 
     def __init__(self, val: Union[float, c_float, "Float32", bytes_t, bytearray, int]):
@@ -43,7 +43,7 @@ class Float32:
         elif isinstance(val, c_float):
             self._val = c_float(val.value)
         elif isinstance(val, (bytes, bytearray)):
-            self._val = c_float(struct.unpack('<f', val)[0])
+            self._val = c_float(struct.unpack("<f", val)[0])
         elif isinstance(val, Float32):
             self._val = val._val
 
@@ -134,7 +134,7 @@ class Float32:
     def __pow__(self, power, modulo=None):
         if modulo is not None:
             raise ValueError("Float32 pow with modulo unsupported")
-        return self.__class__(self.value ** power)
+        return self.__class__(self.value**power)
 
     # right handed binary operators
 
@@ -193,4 +193,3 @@ class Float32:
 
     def __rshift__(self, other: int):
         return self.from_bytes(self.bits >> other)
-
