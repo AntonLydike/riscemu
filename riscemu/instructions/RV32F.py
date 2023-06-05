@@ -274,7 +274,11 @@ class RV32F(InstructionSet):
         :Implementation:
         | f[rd] = min(f[rs1], f[rs2])
         """
-        INS_NOT_IMPLEMENTED(ins)
+        rd, rs1, rs2 = self.parse_rd_rs_rs(ins)
+        self.regs.set_f(rd, Float32(min(
+            self.regs.get_f(rs1).value,
+            self.regs.get_f(rs2).value,
+        )))
 
     def instruction_fmax_s(self, ins: Instruction):
         """
@@ -293,7 +297,11 @@ class RV32F(InstructionSet):
         :Implementation:
         | f[rd] = max(f[rs1], f[rs2])
         """
-        INS_NOT_IMPLEMENTED(ins)
+        rd, rs1, rs2 = self.parse_rd_rs_rs(ins)
+        self.regs.set_f(rd, Float32(max(
+            self.regs.get_f(rs1).value,
+            self.regs.get_f(rs2).value,
+        )))
 
     def instruction_fcvt_w_s(self, ins: Instruction):
         """
