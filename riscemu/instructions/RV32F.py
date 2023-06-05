@@ -11,7 +11,7 @@ and their function)
 from typing import Tuple
 
 from .instruction_set import InstructionSet, Instruction
-from riscemu.types import INS_NOT_IMPLEMENTED, Float32
+from riscemu.types import INS_NOT_IMPLEMENTED, Float32, Int32
 
 
 class RV32F(InstructionSet):
@@ -371,7 +371,8 @@ class RV32F(InstructionSet):
         :Implementation:
         | x[rd] = f[rs1] == f[rs2]
         """
-        INS_NOT_IMPLEMENTED(ins)
+        rd, rs1, rs2 = self.parse_rd_rs_rs(ins)
+        self.regs.set(rd, Int32(rs1 == rs2))
 
     def instruction_flt_s(self, ins: Instruction):
         """
@@ -392,7 +393,8 @@ class RV32F(InstructionSet):
         :Implementation:
         | x[rd] = f[rs1] < f[rs2]
         """
-        INS_NOT_IMPLEMENTED(ins)
+        rd, rs1, rs2 = self.parse_rd_rs_rs(ins)
+        self.regs.set(rd, Int32(rs1 < rs2))
 
     def instruction_fle_s(self, ins: Instruction):
         """
@@ -413,7 +415,8 @@ class RV32F(InstructionSet):
         :Implementation:
         | x[rd] = f[rs1] <= f[rs2]
         """
-        INS_NOT_IMPLEMENTED(ins)
+        rd, rs1, rs2 = self.parse_rd_rs_rs(ins)
+        self.regs.set(rd, Int32(rs1 <= rs2))
 
     def instruction_fclass_s(self, ins: Instruction):
         """
@@ -547,3 +550,10 @@ class RV32F(InstructionSet):
     def parse_rd_rs(self, ins: Instruction) -> Tuple[str, str]:
         assert len(ins.args) == 2
         return ins.get_reg(0), ins.get_reg(1)
+
+    def parse_rd_rs_rs(self, ins: Instruction) -> Tuple[str, Float32, Float32]:
+        return (
+            ins.get_reg(0),
+            self.regs.get_f(ins.get_reg(1)),
+            self.regs.get_f(ins.get_reg(2)),
+        )
