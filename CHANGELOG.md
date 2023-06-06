@@ -1,14 +1,13 @@
 # Changelog
 
-## Upcoming 2.0.6
+## Upcoming 2.1.0
 
  - Added a very basic libc containing a `crt0.s`, and a few functions
    such as `malloc`, `rand`, and `memcpy`.
  - Added a subset of the `mmap2` syscall (code 192) to allocate new memory
  - Refactored the launching code to improve using riscemu from code
-
-**Planned:**
- - Add a floating point unit
+ - Added an option to start with the provided libc: `-o libc`
+ - Added floating point support (enabled by default). The RV32F extension is now available
 
 ## 2.0.5
 
