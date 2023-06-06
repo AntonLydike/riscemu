@@ -48,6 +48,10 @@ class Float32:
             self._val = c_float(struct.unpack("<f", val)[0])
         elif isinstance(val, Float32):
             self._val = val._val
+        else:
+            raise ValueError("Unsupported value passed to Float32: {} ({})".format(
+                repr(val), type(val)
+            ))
 
     def __add__(self, other: Union["Float32", float]):
         if isinstance(other, Float32):
