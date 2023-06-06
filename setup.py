@@ -1,4 +1,5 @@
 import setuptools
+from glob import glob
 
 import riscemu
 
@@ -34,6 +35,9 @@ setuptools.setup(
     package_data={
         "riscemu": ["libc/*.s", "py.typed"],
     },
+    data_files=[
+        ('libc', glob('libc/*.s')),
+    ],
     scripts=["riscemu/tools/riscemu"],
     python_requires=">=3.8",
     install_requires=["pyelftools~=0.27"],

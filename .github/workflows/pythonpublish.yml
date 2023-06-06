@@ -1,0 +1,22 @@
+name: Upload to PyPI
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: publishing
+    permissions:
+      # IMPORTANT: this permission is mandatory for trusted publishing
+      id-token: write
+    steps:
+      # install build package and build dist
+      - name: Build distribution
+        run: >-
+          python3 -m pip install build --user
+          python3 -m build --sdist --wheel --outdir dist/
+      # retrieve your distributions here
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
