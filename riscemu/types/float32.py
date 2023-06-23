@@ -34,7 +34,7 @@ class Float32:
     @classmethod
     def from_bytes(cls, val: Union[int, bytes_t, bytearray]):
         if isinstance(val, int):
-            val = int.to_bytes(byteorder="little")
+            val = struct.unpack("!f", struct.pack("!I", val))[0]
         return Float32(val)
 
     def __init__(
@@ -133,11 +133,6 @@ class Float32:
 
     def __bool__(self):
         return bool(self.value)
-
-    def __cmp__(self, other: Any):
-        if isinstance(other, Float32):
-            other = other.value
-        return self.value.__cmp__(other)
 
     def __pow__(self, power, modulo=None):
         if modulo is not None:
