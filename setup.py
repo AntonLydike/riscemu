@@ -36,7 +36,7 @@ setuptools.setup(
         "riscemu": ["libc/*.s", "py.typed"],
     },
     data_files=[
-        ('libc', glob('libc/*.s')),
+        ("libc", glob("libc/*.s")),
     ],
     scripts=["riscemu/tools/riscemu"],
     python_requires=">=3.8",
