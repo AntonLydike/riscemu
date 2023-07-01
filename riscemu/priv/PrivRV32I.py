@@ -168,8 +168,14 @@ class PrivRV32I(RV32I):
         ASSERT_LEN(ins.args, 3)
         return ins.get_reg(0), ins.get_reg(1), ins.get_imm(2)
 
-    def parse_mem_ins(self, ins: "Instruction") -> Tuple[str, int]:
+    def parse_rd_rs_mem_ins(self, ins: "Instruction") -> Tuple[str, int]:
         ASSERT_LEN(ins.args, 3)
         addr = self.get_reg_content(ins, 1) + ins.get_imm(2)
         reg = ins.get_reg(0)
+        return reg, addr
+
+    def parse_rs_rs_mem_ins(self, ins: "Instruction") -> Tuple[str, int]:
+        ASSERT_LEN(ins.args, 3)
+        addr = self.get_reg_content(ins, 0) + ins.get_imm(2)
+        reg = ins.get_reg(1)
         return reg, addr

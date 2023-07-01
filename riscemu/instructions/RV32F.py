@@ -561,7 +561,7 @@ class RV32F(InstructionSet):
         :Implementation:
           | f[rd] = M[x[rs1] + sext(offset)][31:0]
         """
-        rd, addr = self.parse_mem_ins(ins)
+        rd, addr = self.parse_rd_rs_mem_ins(ins)
         self.regs.set_f(rd, self.mmu.read_float(addr))
 
     def instruction_fsw(self, ins: Instruction):
@@ -581,7 +581,7 @@ class RV32F(InstructionSet):
         :Implementation:
           | M[x[rs1] + sext(offset)] = f[rs2][31:0]
         """
-        rs, addr = self.parse_mem_ins(ins)
+        rs, addr = self.parse_rs_rs_mem_ins(ins)
         val = self.regs.get_f(rs)
         self.mmu.write(addr, 4, bytearray(val.bytes))
 

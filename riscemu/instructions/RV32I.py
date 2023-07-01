@@ -23,35 +23,35 @@ class RV32I(InstructionSet):
     """
 
     def instruction_lb(self, ins: "Instruction"):
-        rd, addr = self.parse_mem_ins(ins)
+        rd, addr = self.parse_rd_rs_mem_ins(ins)
         self.regs.set(rd, Int32.sign_extend(self.mmu.read(addr.unsigned_value, 1), 8))
 
     def instruction_lh(self, ins: "Instruction"):
-        rd, addr = self.parse_mem_ins(ins)
+        rd, addr = self.parse_rd_rs_mem_ins(ins)
         self.regs.set(rd, Int32.sign_extend(self.mmu.read(addr.unsigned_value, 2), 16))
 
     def instruction_lw(self, ins: "Instruction"):
-        rd, addr = self.parse_mem_ins(ins)
+        rd, addr = self.parse_rd_rs_mem_ins(ins)
         self.regs.set(rd, Int32(self.mmu.read(addr.unsigned_value, 4)))
 
     def instruction_lbu(self, ins: "Instruction"):
-        rd, addr = self.parse_mem_ins(ins)
+        rd, addr = self.parse_rd_rs_mem_ins(ins)
         self.regs.set(rd, Int32(self.mmu.read(addr.unsigned_value, 1)))
 
     def instruction_lhu(self, ins: "Instruction"):
-        rd, addr = self.parse_mem_ins(ins)
+        rd, addr = self.parse_rd_rs_mem_ins(ins)
         self.regs.set(rd, Int32(self.mmu.read(addr.unsigned_value, 2)))
 
     def instruction_sb(self, ins: "Instruction"):
-        rd, addr = self.parse_mem_ins(ins)
+        rd, addr = self.parse_rs_rs_mem_ins(ins)
         self.mmu.write(addr.unsigned_value, 1, self.regs.get(rd).to_bytes(1))
 
     def instruction_sh(self, ins: "Instruction"):
-        rd, addr = self.parse_mem_ins(ins)
+        rd, addr = self.parse_rs_rs_mem_ins(ins)
         self.mmu.write(addr.unsigned_value, 2, self.regs.get(rd).to_bytes(2))
 
     def instruction_sw(self, ins: "Instruction"):
-        rd, addr = self.parse_mem_ins(ins)
+        rd, addr = self.parse_rs_rs_mem_ins(ins)
         self.mmu.write(addr.unsigned_value, 4, self.regs.get(rd).to_bytes(4))
 
     def instruction_sll(self, ins: "Instruction"):
