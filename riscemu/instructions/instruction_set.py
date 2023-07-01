@@ -49,7 +49,7 @@ class InstructionSet(ABC):
             if member.startswith("instruction_"):
                 yield member[12:].replace("_", "."), getattr(self, member)
 
-    def parse_mem_ins(self, ins: "Instruction") -> Tuple[str, Int32]:
+    def parse_rd_rs_mem_ins(self, ins: "Instruction") -> Tuple[str, Int32]:
         """
         parses both rd, rs, imm and rd, imm(rs) argument format and returns (rd, imm+rs1)
         (so a register and address tuple for memory instructions)
@@ -66,6 +66,25 @@ class InstructionSet(ABC):
             rs = self.regs.get(rs_name)
         rd = ins.get_reg(0)
         return rd, rs + imm
+
+    def parse_rs_rs_mem_ins(self, ins: "Instruction") -> Tuple[str, Int32]:
+        """
+        parses both rs1, rs2, imm and rs2, imm(rs1) argument format and returns (rs2, imm+rs1)
+        (so a register and address tuple for memory instructions)
+        """
+        if len(ins.args) == 3:
+            # handle rs1, rs2, imm
+            rs1 = self.get_reg_content(ins, 0)
+            rs2 = ins.get_reg(1)
+            imm = ins.get_imm(2)
+        else:
+            # handle rs2, imm(rs1)
+            ASSERT_LEN(ins.args, 2)
+            ASSERT_IN("(", ins.args[1])
+            imm, rs1_name = ins.get_imm_reg(1)
+            rs1 = self.regs.get(rs1_name)
+            rs2 = ins.get_reg(0)
+        return rs2, rs1 + imm
 
     def parse_rd_rs_rs(
         self, ins: "Instruction", signed=True
