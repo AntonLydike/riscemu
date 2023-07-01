@@ -15,7 +15,7 @@ from riscemu.types.exceptions import ParseException
 LINE_COMMENT_STARTERS = ("#", ";", "//")
 WHITESPACE_PATTERN = re.compile(r"\s+")
 MEMORY_ADDRESS_PATTERN = re.compile(
-    r"^(0[xX][A-f0-9]+|\d+|0b[0-1]+|[A-z0-9_-]+)\(([A-z]+[0-9]{0,2})\)$"
+    r"^(0[xX][A-f0-9]+|\d+|0b[0-1]+|[A-z0-9_-]+)\(([A-z]+[0-9]*)\)$"
 )
 REGISTER_NAMES = RISCV_REGS
 
@@ -88,10 +88,9 @@ def parse_arg(arg: str) -> Iterable[Token]:
     mem_match_resul = re.match(MEMORY_ADDRESS_PATTERN, arg)
     if mem_match_resul:
         register = mem_match_resul.group(2).lower()
-        if register not in RISCV_REGS:
-            raise ParseException(f'"{register}" is not a valid register!')
+        immediate = mem_match_resul.group(1)
         yield Token(TokenType.ARGUMENT, register)
-        yield Token(TokenType.ARGUMENT, mem_match_resul.group(1))
+        yield Token(TokenType.ARGUMENT, immediate)
     else:
         yield Token(TokenType.ARGUMENT, arg)
     if comma:
