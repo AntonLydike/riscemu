@@ -19,3 +19,7 @@ def test_random_float_ops():
     assert val - 2 == 3
     assert val * val == 25
     assert Float32(9) ** 0.5 == 3
+
+
+def test_float_from_raw_int_conversion():
+    assert Float32.from_bytes(1084227584) == Float32(5.0)

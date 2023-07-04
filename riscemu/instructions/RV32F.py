@@ -121,7 +121,7 @@ class RV32F(InstructionSet):
         rd, rs1, rs2 = self.parse_rd_rs_rs(ins)
         self.regs.set_f(
             rd,
-            self.regs.get_f(rs1) + self.regs.get_f(rs2),
+            rs1 + rs2,
         )
 
     def instruction_fsub_s(self, ins: Instruction):
@@ -145,7 +145,7 @@ class RV32F(InstructionSet):
         rd, rs1, rs2 = self.parse_rd_rs_rs(ins)
         self.regs.set_f(
             rd,
-            self.regs.get_f(rs1) - self.regs.get_f(rs2),
+            rs1 - rs2,
         )
 
     def instruction_fmul_s(self, ins: Instruction):
@@ -169,7 +169,7 @@ class RV32F(InstructionSet):
         rd, rs1, rs2 = self.parse_rd_rs_rs(ins)
         self.regs.set_f(
             rd,
-            self.regs.get_f(rs1) * self.regs.get_f(rs2),
+            rs1 * rs2,
         )
 
     def instruction_fdiv_s(self, ins: Instruction):
@@ -193,7 +193,7 @@ class RV32F(InstructionSet):
         rd, rs1, rs2 = self.parse_rd_rs_rs(ins)
         self.regs.set_f(
             rd,
-            self.regs.get_f(rs1) / self.regs.get_f(rs2),
+            rs1 / rs2,
         )
 
     def instruction_fsqrt_s(self, ins: Instruction):
@@ -215,7 +215,7 @@ class RV32F(InstructionSet):
         | f[rd] = sqrt(f[rs1])
         """
         rd, rs = self.parse_rd_rs(ins)
-        self.regs.set_f(self.regs.get_f(rs) ** 0.5)
+        self.regs.set_f(rd, self.regs.get_f(rs) ** 0.5)
 
     def instruction_fsgnj_s(self, ins: Instruction):
         """
@@ -300,8 +300,8 @@ class RV32F(InstructionSet):
             rd,
             Float32(
                 min(
-                    self.regs.get_f(rs1).value,
-                    self.regs.get_f(rs2).value,
+                    rs1.value,
+                    rs2.value,
                 )
             ),
         )
@@ -328,8 +328,8 @@ class RV32F(InstructionSet):
             rd,
             Float32(
                 max(
-                    self.regs.get_f(rs1).value,
-                    self.regs.get_f(rs2).value,
+                    rs1.value,
+                    rs2.value,
                 )
             ),
         )
@@ -352,7 +352,7 @@ class RV32F(InstructionSet):
         | x[rd] = sext(s32_{f32}(f[rs1]))
         """
         rd, rs = self.parse_rd_rs(ins)
-        self.regs.set(rd, Int32(self.regs.get_f(rs).value))
+        self.regs.set(rd, Int32(self.regs.get_f(rs).bytes))
 
     def instruction_fcvt_wu_s(self, ins: Instruction):
         """
@@ -372,7 +372,7 @@ class RV32F(InstructionSet):
         | x[rd] = sext(u32_{f32}(f[rs1]))
         """
         rd, rs = self.parse_rd_rs(ins)
-        self.regs.set(rd, UInt32(self.regs.get_f(rs).value))
+        self.regs.set(rd, UInt32(self.regs.get_f(rs).bytes))
 
     def instruction_fmv_x_w(self, ins: Instruction):
         """
@@ -500,7 +500,7 @@ class RV32F(InstructionSet):
         | f[rd] = f32_{s32}(x[rs1])
         """
         rd, rs = self.parse_rd_rs(ins)
-        self.regs.set_f(rd, Float32(self.regs.get(rs).signed().value))
+        self.regs.set_f(rd, Float32.from_bytes(self.regs.get(rs).signed().value))
 
     def instruction_fcvt_s_wu(self, ins: Instruction):
         """
@@ -520,7 +520,7 @@ class RV32F(InstructionSet):
         | f[rd] = f32_{u32}(x[rs1])
         """
         rd, rs = self.parse_rd_rs(ins)
-        self.regs.set_f(rd, Float32(self.regs.get(rs).unsigned_value))
+        self.regs.set_f(rd, Float32.from_bytes(self.regs.get(rs).unsigned_value))
 
     def instruction_fmv_w_x(self, ins: Instruction):
         """
@@ -562,7 +562,7 @@ class RV32F(InstructionSet):
           | f[rd] = M[x[rs1] + sext(offset)][31:0]
         """
         rd, addr = self.parse_mem_ins(ins)
-        self.regs.set_f(rd, self.mmu.read_float(addr))
+        self.regs.set_f(rd, self.mmu.read_float(addr.value))
 
     def instruction_fsw(self, ins: Instruction):
         """
@@ -583,7 +583,7 @@ class RV32F(InstructionSet):
         """
         rs, addr = self.parse_mem_ins(ins)
         val = self.regs.get_f(rs)
-        self.mmu.write(addr, 4, bytearray(val.bytes))
+        self.mmu.write(addr.value, 4, bytearray(val.bytes))
 
     def parse_rd_rs(self, ins: Instruction) -> Tuple[str, str]:
         assert len(ins.args) == 2
