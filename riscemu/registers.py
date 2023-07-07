@@ -148,7 +148,7 @@ class Registers:
 
     def _reg_repr(self, reg: str, name_len=4, fmt="08X"):
         if(reg in self.float_regs):
-            txt = "{:{}}={:.8f}".format(reg, name_len, self.get_f(reg, False))
+            txt = "{:{}}={: .3e}".format(reg, name_len, self.get_f(reg, False))
         else:
             txt = "{:{}}=0x{:{}}".format(reg, name_len, self.get(reg, False), fmt)
         if reg == "fp":
