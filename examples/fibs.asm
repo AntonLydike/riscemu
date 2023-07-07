@@ -17,6 +17,7 @@ loop:
         addi    t1, t2, 0       // t1 = t2
         addi    s1, s1, 4       // increment storage pointer
         blt     s1, s2, loop    // loop as long as we did not reach array length
+        ebreak
         // exit gracefully
         addi    a0, zero, 0
         addi    a7, zero, 93
