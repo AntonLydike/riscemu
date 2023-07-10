@@ -159,13 +159,13 @@ class Registers:
             return FMT_ORANGE + FMT_UNDERLINE + txt + FMT_NONE
         if reg == "zero":
             return txt
-        if (
+        should_grayscale_int = (
             reg in self.valid_regs
             and self.get(reg, False) == 0
             and reg not in Registers.named_registers()
-            or reg in self.float_regs
-            and self.get_f(reg, False)
-        ):
+        )
+        should_grayscale_float = reg in self.float_regs and self.get_f(reg, False) == 0
+        if should_grayscale_int or should_grayscale_float:
             return FMT_GRAY + txt + FMT_NONE
         return txt
 
