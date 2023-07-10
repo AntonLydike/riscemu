@@ -147,7 +147,7 @@ class Registers:
         )
 
     def _reg_repr(self, reg: str, name_len=4, fmt="08X"):
-        if(reg in self.float_regs):
+        if reg in self.float_regs:
             txt = "{:{}}={: .3e}".format(reg, name_len, self.get_f(reg, False))
         else:
             txt = "{:{}}=0x{:{}}".format(reg, name_len, self.get(reg, False), fmt)
@@ -159,7 +159,13 @@ class Registers:
             return FMT_ORANGE + FMT_UNDERLINE + txt + FMT_NONE
         if reg == "zero":
             return txt
-        if reg in self.valid_regs and self.get(reg, False) == 0 and reg not in Registers.named_registers() or reg in self.float_regs and self.get_f(reg, False):
+        if (
+            reg in self.valid_regs
+            and self.get(reg, False) == 0
+            and reg not in Registers.named_registers()
+            or reg in self.float_regs
+            and self.get_f(reg, False)
+        ):
             return FMT_GRAY + txt + FMT_NONE
         return txt
 
