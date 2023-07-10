@@ -198,7 +198,7 @@ class RV32I(InstructionSet):
     def instruction_j(self, ins: "Instruction"):
         ASSERT_LEN(ins.args, 1)
         addr = ins.get_imm(0)
-        self.pc = addr
+        self.pc += addr
 
     def instruction_jal(self, ins: "Instruction"):
         reg = "ra"  # default register is ra
@@ -209,7 +209,7 @@ class RV32I(InstructionSet):
             reg = ins.get_reg(0)
             addr = ins.get_imm(1)
         self.regs.set(reg, Int32(self.pc))
-        self.pc = addr
+        self.pc += addr
 
     def instruction_jalr(self, ins: "Instruction"):
         ASSERT_LEN(ins.args, 2)
