@@ -7,7 +7,7 @@ class Instruction(ABC):
     args: tuple
 
     @abstractmethod
-    def get_imm(self, num: int) -> int:
+    def get_imm(self, num: int, rel: int = 0) -> int:
         """
         parse and get immediate argument
         """

@@ -17,10 +17,10 @@ class SimpleInstruction(Instruction):
         self.args = args
         self.addr = addr
 
-    def get_imm(self, num: int) -> int:
+    def get_imm(self, num: int, rel: int = 0) -> int:
         resolved_label = self.context.resolve_label(self.args[num], self.addr)
         if resolved_label is None:
-            return parse_numeric_argument(self.args[num])
+            return parse_numeric_argument(self.args[num]) + rel
         return resolved_label
 
     def get_imm_reg(self, num: int) -> Tuple[int, str]:

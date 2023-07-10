@@ -197,17 +197,17 @@ class RV32I(InstructionSet):
     # technically deprecated
     def instruction_j(self, ins: "Instruction"):
         ASSERT_LEN(ins.args, 1)
-        addr = ins.get_imm(0)
+        addr = ins.get_imm(0, self.pc)
         self.pc = addr
 
     def instruction_jal(self, ins: "Instruction"):
         reg = "ra"  # default register is ra
         if len(ins.args) == 1:
-            addr = ins.get_imm(0)
+            addr = ins.get_imm(0, self.pc)
         else:
             ASSERT_LEN(ins.args, 2)
             reg = ins.get_reg(0)
-            addr = ins.get_imm(1)
+            addr = ins.get_imm(1, self.pc)
         self.regs.set(reg, Int32(self.pc))
         self.pc = addr
 
