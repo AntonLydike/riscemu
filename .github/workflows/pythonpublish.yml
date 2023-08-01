@@ -15,7 +15,7 @@ jobs:
       # install build package and build dist
       - name: Build distribution
         run: >-
-          python3 -m pip install build --user
+          python3 -m pip install build --user &&
           python3 -m build --sdist --wheel --outdir dist/
       # retrieve your distributions here
       - name: Publish package distributions to PyPI
