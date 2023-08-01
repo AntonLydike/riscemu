@@ -1,6 +1,12 @@
 # Changelog
 
-## Upcoming 2.1.0
+## 2.1.1
+
+ - Bugfix: Fix some errors in the RV32F implementation (thanks @adutilleul)
+ - Bugfix: Fix how floats are printed in the register view (thanks @KGrykiel)
+ - Bugfix: Fix missing support for infinite registers in load/store ins (thanks @superlopuh)
+
+## 2.1.0
 
  - Added a very basic libc containing a `crt0.s`, and a few functions
    such as `malloc`, `rand`, and `memcpy`.
