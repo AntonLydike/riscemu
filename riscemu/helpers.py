@@ -7,6 +7,8 @@ SPDX-License-Identifier: MIT
 from math import log10, ceil
 from typing import Iterable, Iterator, TypeVar, Generic, List, Optional
 
+from riscemu.types.immediate import Immediate
+
 from .types import Int32, UInt32
 from .types.exceptions import *
 
@@ -28,6 +30,20 @@ def parse_numeric_argument(arg: str) -> int:
         if arg.lower().startswith("0x"):
             return int(arg, 16)
         return int(arg)
+    except ValueError as ex:
+        raise ParseException(
+            'Invalid immediate argument "{}", maybe missing symbol?'.format(arg),
+            (arg, ex),
+        )
+    
+def parse_numeric_argument_alt(arg: str) -> Immediate:
+    """
+    parse hex or int strings
+    """
+    try:
+        if arg.lower().startswith("0x"):
+            return Immediate(int(arg, 16), 0)
+        return Immediate(int(arg), 0)
     except ValueError as ex:
         raise ParseException(
             'Invalid immediate argument "{}", maybe missing symbol?'.format(arg),

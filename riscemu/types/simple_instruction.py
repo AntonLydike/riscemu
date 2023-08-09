@@ -1,7 +1,9 @@
 from typing import Union, Tuple
 
+from riscemu.types.immediate import Immediate
+
 from . import Instruction, T_RelativeAddress, InstructionContext
-from ..helpers import parse_numeric_argument
+from ..helpers import parse_numeric_argument, parse_numeric_argument_alt
 
 
 class SimpleInstruction(Instruction):
@@ -21,6 +23,12 @@ class SimpleInstruction(Instruction):
         resolved_label = self.context.resolve_label(self.args[num], self.addr)
         if resolved_label is None:
             return parse_numeric_argument(self.args[num])
+        return resolved_label
+    
+    def get_imm_alt(self, num: int) -> Immediate:
+        resolved_label = Immediate(self.context.resolve_label(self.args[num], self.addr), 1)
+        if resolved_label.value is None:
+            return parse_numeric_argument_alt(self.args[num])
         return resolved_label
 
     def get_imm_reg(self, num: int) -> Tuple[int, str]:
