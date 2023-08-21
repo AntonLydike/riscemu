@@ -25,7 +25,7 @@ class MockCPU(CPU):
         self.regs = MockRegisters(True)
 
     @classmethod
-    def get_loaders(cls) -> Iterable[type[ProgramLoader]]:
+    def get_loaders(cls) -> "Iterable[type[ProgramLoader]]":
         assert False
 
     def run(self, verbose: bool = False):
