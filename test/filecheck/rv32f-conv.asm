@@ -1,6 +1,8 @@
-// RUN: python3 -m riscemu -v %s | filecheck %s
+// RUN: python3 -m riscemu -v %s -o libc | filecheck %s
 
 .text
+
+.globl      main
 main:
     // test fcvt.s.wu
     li a1, -2
@@ -44,6 +46,5 @@ main:
     print.float fa0
     // CHECK-NEXT: register fa0 contains value -2.0
 
-    addi    a0, zero, 0             // set exit code to 0
-    addi    a7, zero, SCALL_EXIT    // exit syscall code
-    scall
+    ret
+// CHECK-NEXT: [CPU] Program exited with code 0
