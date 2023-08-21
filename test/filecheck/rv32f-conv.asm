@@ -22,7 +22,7 @@ main:
     print.float fa0
     // CHECK-NEXT: register fa0 contains value 2.0
 
-    // test fmv.s.x 
+    // test fmv.s.x
     li a1, 2
     fcvt.s.w fa0, a1
     fmv.x.w a1, fa0
