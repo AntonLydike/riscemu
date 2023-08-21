@@ -1,5 +1,9 @@
 # Changelog
 
+# Upcoming
+
+ - BugFix: Fix some more errors in the RV32F implementation
+
 ## 2.1.1
 
  - Bugfix: Fix some errors in the RV32F implementation (thanks @adutilleul)
