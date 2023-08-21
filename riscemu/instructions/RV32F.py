@@ -352,7 +352,7 @@ class RV32F(InstructionSet):
         | x[rd] = sext(s32_{f32}(f[rs1]))
         """
         rd, rs = self.parse_rd_rs(ins)
-        self.regs.set(rd, Int32(self.regs.get_f(rs).value))
+        self.regs.set(rd, Int32(int(self.regs.get_f(rs).value)))
 
     def instruction_fcvt_wu_s(self, ins: Instruction):
         """
