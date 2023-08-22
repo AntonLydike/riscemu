@@ -29,21 +29,16 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Upgrade pip
+    - name: Install poetry
       run: |
-        pip install --upgrade pip
+        pip install poetry
 
     - name: Install the package locally
-      run: pip install -r requirements.txt -r requirements-dev.txt
+      run: poetry install
 
     - name: Test with pytest
       run: |
-        pytest -W error
+        poetry run pytest -W error
     - name: Test with lit
       run: |
-        lit -v test/filecheck
-
-    #- name: Execute lit tests
-    #  run: |
-    #    export PYTHONPATH=$(pwd)
-    #    lit -v tests/filecheck/
+        poetry run lit -v test/filecheck

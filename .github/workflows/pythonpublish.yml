@@ -15,8 +15,8 @@ jobs:
       # install build package and build dist
       - name: Build distribution
         run: >-
-          python3 -m pip install build --user &&
-          python3 -m build --sdist --wheel --outdir dist/
+          python3 -m pip install poetry &&
+          poetry build
       # retrieve your distributions here
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1

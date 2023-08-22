@@ -10,13 +10,19 @@ import sys
 from riscemu import RiscemuBaseException
 from riscemu.riscemu_main import RiscemuMain
 
-try:
-    main = RiscemuMain()
-    main.run_from_cli(sys.argv[1:])
-    sys.exit(main.cpu.exit_code if not main.cfg.ignore_exit_code else 0)
 
-except RiscemuBaseException as e:
-    print("Error: {}".format(e.message()))
-    e.print_stacktrace()
+def main():
+    try:
+        main = RiscemuMain()
+        main.run_from_cli(sys.argv[1:])
+        sys.exit(main.cpu.exit_code if not main.cfg.ignore_exit_code else 0)
 
-    sys.exit(-1)
+    except RiscemuBaseException as e:
+        print("Error: {}".format(e.message()))
+        e.print_stacktrace()
+
+        sys.exit(-1)
+
+
+if __name__ == "__main__":
+    main()
