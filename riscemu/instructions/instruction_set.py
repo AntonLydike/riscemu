@@ -4,12 +4,12 @@ RiscEmu (c) 2021 Anton Lydike
 SPDX-License-Identifier: MIT
 """
 
-from typing import Tuple, Callable, Dict
+from typing import Tuple, Callable, Dict, Union
 
 from abc import ABC
 
 from ..CPU import CPU
-from riscemu.types.exceptions import ASSERT_LEN, ASSERT_IN
+from riscemu.types.exceptions import ASSERT_LEN
 from ..types import Instruction, Int32, UInt32, Immediate
 
 
@@ -138,7 +138,7 @@ class InstructionSet(ABC):
         return self.cpu.pc
 
     @pc.setter
-    def pc(self, val: int | Int32):
+    def pc(self, val: Union[int, Int32]):
         if isinstance(val, Int32):
             val = val.unsigned_value
         self.cpu.pc = val
