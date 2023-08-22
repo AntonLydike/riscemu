@@ -28,7 +28,7 @@ class Immediate:
 
     __slots__ = ["abs_value", "pcrel_value"]
 
-    def __init__(self, abs_value: int | Int32, pcrel_value: int | Int32):
+    def __init__(self, abs_value: Union[int, Int32], pcrel_value: Union[int, Int32]):
         self.abs_value = Int32(abs_value)
         self.pcrel_value = Int32(pcrel_value)
 
