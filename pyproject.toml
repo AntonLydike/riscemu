@@ -1,0 +1,41 @@
+[tool.poetry]
+name = "riscemu"
+version = "2.1.1"
+description = "A basic RISC-V emulator"
+authors = ["Anton Lydike <me@antonlydike.de>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/antonlydike/riscemu"
+repository = "https://github.com/antonlydike/riscemu"
+keywords = ["RISC-V"]
+# include libc in build:
+include = [
+    "libc/"
+]
+# classifiers
+classifiers = [
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+]
+
+[tool.poetry.scripts]
+riscemu = "riscemu:main"
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/antonlydike/riscemu/issues"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+pyelftools = "^0.29"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.7.0"
+pytest = "^7.4.0"
+filecheck = "^0.0.23"
+lit = "^16.0.6"
+pre-commit = "^3.3.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
