@@ -101,9 +101,7 @@ class RV32I(InstructionSet):
         self.regs.set(dst, self.regs.get(src1) >> (imm.abs_value & 0b11111))
 
     def instruction_add(self, ins: "Instruction"):
-        # FIXME: once configuration is figured out, add flag to support immediate arg in add instruction
         dst, rs1, rs2 = self.parse_rd_rs_rs(ins)
-
         self.regs.set(dst, rs1 + rs2)
 
     def instruction_addi(self, ins: "Instruction"):
@@ -117,14 +115,13 @@ class RV32I(InstructionSet):
     def instruction_lui(self, ins: "Instruction"):
         ASSERT_LEN(ins.args, 2)
         reg = ins.get_reg(0)
-        imm = UInt32(ins.get_imm(1).abs_value << 12)
-        self.regs.set(reg, Int32(imm))
+        self.regs.set(reg, ins.get_imm(1).abs_value << 12)
 
     def instruction_auipc(self, ins: "Instruction"):
         ASSERT_LEN(ins.args, 2)
         reg = ins.get_reg(0)
-        imm = UInt32(ins.get_imm(1).abs_value << 12)
-        self.regs.set(reg, imm.signed() + self.pc)
+        imm = ins.get_imm(1).abs_value << 12
+        self.regs.set(reg, imm + self.pc)
 
     def instruction_xor(self, ins: "Instruction"):
         rd, rs1, rs2 = self.parse_rd_rs_rs(ins)
@@ -152,19 +149,19 @@ class RV32I(InstructionSet):
 
     def instruction_slt(self, ins: "Instruction"):
         rd, rs1, rs2 = self.parse_rd_rs_rs(ins)
-        self.regs.set(rd, Int32(int(rs1 < rs2)))
+        self.regs.set(rd, Int32(rs1 < rs2))
 
     def instruction_slti(self, ins: "Instruction"):
         rd, rs1, imm = self.parse_rd_rs_imm(ins)
-        self.regs.set(rd, Int32(int(rs1 < imm)))
+        self.regs.set(rd, Int32(rs1 < imm))
 
     def instruction_sltu(self, ins: "Instruction"):
         dst, rs1, rs2 = self.parse_rd_rs_rs(ins, signed=False)
-        self.regs.set(dst, Int32(int(rs1 < rs2)))
+        self.regs.set(dst, Int32(rs1 < rs2))
 
     def instruction_sltiu(self, ins: "Instruction"):
         dst, rs1, imm = self.parse_rd_rs_imm(ins, signed=False)
-        self.regs.set(dst, Int32(int(rs1 < imm)))
+        self.regs.set(dst, Int32(rs1 < imm))
 
     def instruction_beq(self, ins: "Instruction"):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins)
@@ -198,8 +195,8 @@ class RV32I(InstructionSet):
 
     def instruction_j(self, ins: "Instruction"):
         ASSERT_LEN(ins.args, 1)
-        addr = ins.get_imm(0).abs_value
-        self.pc = addr
+        addr = ins.get_imm(0)
+        self.pc += addr.pcrel_value - 4
 
     def instruction_jal(self, ins: "Instruction"):
         reg = "ra"  # default register is ra
@@ -210,7 +207,7 @@ class RV32I(InstructionSet):
             reg = ins.get_reg(0)
             addr = ins.get_imm(1)
         self.regs.set(reg, UInt32(self.pc))
-        self.pc = addr.abs_value
+        self.pc += addr.pcrel_value - 4
 
     def instruction_jalr(self, ins: "Instruction"):
         ASSERT_LEN(ins.args, 2)

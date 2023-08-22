@@ -148,14 +148,14 @@ class PrivRV32I(RV32I):
                 FMT_CPU
                 + "Jumping from 0x{:x} to {} (0x{:x})".format(
                     self.pc,
-                    self.mmu.translate_address(self.pc + addr.abs_value),
-                    self.pc + addr.abs_value,
+                    self.mmu.translate_address(self.pc + addr.pcrel_value),
+                    self.pc + addr.pcrel_value,
                 )
                 + FMT_NONE
             )
             self.regs.dump_reg_a()
         self.regs.set(reg, Int32(self.pc))
-        self.pc += addr.abs_value - 4
+        self.pc += addr.pcrel_value - 4
 
     def instruction_jalr(self, ins: "Instruction"):
         ASSERT_LEN(ins.args, 3)
