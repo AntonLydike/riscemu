@@ -7,9 +7,10 @@ SPDX-License-Identifier: MIT
 from typing import Tuple, Callable, Dict
 
 from abc import ABC
+
 from ..CPU import CPU
 from riscemu.types.exceptions import ASSERT_LEN, ASSERT_IN
-from ..types import Instruction, Int32, UInt32
+from ..types import Instruction, Int32, UInt32, Immediate
 
 
 class InstructionSet(ABC):
@@ -49,23 +50,17 @@ class InstructionSet(ABC):
             if member.startswith("instruction_"):
                 yield member[12:].replace("_", "."), getattr(self, member)
 
-    def parse_mem_ins(self, ins: "Instruction") -> Tuple[str, Int32]:
+    def parse_mem_ins(self, ins: "Instruction") -> Tuple[str, UInt32]:
         """
-        parses both rd, rs, imm and rd, imm(rs) argument format and returns (rd, imm+rs1)
+        parses rd, imm(rs) argument format and returns (rd, imm+rs1)
         (so a register and address tuple for memory instructions)
         """
-        if len(ins.args) == 3:
-            # handle rd, rs1, imm
-            rs = self.get_reg_content(ins, 1)
-            imm = ins.get_imm(2)
-        else:
-            # handle rd, imm(rs1)
-            ASSERT_LEN(ins.args, 2)
-            ASSERT_IN("(", ins.args[1])
-            imm, rs_name = ins.get_imm_reg(1)
-            rs = self.regs.get(rs_name)
+        assert len(ins.args) == 3
+        # handle rd, rs1, imm
         rd = ins.get_reg(0)
-        return rd, rs + imm
+        rs = self.get_reg_content(ins, 1).unsigned()
+        imm = ins.get_imm(2)
+        return rd, rs + imm.abs_value.unsigned()
 
     def parse_rd_rs_rs(
         self, ins: "Instruction", signed=True
@@ -90,7 +85,7 @@ class InstructionSet(ABC):
 
     def parse_rd_rs_imm(
         self, ins: "Instruction", signed=True
-    ) -> Tuple[str, Int32, Int32]:
+    ) -> Tuple[str, Int32, Immediate]:
         """
         Assumes the command is in <name> rd, rs, imm format
         Returns the name of rd, the value in rs and the immediate imm
@@ -100,18 +95,18 @@ class InstructionSet(ABC):
             return (
                 ins.get_reg(0),
                 Int32(self.get_reg_content(ins, 1)),
-                Int32(ins.get_imm(2)),
+                ins.get_imm(2),
             )
         else:
             return (
                 ins.get_reg(0),
                 UInt32(self.get_reg_content(ins, 1)),
-                UInt32(ins.get_imm(2)),
+                ins.get_imm(2),
             )
 
     def parse_rs_rs_imm(
         self, ins: "Instruction", signed=True
-    ) -> Tuple[Int32, Int32, Int32]:
+    ) -> Tuple[Int32, Int32, Immediate]:
         """
         Assumes the command is in <name> rs1, rs2, imm format
         Returns the values in rs1, rs2 and the immediate imm
@@ -120,13 +115,13 @@ class InstructionSet(ABC):
             return (
                 Int32(self.get_reg_content(ins, 0)),
                 Int32(self.get_reg_content(ins, 1)),
-                Int32(ins.get_imm(2)),
+                ins.get_imm(2),
             )
         else:
             return (
                 UInt32(self.get_reg_content(ins, 0)),
                 UInt32(self.get_reg_content(ins, 1)),
-                UInt32(ins.get_imm(2)),
+                ins.get_imm(2),
             )
 
     def get_reg_content(self, ins: "Instruction", ind: int) -> Int32:
@@ -136,14 +131,16 @@ class InstructionSet(ABC):
         return self.regs.get(ins.get_reg(ind))
 
     @property
-    def pc(self):
+    def pc(self) -> int:
         """
         shorthand for self.cpu.pc
         """
         return self.cpu.pc
 
     @pc.setter
-    def pc(self, val):
+    def pc(self, val: int | Int32):
+        if isinstance(val, Int32):
+            val = val.unsigned_value
         self.cpu.pc = val
 
     @property

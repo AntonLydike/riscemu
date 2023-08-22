@@ -14,7 +14,7 @@ NUMBER_SYMBOL_PATTERN = re.compile(r"^\d+[fb]$")
 from .flags import MemoryFlags
 from .int32 import UInt32, Int32
 from .float32 import Float32
-from .instruction import Instruction
+from .instruction import Instruction, Immediate
 from .instruction_context import InstructionContext
 from .memory_section import MemorySection
 from .program import Program

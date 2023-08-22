@@ -18,6 +18,7 @@ from riscemu.types import (
     MemoryFlags,
     T_AbsoluteAddress,
     BinaryDataMemorySection,
+    Immediate,
 )
 
 
@@ -27,11 +28,8 @@ class ElfInstruction(Instruction):
     args: Tuple[int]
     encoded: int
 
-    def get_imm(self, num: int) -> int:
-        return self.args[num]
-
-    def get_imm_reg(self, num: int) -> Tuple[int, int]:
-        return self.args[-1], self.args[-2]
+    def get_imm(self, num: int) -> Immediate:
+        return Immediate(self.args[num], self.args[num])
 
     def get_reg(self, num: int) -> str:
         return RISCV_REGS[self.args[num]]
