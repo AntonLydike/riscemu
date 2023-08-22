@@ -20,7 +20,7 @@ classifiers = [
 ]
 
 [tool.poetry.scripts]
-riscemu = "riscemu:main"
+riscemu = "riscemu.__main__:main"
 
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/antonlydike/riscemu/issues"
