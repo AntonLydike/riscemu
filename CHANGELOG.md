@@ -3,6 +3,7 @@
 # Upcoming
 
  - BugFix: Fix some more errors in the RV32F implementation
+ - Dev: Move to poetry for project development environment
 
 ## 2.1.1
 
