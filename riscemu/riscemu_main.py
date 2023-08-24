@@ -238,13 +238,17 @@ class RiscemuMain:
                 raise RuntimeError(
                     f"Cannot load {path}! No loader for this file type available."
                 )
-            if path == "-":
+            if isinstance(path, RiscemuSource):
+                stream = path.stream
+                source_name = path.name
+            elif path == "-":
                 stream: IOBase = sys.stdin
-                path = "<stdin>"
+                source_name = "<stdin>"
             else:
+                source_name = path
                 stream: IOBase = open(path, "rb" if bidder.is_binary else "r")
 
-            programs = bidder.instantiate(path, stream, {}).parse()
+            programs = bidder.instantiate(source_name, stream, {}).parse()
             if isinstance(programs, Program):
                 programs = [programs]
             for p in programs:
