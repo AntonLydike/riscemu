@@ -1,9 +1,5 @@
-from dataclasses import dataclass
-from typing import Iterable, List, Type
+from typing import Iterable
 from riscemu import CPU
-from riscemu.MMU import MMU
-from riscemu.config import RunConfig
-from riscemu.instructions import InstructionSet
 from riscemu.instructions.RV32F import RV32F
 from riscemu.registers import Registers
 from riscemu.types import ProgramLoader
