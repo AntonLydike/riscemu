@@ -28,6 +28,7 @@ riscemu = "riscemu.__main__:main"
 [tool.poetry.dependencies]
 python = "^3.8"
 pyelftools = "^0.29"
+psutil = "^5.9.5"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.7.0"

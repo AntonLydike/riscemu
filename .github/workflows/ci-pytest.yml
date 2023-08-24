@@ -41,4 +41,4 @@ jobs:
         poetry run pytest -W error
     - name: Test with lit
       run: |
-        poetry run lit -v test/filecheck
+        poetry run lit --timeout=5 -v test/filecheck

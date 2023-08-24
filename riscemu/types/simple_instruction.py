@@ -1,7 +1,11 @@
+import re
 from typing import Union, Tuple
 
-from . import Instruction, T_RelativeAddress, InstructionContext
+from . import Instruction, T_RelativeAddress, InstructionContext, Immediate
 from ..helpers import parse_numeric_argument
+
+_NUM_LABEL_RE = re.compile(r"[0-9][fb]")
+_INT_IMM_RE = re.compile(r"[+-]?([0-9]+|0x[A-Fa-f0-9]+)")
 
 
 class SimpleInstruction(Instruction):
@@ -15,16 +19,28 @@ class SimpleInstruction(Instruction):
         self.context = context
         self.name = name
         self.args = args
-        self.addr = addr
+        self._addr = addr
 
-    def get_imm(self, num: int) -> int:
-        resolved_label = self.context.resolve_label(self.args[num], self.addr)
-        if resolved_label is None:
-            return parse_numeric_argument(self.args[num])
-        return resolved_label
+    @property
+    def addr(self) -> int:
+        return self._addr + self.context.base_address
 
-    def get_imm_reg(self, num: int) -> Tuple[int, str]:
-        return self.get_imm(num + 1), self.get_reg(num)
+    def get_imm(self, num: int) -> Immediate:
+        token = self.args[num]
+
+        if _INT_IMM_RE.fullmatch(token):
+            value = parse_numeric_argument(token)
+            return Immediate(abs_value=value, pcrel_value=value + self.addr)
+
+        # resolve label correctly
+        if _NUM_LABEL_RE.fullmatch(token):
+            value = self.context.resolve_numerical_label(token, self.addr)
+        else:
+            value = self.context.resolve_label(token)
+
+        # TODO: make it raise a nice error instead
+        assert value is not None
+        return Immediate(abs_value=value, pcrel_value=value - self.addr)
 
     def get_reg(self, num: int) -> str:
         return self.args[num]

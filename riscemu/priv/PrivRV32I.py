@@ -75,7 +75,7 @@ class PrivRV32I(RV32I):
         self.cpu.mode = PrivModes(mpp)
         # restore pc
         mepc = self.cpu.csr.get("mepc")
-        self.cpu.pc = (mepc - self.cpu.INS_XLEN).value
+        self.cpu.pc = (mepc - self.cpu.INS_XLEN).abs_value
 
         if self.cpu.conf.verbosity > 0:
             sec = self.mmu.get_sec_containing(mepc.value)
@@ -105,32 +105,32 @@ class PrivRV32I(RV32I):
     def instruction_beq(self, ins: "Instruction"):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins)
         if rs1 == rs2:
-            self.pc += dst.value - 4
+            self.pc += dst.abs_value - 4
 
     def instruction_bne(self, ins: "Instruction"):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins)
         if rs1 != rs2:
-            self.pc += dst.value - 4
+            self.pc += dst.abs_value - 4
 
     def instruction_blt(self, ins: "Instruction"):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins)
         if rs1 < rs2:
-            self.pc += dst.value - 4
+            self.pc += dst.abs_value - 4
 
     def instruction_bge(self, ins: "Instruction"):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins)
         if rs1 >= rs2:
-            self.pc += dst.value - 4
+            self.pc += dst.abs_value - 4
 
     def instruction_bltu(self, ins: "Instruction"):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins, signed=False)
         if rs1 < rs2:
-            self.pc += dst.value - 4
+            self.pc += dst.abs_value - 4
 
     def instruction_bgeu(self, ins: "Instruction"):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins, signed=False)
         if rs1 >= rs2:
-            self.pc += dst.value - 4
+            self.pc += dst.abs_value - 4
 
     # technically deprecated
     def instruction_j(self, ins: "Instruction"):
@@ -147,19 +147,21 @@ class PrivRV32I(RV32I):
             print(
                 FMT_CPU
                 + "Jumping from 0x{:x} to {} (0x{:x})".format(
-                    self.pc, self.mmu.translate_address(self.pc + addr), self.pc + addr
+                    self.pc,
+                    self.mmu.translate_address(self.pc + addr.pcrel_value),
+                    self.pc + addr.pcrel_value,
                 )
                 + FMT_NONE
             )
             self.regs.dump_reg_a()
         self.regs.set(reg, Int32(self.pc))
-        self.pc += addr - 4
+        self.pc += addr.pcrel_value - 4
 
     def instruction_jalr(self, ins: "Instruction"):
         ASSERT_LEN(ins.args, 3)
         rd, rs, imm = self.parse_rd_rs_imm(ins)
         self.regs.set(rd, Int32(self.pc))
-        self.pc = rs.value + imm.value - 4
+        self.pc = rs.value + imm.abs_value - 4
 
     def instruction_sbreak(self, ins: "Instruction"):
         raise LaunchDebuggerException()
@@ -170,6 +172,6 @@ class PrivRV32I(RV32I):
 
     def parse_mem_ins(self, ins: "Instruction") -> Tuple[str, int]:
         ASSERT_LEN(ins.args, 3)
-        addr = self.get_reg_content(ins, 1) + ins.get_imm(2)
+        addr = self.get_reg_content(ins, 1) + ins.get_imm(2).abs_value
         reg = ins.get_reg(0)
         return reg, addr
