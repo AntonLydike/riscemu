@@ -7,6 +7,7 @@ from io import IOBase, RawIOBase, TextIOBase
 from typing import Type, Dict, List, Optional
 
 from riscemu import AssemblyFileLoader, __version__, __copyright__
+from riscemu.colors import FMT_GRAY, FMT_NONE
 from riscemu.types import CPU, ProgramLoader, Program
 from riscemu.instructions import InstructionSet, InstructionSetDict
 from riscemu.config import RunConfig
@@ -234,7 +235,7 @@ class RiscemuMain:
                 if score > max_bid:
                     max_bid = score
                     bidder = loader
-            if score <= 0:
+            if max_bid <= 0:
                 raise RuntimeError(
                     f"Cannot load {path}! No loader for this file type available."
                 )
@@ -253,6 +254,14 @@ class RiscemuMain:
                 programs = [programs]
             for p in programs:
                 self.cpu.mmu.load_program(p)
+            if self.cfg.verbosity > 2:
+                print(
+                    FMT_GRAY
+                    + "[Startup] Loaded {} with loader {}".format(
+                        source_name, bidder.__name__
+                    )
+                    + FMT_NONE
+                )
 
     def run_from_cli(self, argv: List[str]):
         # register everything
@@ -264,6 +273,14 @@ class RiscemuMain:
         self.instantiate_cpu()
         self.load_programs()
 
+        if self.cfg.verbosity > 3:
+            print(
+                FMT_GRAY
+                + "[Startup] Startup complete, the following sections were loaded"
+            )
+            for sec in self.cpu.mmu.sections:
+                print("          {}".format(sec.debug_str()))
+            print(FMT_NONE)
         # run the program
         self.cpu.launch(self.cfg.verbosity > 1)
 

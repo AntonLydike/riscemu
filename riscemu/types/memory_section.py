@@ -171,3 +171,13 @@ class MemorySection(ABC):
             self.flags,
             self.owner,
         )
+
+    def debug_str(self) -> str:
+        return "0x{:08X}-0x{:08X} flags={} {}[{}] ({}bytes)".format(
+            self.base,
+            self.base + self.size,
+            self.flags,
+            self.owner,
+            self.name,
+            self.size,
+        )
