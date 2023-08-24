@@ -4,7 +4,7 @@ import os
 import sys
 from dataclasses import dataclass
 from io import IOBase, RawIOBase, TextIOBase
-from typing import Type, Dict, List, Optional
+from typing import Type, Dict, List, Optional, Union
 
 from riscemu import AssemblyFileLoader, __version__, __copyright__
 from riscemu.colors import FMT_GRAY, FMT_NONE
@@ -17,7 +17,7 @@ from riscemu.CPU import UserModeCPU
 @dataclass
 class RiscemuSource:
     name: str
-    stream: TextIOBase | RawIOBase
+    stream: Union[TextIOBase, RawIOBase]
 
     def get_score_for(self, loader: ProgramLoader) -> float:
         if loader.is_binary:
