@@ -2,6 +2,8 @@ import argparse
 import glob
 import os
 import sys
+from dataclasses import dataclass
+from io import IOBase, RawIOBase, TextIOBase
 from typing import Type, Dict, List, Optional
 
 from riscemu import AssemblyFileLoader, __version__, __copyright__
@@ -9,6 +11,20 @@ from riscemu.types import CPU, ProgramLoader, Program
 from riscemu.instructions import InstructionSet, InstructionSetDict
 from riscemu.config import RunConfig
 from riscemu.CPU import UserModeCPU
+
+
+@dataclass
+class RiscemuSource:
+    name: str
+    stream: TextIOBase | RawIOBase
+
+    def get_score_for(self, loader: ProgramLoader) -> float:
+        if loader.is_binary:
+            if isinstance(self.stream, TextIOBase):
+                return 0
+        elif isinstance(self.stream, RawIOBase):
+            return 0
+        return loader.can_parse(self.name)
 
 
 class RiscemuMain:
@@ -23,7 +39,7 @@ class RiscemuMain:
     cfg: Optional[RunConfig]
     cpu: Optional[CPU]
 
-    input_files: List[str]
+    input_files: List[str | RiscemuSource]
     selected_ins_sets: List[Type[InstructionSet]]
 
     def __init__(self, cfg: Optional[RunConfig] = None):
@@ -156,10 +172,10 @@ class RiscemuMain:
         self.cfg = self.create_config(args)
 
         # set input files
-        self.input_files = args.files
+        self.input_files += list(args.files)
 
         # get selected ins sets
-        self.selected_ins_sets = list(
+        self.selected_ins_sets += list(
             self.available_ins_sets[name]
             for name, selected in args.ins.items()
             if selected
@@ -181,7 +197,7 @@ class RiscemuMain:
         )
         for path in glob.iglob(libc_path):
             if path not in self.input_files:
-                self.input_files.append(path)
+                self.input_files.append(RiscemuSource(path, open(path, "r")))
 
     def create_config(self, args: argparse.Namespace) -> RunConfig:
         # create a RunConfig from the cli args
@@ -206,14 +222,33 @@ class RiscemuMain:
 
     def load_programs(self):
         for path in self.input_files:
+            max_bid = -1
+            bidder = None
+            # get best-fit loader:
             for loader in self.available_file_loaders:
-                if not loader.can_parse(path):
-                    continue
-                programs = loader.instantiate(path, {}).parse()
-                if isinstance(programs, Program):
-                    programs = [programs]
-                for p in programs:
-                    self.cpu.mmu.load_program(p)
+                if isinstance(path, RiscemuSource):
+                    score = path.get_score_for(loader)
+                else:
+                    score = loader.can_parse(path)
+
+                if score > max_bid:
+                    max_bid = score
+                    bidder = loader
+            if score <= 0:
+                raise RuntimeError(
+                    f"Cannot load {path}! No loader for this file type available."
+                )
+            if path == "-":
+                stream: IOBase = sys.stdin
+                path = "<stdin>"
+            else:
+                stream: IOBase = open(path, "rb" if bidder.is_binary else "r")
+
+            programs = bidder.instantiate(path, stream, {}).parse()
+            if isinstance(programs, Program):
+                programs = [programs]
+            for p in programs:
+                self.cpu.mmu.load_program(p)
 
     def run_from_cli(self, argv: List[str]):
         # register everything
