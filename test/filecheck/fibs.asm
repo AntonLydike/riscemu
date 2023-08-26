@@ -1,8 +1,10 @@
-// RUN: python3 -m riscemu -v -o ignore_exit_code %s | filecheck %s
+// RUN: python3 -m riscemu -v -o ignore_exit_code,libc %s | filecheck %s
 .data
 fibs:   .space 1024
 
 .text
+// make main global so it can be picked up by the crt0.s
+.globl  main
 main:
         addi    s1, zero, 0     // storage index
         addi    s2, zero, 1024  // last storage index
