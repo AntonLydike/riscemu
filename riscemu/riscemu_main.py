@@ -173,7 +173,7 @@ class RiscemuMain:
         self.cfg = self.create_config(args)
 
         # set input files
-        self.input_files += list(args.files)
+        self.input_files.extend(args.files)
 
         # get selected ins sets
         self.selected_ins_sets += list(
