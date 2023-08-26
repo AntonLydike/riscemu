@@ -40,7 +40,7 @@ class RiscemuMain:
     cfg: Optional[RunConfig]
     cpu: Optional[CPU]
 
-    input_files: List[str | RiscemuSource]
+    input_files: List[Union[str, RiscemuSource]]
     selected_ins_sets: List[Type[InstructionSet]]
 
     def __init__(self, cfg: Optional[RunConfig] = None):
