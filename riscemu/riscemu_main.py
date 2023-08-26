@@ -176,7 +176,7 @@ class RiscemuMain:
         self.input_files.extend(args.files)
 
         # get selected ins sets
-        self.selected_ins_sets += list(
+        self.selected_ins_sets.extend(
             self.available_ins_sets[name]
             for name, selected in args.ins.items()
             if selected
