@@ -38,4 +38,4 @@ class RV32_Xssr_pseudo(InstructionSet):
 
     @property
     def _stream(self) -> StreamingRegs:
-        return self.cpu.regs  #type: ignore
+        return self.cpu.regs  # type: ignore
