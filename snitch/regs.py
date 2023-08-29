@@ -16,15 +16,15 @@ class StreamMode(Enum):
 
 @dataclass
 class StreamDef:
-    base: int
+    base: int = 0
     """
     Base address to read from
     """
-    bound: int
+    bound: int = 0
     """
     How many elements are in here
     """
-    stride: int
+    stride: int = 0
     """
     stride = register width
     """
@@ -32,7 +32,7 @@ class StreamDef:
     """
     Differentiate between read/write
     """
-    dim: int
+    dim: int = 0
     """
     Supports nested loops
     """
@@ -70,7 +70,7 @@ class StreamingRegs(Registers):
         assert stream.mode is StreamMode.READ
         # TODO: Check overflow
         # TODO: repetition
-        addr = stream.base + (4 * stream.pos * stream.stride)
+        addr = stream.base + (stream.pos * stream.stride)
         val = self.mem.read_float(addr)
         # increment pos
         print("stream: got val {} from addr 0x{:x}, stream {}".format(
@@ -86,7 +86,7 @@ class StreamingRegs(Registers):
         stream = self.streams[reg]
         assert stream.mode is StreamMode.WRITE
 
-        addr = stream.base + (4 * stream.pos * stream.stride)
+        addr = stream.base + (stream.pos * stream.stride)
         self.mem.write(addr, 4, bytearray(val.bytes))
 
         print("stream: wrote val {} into addr 0x{:x}, stream {}".format(
