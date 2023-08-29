@@ -7,9 +7,9 @@ SPDX-License-Identifier: MIT
 from collections import defaultdict
 from typing import Union
 
-from .helpers import *
+from ..helpers import *
 
-from .types import Int32, Float32
+from . import Int32, Float32
 
 
 class Registers:

@@ -1,6 +1,6 @@
 from .IOModule import IOModule
-from ..priv.Exceptions import InstructionAccessFault
-from ..types import T_RelativeAddress, Instruction, MemoryFlags, Int32
+from core.traps import InstructionAccessFault
+from ..core import T_RelativeAddress, Instruction, MemoryFlags, Int32
 
 
 class TextIO(IOModule):

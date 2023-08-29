@@ -9,10 +9,14 @@ from dataclasses import dataclass
 from math import log2, ceil
 from typing import Dict, IO, Union
 
-from .types import BinaryDataMemorySection, MemoryFlags
+from .core import (
+    BinaryDataMemorySection,
+    MemoryFlags,
+    Int32,
+    CPU,
+    InvalidSyscallException,
+)
 from .colors import FMT_SYSCALL, FMT_NONE
-from .types import Int32, CPU
-from .types.exceptions import InvalidSyscallException
 
 SYSCALLS = {
     63: "read",

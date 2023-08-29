@@ -4,13 +4,11 @@ RiscEmu (c) 2021 Anton Lydike
 SPDX-License-Identifier: MIT
 """
 
-from .instruction_set import *
-from ..CPU import UserModeCPU
+from .instruction_set import InstructionSet, ASSERT_LEN
 
 from ..colors import FMT_DEBUG, FMT_NONE
-from riscemu.types.exceptions import LaunchDebuggerException
 from ..syscall import Syscall
-from ..types import Instruction, Int32, UInt32
+from ..core import Instruction, Int32, UInt32, UserModeCPU, LaunchDebuggerException
 
 
 class RV32I(InstructionSet):

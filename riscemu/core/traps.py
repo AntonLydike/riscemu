@@ -1,16 +1,10 @@
-from typing import Optional, NewType
 from enum import Enum
-from .privmodes import PrivModes
-from .CSRConsts import MCAUSE_TRANSLATION
-
-import typing
-
-from .. import RiscemuBaseException
 from ..colors import FMT_PARSE, FMT_NONE
-from ..types import UInt32
-
-if typing.TYPE_CHECKING:
-    from .ElfLoader import ElfInstruction
+from .privmodes import PrivModes
+from .csr_constants import MCAUSE_TRANSLATION
+from .exceptions import RiscemuBaseException
+from .int32 import UInt32
+from .instruction import InstructionWithEncoding
 
 
 class CpuTrapType(Enum):
@@ -78,8 +72,8 @@ class CpuTrap(BaseException):
 
 
 class IllegalInstructionTrap(CpuTrap):
-    def __init__(self, ins: "ElfInstruction"):
-        super().__init__(2, ins.encoded, CpuTrapType.EXCEPTION)
+    def __init__(self, ins: InstructionWithEncoding):
+        super().__init__(2, ins.encoding, CpuTrapType.EXCEPTION)
 
 
 class InstructionAddressMisalignedTrap(CpuTrap):

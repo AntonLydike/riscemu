@@ -9,18 +9,22 @@ on them.
 import typing
 from typing import List, Type
 
-import riscemu
-from .config import RunConfig
-from .MMU import MMU
-from .colors import FMT_CPU, FMT_NONE, FMT_ERROR
-from .debug import launch_debug_session
-from .types.exceptions import RiscemuBaseException, LaunchDebuggerException
-from .syscall import SyscallInterface, get_syscall_symbols
-from .types import CPU, ProgramLoader, Int32, BinaryDataMemorySection
-from .parser import AssemblyFileLoader
+from ..config import RunConfig
+from ..colors import FMT_CPU, FMT_NONE, FMT_ERROR
+from ..debug import launch_debug_session
+from ..syscall import SyscallInterface, get_syscall_symbols
+from . import (
+    CPU,
+    Int32,
+    BinaryDataMemorySection,
+    MMU,
+    RiscemuBaseException,
+    LaunchDebuggerException,
+    PrivModes,
+)
 
 if typing.TYPE_CHECKING:
-    from .instructions.instruction_set import InstructionSet
+    from ..instructions import InstructionSet
 
 
 class UserModeCPU(CPU):
@@ -30,9 +34,7 @@ class UserModeCPU(CPU):
     It is initialized with a configuration and a list of instruction sets.
     """
 
-    def __init__(
-        self, instruction_sets: List[Type["riscemu.InstructionSet"]], conf: RunConfig
-    ):
+    def __init__(self, instruction_sets: List[Type["InstructionSet"]], conf: RunConfig):
         """
         Creates a CPU instance.
 
@@ -50,6 +52,7 @@ class UserModeCPU(CPU):
         syscall_symbols = get_syscall_symbols()
         syscall_symbols.update(self.mmu.global_symbols)
         self.mmu.global_symbols.update(syscall_symbols)
+        self.mode = PrivModes.USER
 
     def step(self, verbose: bool = False):
         """
@@ -132,7 +135,3 @@ class UserModeCPU(CPU):
             )
 
         return True
-
-    @classmethod
-    def get_loaders(cls) -> typing.Iterable[Type[ProgramLoader]]:
-        return [AssemblyFileLoader]

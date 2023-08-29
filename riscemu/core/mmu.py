@@ -6,9 +6,9 @@ SPDX-License-Identifier: MIT
 
 from typing import Dict, List, Optional, Union
 
-from .colors import *
-from .helpers import align_addr
-from .types import (
+from ..colors import *
+from ..helpers import align_addr
+from . import (
     Instruction,
     MemorySection,
     MemoryFlags,
@@ -17,8 +17,9 @@ from .types import (
     InstructionContext,
     Int32,
     Float32,
+    InvalidAllocationException,
+    MemoryAccessException,
 )
-from .types.exceptions import InvalidAllocationException, MemoryAccessException
 
 
 class MMU:

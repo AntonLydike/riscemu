@@ -3,10 +3,10 @@ from typing import List
 from typing import Optional, Tuple, Union
 
 from .colors import FMT_PARSE, FMT_NONE
-from riscemu.types.exceptions import ParseException, ASSERT_LEN
+from riscemu.core.exceptions import ParseException, ASSERT_LEN
 from .helpers import parse_numeric_argument, align_addr, get_section_base_name
 from .tokenizer import Token
-from .types import (
+from .core import (
     Program,
     T_RelativeAddress,
     InstructionContext,

@@ -1,4 +1,4 @@
-from riscemu.types import Int32, UInt32
+from riscemu.core import Int32, UInt32
 
 
 def test_logical_right_shift():

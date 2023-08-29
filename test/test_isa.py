@@ -1,6 +1,6 @@
 from riscemu.colors import FMT_ERROR, FMT_NONE, FMT_BOLD, FMT_GREEN
 from riscemu.instructions import InstructionSet
-from riscemu.types import Instruction, CPU
+from riscemu.core import Instruction, CPU
 from riscemu.decoder import RISCV_REGS
 
 FMT_SUCCESS = FMT_GREEN + FMT_BOLD

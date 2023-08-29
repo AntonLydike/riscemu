@@ -1,5 +1,5 @@
 from riscemu import RunConfig
-from riscemu.types import Program
+from riscemu.core import Program
 from .PrivCPU import PrivCPU
 
 import sys

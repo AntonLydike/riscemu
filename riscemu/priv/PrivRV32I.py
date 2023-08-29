@@ -5,9 +5,9 @@ SPDX-License-Identifier: MIT
 """
 
 from ..instructions.RV32I import *
-from riscemu.types.exceptions import INS_NOT_IMPLEMENTED
-from .Exceptions import *
-from .privmodes import PrivModes
+from riscemu.core.exceptions import INS_NOT_IMPLEMENTED
+from core.traps import *
+from core.privmodes import PrivModes
 from ..colors import FMT_CPU, FMT_NONE
 import typing
 

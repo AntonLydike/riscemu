@@ -53,3 +53,14 @@ class Instruction(ABC):
 
     def __repr__(self):
         return "{} {}".format(self.name, ", ".join(self.args))
+
+
+class InstructionWithEncoding(ABC):
+    """
+    Mixin for instructions that have encodings
+    """
+
+    @property
+    @abstractmethod
+    def encoding(self) -> int:
+        raise NotImplementedError()

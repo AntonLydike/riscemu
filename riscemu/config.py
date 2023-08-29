@@ -24,3 +24,6 @@ class RunConfig:
     # runtime config
     use_libc: bool = False
     ignore_exit_code: bool = False
+    # csr stuff:
+    # frequency of the real-time clock
+    rtclock_tickrate: int = 32768

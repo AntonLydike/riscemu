@@ -5,6 +5,7 @@
 fibs:   .space 56
 
         .text
+.globl main
 main:
         addi    s1, zero, 0     // storage index
         addi    s2, zero, 56    // last storage index

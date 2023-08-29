@@ -10,7 +10,7 @@ from enum import Enum, auto
 from typing import List, Iterable
 
 from riscemu.decoder import RISCV_REGS
-from riscemu.types.exceptions import ParseException
+from riscemu.core.exceptions import ParseException
 
 LINE_COMMENT_STARTERS = ("#", ";", "//")
 WHITESPACE_PATTERN = re.compile(r"\s+")

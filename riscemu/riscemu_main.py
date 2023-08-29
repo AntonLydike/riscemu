@@ -4,11 +4,12 @@ import os
 import sys
 from typing import Type, Dict, List, Optional
 
-from riscemu import AssemblyFileLoader, __version__, __copyright__
-from riscemu.types import CPU, ProgramLoader, Program
-from riscemu.instructions import InstructionSet, InstructionSetDict
-from riscemu.config import RunConfig
-from riscemu.CPU import UserModeCPU
+from . import __version__, __copyright__
+from .core import CPU, ProgramLoader, Program
+from .instructions import InstructionSet, InstructionSetDict
+from .config import RunConfig
+from .core.usermode_cpu import UserModeCPU
+from .parser import AssemblyFileLoader
 
 
 class RiscemuMain:

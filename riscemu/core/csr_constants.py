@@ -29,34 +29,6 @@ MCAUSE_TRANSLATION: Dict[Tuple[int, int], str] = {
 Assigns tuple (interrupt bit, exception code) to their respective readable names
 """
 
-MSTATUS_OFFSETS: Dict[str, int] = {
-    "uie": 0,
-    "sie": 1,
-    "mie": 3,
-    "upie": 4,
-    "spie": 5,
-    "mpie": 7,
-    "spp": 8,
-    "mpp": 11,
-    "fs": 13,
-    "xs": 15,
-    "mpriv": 17,
-    "sum": 18,
-    "mxr": 19,
-    "tvm": 20,
-    "tw": 21,
-    "tsr": 22,
-    "sd": 31,
-}
-"""
-Offsets for all mstatus bits
-"""
-
-MSTATUS_LEN_2 = ("mpp", "fs", "xs")
-"""
-All mstatus parts that have length 2. All other mstatus parts have length 1
-"""
-
 CSR_NAME_TO_ADDR: Dict[str, int] = {
     "mstatus": 0x300,
     "misa": 0x301,

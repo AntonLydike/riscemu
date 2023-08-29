@@ -11,7 +11,7 @@ and their function)
 from typing import Tuple
 
 from .instruction_set import InstructionSet, Instruction
-from riscemu.types import INS_NOT_IMPLEMENTED, Float32, Int32, UInt32
+from riscemu.core import INS_NOT_IMPLEMENTED, Float32, Int32, UInt32
 
 
 class RV32F(InstructionSet):
