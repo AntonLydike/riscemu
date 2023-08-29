@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Tuple
 from riscemu.registers import Registers
 from riscemu.MMU import MMU
 from riscemu.types import Int32, UInt32
@@ -54,7 +54,7 @@ class StreamingRegs(Registers):
     def __init__(
         self,
         mem: MMU,
-        xssr_regs: tuple[str] = ("ft0", "ft1", "ft2"),
+        xssr_regs: Tuple[str] = ("ft0", "ft1", "ft2"),
         infinite_regs: bool = False,
     ):
         self.mem = mem
