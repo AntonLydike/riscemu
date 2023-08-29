@@ -9,7 +9,7 @@ class RV32_Xssr_pseudo(InstructionSet):
 
     def instruction_ssr_disable(self, ins: Instruction):
         self._stream.enabled = False
-    
+
     def instruction_ssr_configure(self, ins: Instruction):
         dm = ins.get_imm(0).abs_value.value
         bound = ins.get_imm(1).abs_value.value

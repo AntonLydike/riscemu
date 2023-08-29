@@ -15,6 +15,7 @@ class StreamMode(Enum):
     WRITE = 2
     # READWRITE = 3
 
+
 @dataclass
 class StreamDef:
     base: int = 0
@@ -88,7 +89,7 @@ class StreamingRegs(Registers):
     def set_f(self, reg, val: "Float32", mark_set=True) -> bool:
         if not self.enabled or reg not in self.streams:
             return super().set_f(reg, mark_set)
-        
+
         stream = self.streams[reg]
         assert stream.mode is StreamMode.WRITE
 
