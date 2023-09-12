@@ -69,7 +69,7 @@ def composite_tokenizer(
     """
     Convert an iterator over tokens into an iterator over tuples: (token, list(token))
 
-    The first token ist either a pseudo_op, label, or instruction name. The token list are all remaining tokens before
+    The first token is either a pseudo_op, label, or instruction name. The token list are all remaining tokens before
     a newline is encountered
     :param tokens_iter: An iterator over tokens
     :return: An iterator over a slightly more structured representation of the tokens

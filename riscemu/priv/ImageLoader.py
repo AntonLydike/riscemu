@@ -1,5 +1,5 @@
 """
-Laods a memory image with debug information into memory
+Loads a memory image with debug information into memory
 """
 
 import os.path

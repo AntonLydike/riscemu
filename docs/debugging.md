@@ -2,7 +2,7 @@
 
 You are launched into the debugger either by an `ebreak/sbreak` instruction, or when an exception occurs while running executing instructions.
 
-Consider the example programm `examples/fibs.asm`:
+Consider the example program `examples/fibs.asm`:
 
 ```asm riscv-asm
         .data
@@ -71,4 +71,4 @@ and most common tasks should have helper methods for them.
 
 Example:
 
-![debuggin the fibs program](debug-session.png)
+![debugging the fibs program](debug-session.png)

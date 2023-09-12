@@ -85,10 +85,10 @@ def parse_line(parts: List[str]) -> Iterable[Token]:
 def parse_arg(arg: str) -> Iterable[Token]:
     comma = arg[-1] == ","
     arg = arg[:-1] if comma else arg
-    mem_match_resul = re.match(MEMORY_ADDRESS_PATTERN, arg)
-    if mem_match_resul:
-        register = mem_match_resul.group(2).lower()
-        immediate = mem_match_resul.group(1)
+    mem_match_result = re.match(MEMORY_ADDRESS_PATTERN, arg)
+    if mem_match_result:
+        register = mem_match_result.group(2).lower()
+        immediate = mem_match_result.group(1)
         yield Token(TokenType.ARGUMENT, register)
         yield Token(TokenType.ARGUMENT, immediate)
     else:
