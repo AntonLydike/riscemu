@@ -202,9 +202,9 @@ class Registers:
 
     def get(self, reg: str, mark_read: bool = True) -> "Int32":
         """
-        Retuns the contents of register reg
+        Returns the contents of register reg
         :param reg: The register name
-        :param mark_read: If the register should be markes as "last read" (only used internally)
+        :param mark_read: If the register should be marked as "last read" (only used internally)
         :return: The contents of register reg
         """
         # if reg not in Registers.all_registers():

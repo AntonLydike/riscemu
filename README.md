@@ -33,12 +33,12 @@ Program exited with code 0
 
 The [`read` syscall](docs/syscalls.md) defaults to readline behaviour. Reading "true chunks" (ignoring newlines) is currently not supported.
 
-See the docs on [asembly](docs/assembly.md) for more detail on how to write assembly code for this emulator.
+See the docs on [assembly](docs/assembly.md) for more detail on how to write assembly code for this emulator.
 See the [list of implemented syscalls](docs/syscalls.md) for more details on how to syscall.
 
 Currently, symbols (such as `main` or `loop`) are looked-up at runtime. This allows for better debugging, I believe.
 
-Basic IO should work, as open, read, write and close are supported for stdin/stdout/stderr and even aribtrary file paths (if enabled)
+Basic IO should work, as open, read, write and close are supported for stdin/stdout/stderr and even arbitrary file paths (if enabled)
 
 When trying to run an assembly program, the emulator first tries to find a symbol named `_start`, then a symbol named `main`. if both
 symbols were not found in the file, it simply starts at the beginning of the `.text` segment.
@@ -71,7 +71,7 @@ disable_io              Disallow reading/writing from stdin/stdout/stderr
                         Currently implemented: RV32I, RV32M
 ```
 
-If multiple files are specified, all are loaded into memeory, but only the last one is executed. This might be improved
+If multiple files are specified, all are loaded into memory, but only the last one is executed. This might be improved
 later, maybe the `_init` section of each binary is executed before the main loop starts?
 
 If `stack_size` is greater than zero, a stack is allocated and initialized, with the `sp` register pointing to the end of the stack.
@@ -81,7 +81,7 @@ If `stack_size` is greater than zero, a stack is allocated and initialized, with
 Debugging is done using the `ebreak` (formerly `sbreak`) instruction, which will launch a debugging session if encountered.
 See [docs/debugging.md](docs/debugging.md) for more info.
 
-![debuggin the fibs program](docs/debug-session.png)
+![debugging the fibs program](docs/debug-session.png)
 
 
 ## The source code:
@@ -89,7 +89,7 @@ Check out the [documentation](https://riscemu.readthedocs.io/en/latest/riscemu.h
 
 ## Accessing local documentation:
 To generate your local documentation, first install everything in `sphinx-docs/requirements.txt`. Then run `./generate-docs.sh`, which will
-generate and make all doc files for you. Finally, you can open the docs locall by runnint `open sphinx-docs/build/html/index.html`.
+generate and make all doc files for you. Finally, you can open the docs locall by running `open sphinx-docs/build/html/index.html`.
 
 ## Resources:
   * RISC-V Programmers Handbook: https://github.com/riscv-non-isa/riscv-asm-manual/blob/master/riscv-asm.md

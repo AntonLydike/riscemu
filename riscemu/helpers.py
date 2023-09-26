@@ -42,7 +42,7 @@ def create_chunks(my_list, chunk_size):
 
 def apply_highlight(item, ind, hi_ind):
     """
-    applies some hightlight such as underline to item if ind == hi_ind
+    applies some highlight such as underline to item if ind == hi_ind
     """
     if ind == hi_ind:
         return FMT_UNDERLINE + FMT_ORANGE + item + FMT_NONE

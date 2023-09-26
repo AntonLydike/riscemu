@@ -27,8 +27,8 @@
 
 .global     memchr
 // void *memchr(const void *str, char c, size_t n)
-// search vor the first occurance of c in str
-// returns a pointer to the first occurance, or NULL
+// search vor the first occurrence of c in str
+// returns a pointer to the first occurrence, or NULL
 
 
 .global     memset

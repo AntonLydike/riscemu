@@ -57,7 +57,7 @@ class ProgramLoader(ABC):
         :param source_name: the path to the source file
         :param source: IO Object representing the source
         :param options: the parsed options (guaranteed to come from this classes get_options method).
-        :return: An instance of a ProgramLoader for the spcified source
+        :return: An instance of a ProgramLoader for the specified source
         """
         return cls(source_name, source, options)
 
