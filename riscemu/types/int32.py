@@ -31,7 +31,7 @@ class Int32:
             self._val = self.__class__._type(val)
         else:
             raise RuntimeError(
-                "Unknonw {} input type: {} ({})".format(
+                "Unknown {} input type: {} ({})".format(
                     self.__class__.__name__, type(val), val
                 )
             )
@@ -216,18 +216,18 @@ class Int32:
         """
         return c_uint32(self.value).value
 
-    def shift_right_logical(self, ammount: Union["Int32", int]) -> "Int32":
+    def shift_right_logical(self, amount: Union["Int32", int]) -> "Int32":
         """
         This function implements logical right shifts, meaning that the sign bit is shifted as well.
 
-        This is equivalent to (self.value % 0x100000000) >> ammount
+        This is equivalent to (self.value % 0x100000000) >> amount
 
-        :param ammount: Number of positions to shift
+        :param amount: Number of positions to shift
         :return: A new Int32 object representing the shifted value (keeps the signed-ness of the source)
         """
-        if isinstance(ammount, Int32):
-            ammount = ammount.value
-        return self.__class__((self.value % 0x100000000) >> ammount)
+        if isinstance(amount, Int32):
+            amount = amount.value
+        return self.__class__((self.value % 0x100000000) >> amount)
 
     def __int__(self):
         return self.value
@@ -273,13 +273,13 @@ class UInt32(Int32):
     def unsigned_value(self) -> int:
         return self._val.value
 
-    def shift_right_logical(self, ammount: Union["Int32", int]) -> "UInt32":
+    def shift_right_logical(self, amount: Union["Int32", int]) -> "UInt32":
         """
         see :meth:`Int32.shift_right_logical <Int32.shift_right_logical>`
 
-        :param ammount: Number of positions to shift
+        :param amount: Number of positions to shift
         :return: A new Int32 object representing the shifted value (keeps the signed-ness of the source)
         """
-        if isinstance(ammount, Int32):
-            ammount = ammount.value
-        return UInt32(self.value >> ammount)
+        if isinstance(amount, Int32):
+            amount = amount.value
+        return UInt32(self.value >> amount)
