@@ -15,5 +15,5 @@ if __name__ == "__main__":
     readline.set_completer(rlcompleter.Completer(sess_vars).complete)
     readline.parse_and_bind("tab: complete")
     code.InteractiveConsole(sess_vars).interact(
-        banner="Interactively decoding session started...", exitmsg="Closing..."
+        banner="Interactive decoding session started...", exitmsg="Closing..."
     )
