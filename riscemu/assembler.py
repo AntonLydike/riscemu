@@ -14,6 +14,7 @@ from .types import (
     BinaryDataMemorySection,
     InstructionMemorySection,
     Int32,
+    SimpleInstruction,
 )
 
 INSTRUCTION_SECTION_NAMES = (".text", ".init", ".fini")
@@ -155,6 +156,33 @@ class AssemblerDirectives:
         if current_mod == 0:
             return
         context.section.data += bytearray(align_to - current_mod)
+
+    @classmethod
+    def op_p2align(cls, token: Token, args: Tuple[str], context: ParseContext):
+        ASSERT_LEN(args, 1)
+        ASSERT_IN_SECTION_TYPE(context, MemorySectionType.Instructions)
+        align_to = 2 ** parse_numeric_argument(args[0])
+
+        current_mod = context.current_address() % align_to
+        if current_mod == 0:
+            return
+        num_bytes_fill = align_to - current_mod
+        # fill in with nops:
+        print(
+            "p2align from {} to {}, filling {}".format(
+                context.current_address(), align_to, num_bytes_fill
+            )
+        )
+        NOP_SIZE = 4
+        for i in range(num_bytes_fill // NOP_SIZE):
+            context.section.data.append(
+                SimpleInstruction(
+                    "nop",
+                    (),
+                    context.context,
+                    context.current_address(),
+                )
+            )
 
     @classmethod
     def op_section(cls, token: Token, args: Tuple[str], context: ParseContext):
