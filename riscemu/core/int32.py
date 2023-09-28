@@ -100,6 +100,9 @@ class Int32:
     def __neg__(self):
         return self.__class__(-self._val.value)
 
+    def __invert__(self):
+        return self.__class__(~self.value)
+
     def __abs__(self):
         return self.__class__(abs(self.value))
 
