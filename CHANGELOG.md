@@ -3,6 +3,7 @@
 # Upcoming
 
  - Feature: Starting to add support for Snitch architecture (Xssr)
+ - Feature: Add support for `.p2align` assembler directive
  - Rework: Improve handling of immediates, so that `beq a0, a1, 1b` and `beq a0, a1, -16` can both can be handled correctly.
  - BugFix: Fix some more errors in the RV32F implementation
  - Dev: Move to poetry for project development environment
