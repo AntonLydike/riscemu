@@ -168,7 +168,11 @@ class AssemblerDirectives:
             return
         num_bytes_fill = align_to - current_mod
         # fill in with nops:
-        print("p2align from {} to {}, filling {}".format(context.current_address(), align_to, num_bytes_fill))
+        print(
+            "p2align from {} to {}, filling {}".format(
+                context.current_address(), align_to, num_bytes_fill
+            )
+        )
         NOP_SIZE = 4
         for i in range(num_bytes_fill // NOP_SIZE):
             context.section.data.append(
