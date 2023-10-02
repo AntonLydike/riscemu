@@ -1,6 +1,6 @@
 import math
 
-from riscemu.types import Float32
+from riscemu.core import Float32
 
 # pi encoded as a 32bit little endian float
 PI_BYTES_LE = b"\xdb\x0fI@"

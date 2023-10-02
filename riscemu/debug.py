@@ -5,11 +5,11 @@ SPDX-License-Identifier: MIT
 """
 import os.path
 
-from .types import SimpleInstruction
+from .core import SimpleInstruction
 from .helpers import *
 
 if typing.TYPE_CHECKING:
-    from riscemu import CPU, Registers
+    pass
 
 HIST_FILE = os.path.join(os.path.expanduser("~"), ".riscemu_history")
 

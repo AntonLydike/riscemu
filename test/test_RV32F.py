@@ -1,11 +1,10 @@
 from typing import Iterable
-from riscemu import CPU
 from riscemu.instructions.RV32F import RV32F
-from riscemu.registers import Registers
-from riscemu.types import ProgramLoader
-from riscemu.types.float32 import Float32
-from riscemu.types.int32 import Int32
-from riscemu.types.simple_instruction import SimpleInstruction
+from riscemu.core.registers import Registers
+from riscemu.core import ProgramLoader, CPU
+from riscemu.core.float32 import Float32
+from riscemu.core.int32 import Int32
+from riscemu.core.simple_instruction import SimpleInstruction
 
 
 class MockInstruction(SimpleInstruction):

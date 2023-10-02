@@ -1,7 +1,7 @@
 from abc import ABC
 from typing import Optional
 
-from riscemu.types import MemorySection, MemoryFlags, T_RelativeAddress
+from riscemu.core import MemorySection, MemoryFlags, T_RelativeAddress
 
 
 class IOModule(MemorySection, ABC):

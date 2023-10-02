@@ -1,5 +1,6 @@
 import re
 from typing import Union, Tuple
+from functools import lru_cache
 
 from . import Instruction, T_RelativeAddress, InstructionContext, Immediate
 from ..helpers import parse_numeric_argument
@@ -25,6 +26,7 @@ class SimpleInstruction(Instruction):
     def addr(self) -> int:
         return self._addr + self.context.base_address
 
+    @lru_cache(maxsize=None)
     def get_imm(self, num: int) -> Immediate:
         token = self.args[num]
 

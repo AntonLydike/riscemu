@@ -1,11 +1,10 @@
 from .types import ElfMemorySection
-from ..MMU import *
-from abc import abstractmethod
+from core.mmu import *
 
 import typing
 
 if typing.TYPE_CHECKING:
-    from .PrivCPU import PrivCPU
+    pass
 
 
 class PrivMMU(MMU):
@@ -23,7 +22,7 @@ class PrivMMU(MMU):
         # get sec succeeding empty space at addr
         sec_after = next((sec for sec in self.sections if sec.base > addr), None)
 
-        # calc start end end of "free" space
+        # calc start and end of "free" space
         prev_sec_end = 0 if sec_before is None else sec_before.end
         next_sec_start = 0x7FFFFFFF if sec_after is None else sec_after.base
 

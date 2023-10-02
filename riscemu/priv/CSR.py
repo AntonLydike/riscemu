@@ -1,11 +1,11 @@
 from typing import Dict, Union, Callable, Optional
 from collections import defaultdict
-from .privmodes import PrivModes
-from .Exceptions import InstructionAccessFault
+from core.privmodes import PrivModes
+from core.traps import InstructionAccessFault
 from ..colors import FMT_CSR, FMT_NONE
 
-from .CSRConsts import CSR_NAME_TO_ADDR, MSTATUS_LEN_2, MSTATUS_OFFSETS
-from ..types import UInt32
+from core.csr_constants import CSR_NAME_TO_ADDR, MSTATUS_LEN_2, MSTATUS_OFFSETS
+from ..core import UInt32
 
 
 class CSR:

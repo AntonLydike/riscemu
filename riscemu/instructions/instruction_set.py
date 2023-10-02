@@ -8,9 +8,8 @@ from typing import Tuple, Callable, Dict, Union
 
 from abc import ABC
 
-from ..CPU import CPU
-from riscemu.types.exceptions import ASSERT_LEN
-from ..types import Instruction, Int32, UInt32, Immediate
+from ..core.exceptions import ASSERT_LEN
+from ..core import Instruction, Int32, UInt32, Immediate, CPU
 
 
 class InstructionSet(ABC):
@@ -58,7 +57,7 @@ class InstructionSet(ABC):
         assert len(ins.args) == 3
         # handle rd, rs1, imm
         rd = ins.get_reg(0)
-        rs = self.get_reg_content(ins, 1).unsigned()
+        rs = self.regs.get(ins.get_reg(1)).unsigned()
         imm = ins.get_imm(2)
         return rd, rs + imm.abs_value.unsigned()
 
@@ -73,56 +72,37 @@ class InstructionSet(ABC):
         if signed:
             return (
                 ins.get_reg(0),
-                Int32(self.get_reg_content(ins, 1)),
-                Int32(self.get_reg_content(ins, 2)),
+                Int32(self.regs.get(ins.get_reg(1))),
+                Int32(self.regs.get(ins.get_reg(2))),
             )
         else:
             return (
                 ins.get_reg(0),
-                UInt32(self.get_reg_content(ins, 1)),
-                UInt32(self.get_reg_content(ins, 2)),
+                UInt32(self.regs.get(ins.get_reg(1))),
+                UInt32(self.regs.get(ins.get_reg(2))),
             )
 
-    def parse_rd_rs_imm(
-        self, ins: "Instruction", signed=True
-    ) -> Tuple[str, Int32, Immediate]:
+    def parse_rd_rs_imm(self, ins: "Instruction") -> Tuple[str, Int32, Immediate]:
         """
         Assumes the command is in <name> rd, rs, imm format
         Returns the name of rd, the value in rs and the immediate imm
         """
-        ASSERT_LEN(ins.args, 3)
-        if signed:
-            return (
-                ins.get_reg(0),
-                Int32(self.get_reg_content(ins, 1)),
-                ins.get_imm(2),
-            )
-        else:
-            return (
-                ins.get_reg(0),
-                UInt32(self.get_reg_content(ins, 1)),
-                ins.get_imm(2),
-            )
+        return (
+            ins.get_reg(0),
+            Int32(self.regs.get(ins.get_reg(1))),
+            ins.get_imm(2),
+        )
 
-    def parse_rs_rs_imm(
-        self, ins: "Instruction", signed=True
-    ) -> Tuple[Int32, Int32, Immediate]:
+    def parse_rs_rs_imm(self, ins: "Instruction") -> Tuple[Int32, Int32, Immediate]:
         """
         Assumes the command is in <name> rs1, rs2, imm format
         Returns the values in rs1, rs2 and the immediate imm
         """
-        if signed:
-            return (
-                Int32(self.get_reg_content(ins, 0)),
-                Int32(self.get_reg_content(ins, 1)),
-                ins.get_imm(2),
-            )
-        else:
-            return (
-                UInt32(self.get_reg_content(ins, 0)),
-                UInt32(self.get_reg_content(ins, 1)),
-                ins.get_imm(2),
-            )
+        return (
+            Int32(self.regs.get(ins.get_reg(0))),
+            Int32(self.regs.get(ins.get_reg(1))),
+            ins.get_imm(2),
+        )
 
     def get_reg_content(self, ins: "Instruction", ind: int) -> Int32:
         """

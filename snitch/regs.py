@@ -1,13 +1,9 @@
 from typing import Dict, List, Tuple
-from riscemu.registers import Registers
-from riscemu.MMU import MMU
-from riscemu.types import Int32, UInt32
+from riscemu.core import Registers, MMU, Float32
 
 from dataclasses import dataclass
 
 from enum import Enum
-
-from riscemu.types.float32 import Float32
 
 
 class StreamMode(Enum):
