@@ -100,22 +100,21 @@ class MMU:
         :param addr: The location
         :return: The Instruction
         """
-        if not (self._ins_sec.base <= addr < self._ins_sec.end):
-            new_sec = self.get_sec_containing(addr)
-            if new_sec is not None:
-                self._ins_sec = new_sec
         sec = self._ins_sec
-
-        if sec is None:
-            print(
-                FMT_MEM
-                + "[MMU] Trying to read instruction form invalid region! (read at {}) ".format(
-                    addr
+        if addr < sec.base or sec.base + sec.size <= addr:
+            sec = self.get_sec_containing(addr)
+            if sec is not None:
+                self._ins_sec = sec
+            else:
+                print(
+                    FMT_MEM
+                    + "[MMU] Trying to read instruction form invalid region! (read at {}) ".format(
+                        addr
+                    )
+                    + "Have you forgotten an exit syscall or ret statement?"
+                    + FMT_NONE
                 )
-                + "Have you forgotten an exit syscall or ret statement?"
-                + FMT_NONE
-            )
-            raise RuntimeError("No next instruction available!")
+                raise RuntimeError("No next instruction available!")
         return sec.read_ins(addr - sec.base)
 
     def read(self, addr: Union[int, Int32], size: int) -> bytearray:
@@ -126,23 +125,22 @@ class MMU:
         :param size: The number of bytes to read
         :return: The bytearray at addr
         """
-        if not (self._mem_sec.base <= addr < self._mem_sec.base + self._mem_sec.size):
-            new_sec = self.get_sec_containing(addr)
-            if new_sec is not None:
-                self._mem_sec = new_sec
         sec = self._mem_sec
-
-        if sec is None:
-            print(
-                FMT_MEM
-                + "[MMU] Trying to read data form invalid region at 0x{:x}! ".format(
-                    addr
+        if addr < sec.base or sec.base + sec.size <= addr:
+            sec = self.get_sec_containing(addr)
+            if sec is not None:
+                self._mem_sec = sec
+            else:
+                print(
+                    FMT_MEM
+                    + "[MMU] Trying to read data form invalid region at 0x{:x}! ".format(
+                        addr
+                    )
+                    + FMT_NONE
                 )
-                + FMT_NONE
-            )
-            raise MemoryAccessException(
-                "region is non-initialized!", addr, size, "read"
-            )
+                raise MemoryAccessException(
+                    "region is non-initialized!", addr, size, "read"
+                )
         return sec.read(addr - sec.base, size)
 
     def write(self, addr: int, size: int, data: bytearray):
@@ -153,23 +151,22 @@ class MMU:
         :param size: The number of bytes to write
         :param data: The bytearray to write (only first size bytes are written)
         """
-        if not (self._mem_sec.base <= addr < self._mem_sec.base + self._mem_sec.size):
-            new_sec = self.get_sec_containing(addr)
-            if new_sec is not None:
-                self._mem_sec = new_sec
         sec = self._mem_sec
-
-        if sec is None:
-            print(
-                FMT_MEM
-                + "[MMU] Invalid write into non-initialized region at 0x{:08X}".format(
-                    addr
+        if addr < sec.base or sec.base + sec.size <= addr:
+            sec = self.get_sec_containing(addr)
+            if sec is not None:
+                self._mem_sec = sec
+            else:
+                print(
+                    FMT_MEM
+                    + "[MMU] Invalid write into non-initialized region at 0x{:08X}".format(
+                        addr
+                    )
+                    + FMT_NONE
                 )
-                + FMT_NONE
-            )
-            raise MemoryAccessException(
-                "region is non-initialized!", addr, size, "write"
-            )
+                raise MemoryAccessException(
+                    "region is non-initialized!", addr, size, "write"
+                )
 
         return sec.write(addr - sec.base, size, data)
 
