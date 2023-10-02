@@ -1,6 +1,6 @@
 # Changelog
 
-# Upcoming
+# 2.2.0
 
  - Feature: Added Zicsr extension and with that support for CSRs
  - Feature: Starting to add support for Snitch architecture (Xssr)
