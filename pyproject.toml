@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "riscemu"
-version = "2.2.0"
+version = "2.2.1"
 description = "A basic RISC-V emulator"
 authors = ["Anton Lydike <me@antonlydike.de>"]
 license = "MIT"
