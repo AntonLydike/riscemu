@@ -1,5 +1,9 @@
 # Changelog
 
+# 2.2.1
+
+Version bump to re-trigger CI run.
+
 # 2.2.0
 
  - Feature: Added Zicsr extension and with that support for CSRs
