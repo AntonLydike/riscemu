@@ -1,4 +1,5 @@
 from time import time
+from typing import Optional
 
 from . import UInt32
 
@@ -12,7 +13,7 @@ class RTClock:
     tickrate: int
     t0: float
 
-    def __init__(self, tickrate: int, t0: float | None = None):
+    def __init__(self, tickrate: int, t0: Optional[float] = None):
         if t0 is None:
             self.t0 = time()
         self.tickrate = tickrate
