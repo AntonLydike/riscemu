@@ -121,7 +121,7 @@ class MMU:
         """
         Read size bytes of memory at addr
 
-        :param addr: The addres at which to start reading
+        :param addr: The address at which to start reading
         :param size: The number of bytes to read
         :return: The bytearray at addr
         """
@@ -266,7 +266,7 @@ class MMU:
             )
         )
 
-    def has_continous_free_region(self, start: int, end: int) -> bool:
+    def has_continuous_free_region(self, start: int, end: int) -> bool:
         # if we have no sections we are all good
         if len(self.sections) == 0:
             return True
@@ -290,7 +290,7 @@ class MMU:
 
     def load_program(self, program: Program, align_to: int = 4):
         if program.base is not None:
-            if not self.has_continous_free_region(
+            if not self.has_continuous_free_region(
                 program.base, program.base + program.size
             ):
                 print(
@@ -331,7 +331,7 @@ class MMU:
 
     def load_section(self, sec: MemorySection, fixed_position: bool = False) -> bool:
         if fixed_position:
-            if self.has_continous_free_region(sec.base, sec.base + sec.size):
+            if self.has_continuous_free_region(sec.base, sec.base + sec.size):
                 self.sections.append(sec)
                 self._update_state()
             else:

@@ -2,14 +2,30 @@ import argparse
 import glob
 import os
 import sys
-from typing import Type, Dict, List, Optional
+from dataclasses import dataclass
+from io import IOBase, RawIOBase, TextIOBase
+from typing import Type, Dict, List, Optional, Union
 
 from . import __version__, __copyright__
-from .core import CPU, ProgramLoader, Program
+from .core import CPU, ProgramLoader, Program, UserModeCPU
 from .instructions import InstructionSet, InstructionSetDict
 from .config import RunConfig
-from .core.usermode_cpu import UserModeCPU
+from .helpers import FMT_GRAY, FMT_NONE
 from .parser import AssemblyFileLoader
+
+
+@dataclass
+class RiscemuSource:
+    name: str
+    stream: Union[TextIOBase, RawIOBase]
+
+    def get_score_for(self, loader: ProgramLoader) -> float:
+        if loader.is_binary:
+            if isinstance(self.stream, TextIOBase):
+                return 0
+        elif isinstance(self.stream, RawIOBase):
+            return 0
+        return loader.can_parse(self.name)
 
 
 class RiscemuMain:
@@ -24,7 +40,7 @@ class RiscemuMain:
     cfg: Optional[RunConfig]
     cpu: Optional[CPU]
 
-    input_files: List[str]
+    input_files: List[Union[str, RiscemuSource]]
     selected_ins_sets: List[Type[InstructionSet]]
 
     def __init__(self, cfg: Optional[RunConfig] = None):
@@ -157,10 +173,10 @@ class RiscemuMain:
         self.cfg = self.create_config(args)
 
         # set input files
-        self.input_files = args.files
+        self.input_files.extend(args.files)
 
         # get selected ins sets
-        self.selected_ins_sets = list(
+        self.selected_ins_sets.extend(
             self.available_ins_sets[name]
             for name, selected in args.ins.items()
             if selected
@@ -182,7 +198,7 @@ class RiscemuMain:
         )
         for path in glob.iglob(libc_path):
             if path not in self.input_files:
-                self.input_files.append(path)
+                self.input_files.append(RiscemuSource(path, open(path, "r")))
 
     def create_config(self, args: argparse.Namespace) -> RunConfig:
         # create a RunConfig from the cli args
@@ -207,14 +223,45 @@ class RiscemuMain:
 
     def load_programs(self):
         for path in self.input_files:
+            max_bid = -1
+            bidder = None
+            # get best-fit loader:
             for loader in self.available_file_loaders:
-                if not loader.can_parse(path):
-                    continue
-                programs = loader.instantiate(path, {}).parse()
-                if isinstance(programs, Program):
-                    programs = [programs]
-                for p in programs:
-                    self.cpu.mmu.load_program(p)
+                if isinstance(path, RiscemuSource):
+                    score = path.get_score_for(loader)
+                else:
+                    score = loader.can_parse(path)
+
+                if score > max_bid:
+                    max_bid = score
+                    bidder = loader
+            if max_bid <= 0:
+                raise RuntimeError(
+                    f"Cannot load {path}! No loader for this file type available."
+                )
+            if isinstance(path, RiscemuSource):
+                stream = path.stream
+                source_name = path.name
+            elif path == "-":
+                stream: IOBase = sys.stdin
+                source_name = "<stdin>"
+            else:
+                source_name = path
+                stream: IOBase = open(path, "rb" if bidder.is_binary else "r")
+
+            programs = bidder.instantiate(source_name, stream, {}).parse()
+            if isinstance(programs, Program):
+                programs = [programs]
+            for p in programs:
+                self.cpu.mmu.load_program(p)
+            if self.cfg.verbosity > 2:
+                print(
+                    FMT_GRAY
+                    + "[Startup] Loaded {} with loader {}".format(
+                        source_name, bidder.__name__
+                    )
+                    + FMT_NONE
+                )
 
     def run_from_cli(self, argv: List[str]):
         # register everything
@@ -226,6 +273,14 @@ class RiscemuMain:
         self.instantiate_cpu()
         self.load_programs()
 
+        if self.cfg.verbosity > 3:
+            print(
+                FMT_GRAY
+                + "[Startup] Startup complete, the following sections were loaded"
+            )
+            for sec in self.cpu.mmu.sections:
+                print("          {}".format(sec.debug_str()))
+            print(FMT_NONE)
         # run the program
         self.cpu.launch(self.cfg.verbosity > 1)
 

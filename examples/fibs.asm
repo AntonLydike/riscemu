@@ -5,7 +5,8 @@
 fibs:   .space 56
 
         .text
-.globl main
+// make main global so it can be picked up by the crt0.s
+.globl  main
 main:
         addi    s1, zero, 0     // storage index
         addi    s2, zero, 56    // last storage index

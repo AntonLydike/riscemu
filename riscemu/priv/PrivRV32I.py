@@ -67,7 +67,7 @@ class PrivRV32I(RV32I):
         if self.cpu.mode != PrivModes.MACHINE:
             print("MRET not inside machine level code!")
             raise IllegalInstructionTrap(ins)
-        # retore mie
+        # restore mie
         mpie = self.cpu.csr.get_mstatus("mpie")
         self.cpu.csr.set_mstatus("mie", mpie)
         # restore priv

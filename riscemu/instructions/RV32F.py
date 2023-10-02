@@ -137,7 +137,7 @@ class RV32F(InstructionSet):
         | fsub.s     rd,rs1,rs2
 
         :Description:
-        | Perform single-precision floating-point substraction.
+        | Perform single-precision floating-point subtraction.
 
         :Implementation:
         | f[rd] = f[rs1] - f[rs2]

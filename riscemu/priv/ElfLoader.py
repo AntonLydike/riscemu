@@ -1,3 +1,5 @@
+import os.path
+from io import IOBase, RawIOBase
 from typing import List
 
 from core.traps import *
@@ -21,15 +23,19 @@ class ElfBinaryFileLoader(ProgramLoader):
     This loader respects local and global symbols.
     """
 
+    is_binary = True
+
     program: Program
 
-    def __init__(self, source_path: str, options: T_ParserOpts):
-        super().__init__(source_path, options)
+    def __post_init__(self):
         self.program = Program(self.filename)
 
     @classmethod
-    def can_parse(cls, source_path: str) -> float:
-        with open(source_path, "rb") as f:
+    def can_parse(cls, source_name: str) -> float:
+        if source_name == "-" or not os.path.isfile(source_name):
+            return 0
+
+        with open(source_name, "rb") as f:
             if f.read(4) == b"\x7f\x45\x4c\x46":
                 return 1
         return 0
@@ -43,15 +49,7 @@ class ElfBinaryFileLoader(ProgramLoader):
             from elftools.elf.elffile import ELFFile
             from elftools.elf.sections import Section, SymbolTableSection
 
-            with open(self.source_path, "rb") as f:
-                print(
-                    FMT_ELF
-                    + "[ElfLoader] Loading elf executable from: {}".format(
-                        self.source_path
-                    )
-                    + FMT_NONE
-                )
-                self._read_elf(ELFFile(f))
+            self._read_elf(ELFFile(self.source))
         except ImportError as e:
             print(
                 FMT_PARSE

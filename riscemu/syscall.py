@@ -113,7 +113,7 @@ class SyscallInterface:
     def read(self, scall: Syscall):
         """
         read syscall (63): read from file no a0, into addr a1, at most a2 bytes
-        on return a0 will be the number of read bytes or -1 if an error occured
+        on return a0 will be the number of read bytes or -1 if an error occurred
         """
         fileno = scall.cpu.regs.get("a0").unsigned_value
         addr = scall.cpu.regs.get("a1").unsigned_value
@@ -139,7 +139,7 @@ class SyscallInterface:
     def write(self, scall: Syscall):
         """
         write syscall (64): write a2 bytes from addr a1 into fileno a0
-        on return a0 will hold the number of bytes written or -1 if an error occured
+        on return a0 will hold the number of bytes written or -1 if an error occurred
         """
         fileno = scall.cpu.regs.get("a0").unsigned_value
         addr = scall.cpu.regs.get("a1").unsigned_value

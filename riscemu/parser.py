@@ -4,7 +4,8 @@ RiscEmu (c) 2021 Anton Lydike
 SPDX-License-Identifier: MIT
 """
 import re
-from typing import Dict, Tuple, Iterable, Callable, List
+from io import IOBase
+from typing import Dict, Tuple, Iterable, Callable, List, TextIO
 
 from .assembler import MemorySectionType, ParseContext, AssemblerDirectives
 from .colors import FMT_PARSE
@@ -73,7 +74,7 @@ def composite_tokenizer(
     """
     Convert an iterator over tokens into an iterator over tuples: (token, list(token))
 
-    The first token ist either a pseudo_op, label, or instruction name. The token list are all remaining tokens before
+    The first token is either a pseudo_op, label, or instruction name. The token list are all remaining tokens before
     a newline is encountered
     :param tokens_iter: An iterator over tokens
     :return: An iterator over a slightly more structured representation of the tokens
@@ -113,33 +114,34 @@ def take_arguments(tokens: Peekable[Token]) -> Iterable[str]:
 
 class AssemblyFileLoader(ProgramLoader):
     """
-    This class loads assembly files written by hand. It understands some assembler directives and supports most
-    pseudo instructions. It does very little verification of source correctness.
+    This class loads assembly files written by hand. It understands some assembler
+    directives and supports most pseudo instructions. It does very little verification
+    of source correctness.
 
-    It also supports numbered jump targets and properly supports local and global scope (.globl assembly directive)
+    It also supports numbered jump targets and properly supports local and global scope
+    (globl assembly directive)
 
 
-    The AssemblyFileLoader loads .asm, .S and .s files by default, and acts as a weak fallback to all other filetypes.
+    The AssemblyFileLoader loads .asm and .s files by default, and acts as a weak
+    fallback to all other filetypes.
     """
 
+    is_binary = False
+
+    source: TextIO
+
     def parse(self) -> Program:
-        with open(self.source_path, "r") as f:
+        with self.source as f:
             return parse_tokens(self.filename, tokenize(f))
 
-    def parse_io(self, io: Iterable[str]):
-        return parse_tokens(self.filename, tokenize(io))
-
     @classmethod
-    def can_parse(cls, source_path: str) -> float:
+    def can_parse(cls, source_name: str) -> float:
         """
-
+        Parse a string assembly file.
         It also acts as a weak fallback if no other loaders want to take the file.
-
-        :param source_path: the path to the source file
-        :return:
         """
         # gcc recognizes these line endings as assembly. So we will do too.
-        if source_path.split(".")[-1] in ("asm", "S", "s"):
+        if source_name == "-" or source_name.split(".")[-1].lower() in ("asm", "s"):
             return 1
         return 0.01
 

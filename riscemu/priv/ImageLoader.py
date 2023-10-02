@@ -1,22 +1,24 @@
 """
-Laods a memory image with debug information into memory
+Loads a memory image with debug information into memory
 """
 
 import os.path
+from io import IOBase
 from typing import List, Iterable
 
 from .ElfLoader import ElfMemorySection
 from .types import MemoryImageDebugInfos
 from ..assembler import INSTRUCTION_SECTION_NAMES
 from ..colors import FMT_NONE, FMT_PARSE
-from ..helpers import get_section_base_name
 from ..core import MemoryFlags, ProgramLoader, Program, T_ParserOpts
 
 
 class MemoryImageLoader(ProgramLoader):
+    is_binary = True
+
     @classmethod
-    def can_parse(cls, source_path: str) -> float:
-        if source_path.split(".")[-1] == "img":
+    def can_parse(cls, source_name: str) -> float:
+        if source_name.split(".")[-1] == "img":
             return 1
         return 0
 
@@ -32,7 +34,7 @@ class MemoryImageLoader(ProgramLoader):
         with open(self.options.get("debug"), "r") as debug_file:
             debug_info = MemoryImageDebugInfos.load(debug_file.read())
 
-        with open(self.source_path, "rb") as source_file:
+        with self.source as source_file:
             data: bytearray = bytearray(source_file.read())
 
         for name, sections in debug_info.sections.items():
@@ -66,7 +68,7 @@ class MemoryImageLoader(ProgramLoader):
             + FMT_NONE
         )
 
-        with open(self.source_path, "rb") as source_file:
+        with self.source as source_file:
             data: bytes = source_file.read()
 
         p = Program(self.filename)
@@ -78,9 +80,11 @@ class MemoryImageLoader(ProgramLoader):
         return p
 
     @classmethod
-    def instantiate(cls, source_path: str, options: T_ParserOpts) -> "ProgramLoader":
-        if os.path.isfile(source_path + ".dbg"):
+    def instantiate(
+        cls, source_name: str, source: IOBase, options: T_ParserOpts
+    ) -> "ProgramLoader":
+        if os.path.isfile(source_name + ".dbg"):
             return MemoryImageLoader(
-                source_path, dict(**options, debug=source_path + ".dbg")
+                source_name, source, dict(**options, debug=source_name + ".dbg")
             )
-        return MemoryImageLoader(source_path, options)
+        return MemoryImageLoader(source_name, source, options)
