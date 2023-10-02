@@ -5,9 +5,9 @@ SPDX-License-Identifier: MIT
 """
 
 from ..instructions.RV32I import *
-from riscemu.types.exceptions import INS_NOT_IMPLEMENTED
-from .Exceptions import *
-from .privmodes import PrivModes
+from riscemu.core.exceptions import INS_NOT_IMPLEMENTED
+from riscemu.core.traps import *
+from riscemu.core.privmodes import PrivModes
 from ..colors import FMT_CPU, FMT_NONE
 import typing
 
@@ -123,13 +123,13 @@ class PrivRV32I(RV32I):
             self.pc += dst.abs_value - 4
 
     def instruction_bltu(self, ins: "Instruction"):
-        rs1, rs2, dst = self.parse_rs_rs_imm(ins, signed=False)
-        if rs1 < rs2:
+        rs1, rs2, dst = self.parse_rs_rs_imm(ins)
+        if rs1.unsigned_value < rs2.unsigned_value:
             self.pc += dst.abs_value - 4
 
     def instruction_bgeu(self, ins: "Instruction"):
-        rs1, rs2, dst = self.parse_rs_rs_imm(ins, signed=False)
-        if rs1 >= rs2:
+        rs1, rs2, dst = self.parse_rs_rs_imm(ins)
+        if rs1.unsigned_value >= rs2.unsigned_value:
             self.pc += dst.abs_value - 4
 
     # technically deprecated
@@ -172,6 +172,6 @@ class PrivRV32I(RV32I):
 
     def parse_mem_ins(self, ins: "Instruction") -> Tuple[str, int]:
         ASSERT_LEN(ins.args, 3)
-        addr = self.get_reg_content(ins, 1) + ins.get_imm(2).abs_value
+        addr = self.regs.get(ins.get_reg(1)) + ins.get_imm(2).abs_value
         reg = ins.get_reg(0)
         return reg, addr

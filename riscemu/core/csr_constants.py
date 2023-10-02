@@ -29,35 +29,10 @@ MCAUSE_TRANSLATION: Dict[Tuple[int, int], str] = {
 Assigns tuple (interrupt bit, exception code) to their respective readable names
 """
 
-MSTATUS_OFFSETS: Dict[str, int] = {
-    "uie": 0,
-    "sie": 1,
-    "mie": 3,
-    "upie": 4,
-    "spie": 5,
-    "mpie": 7,
-    "spp": 8,
-    "mpp": 11,
-    "fs": 13,
-    "xs": 15,
-    "mpriv": 17,
-    "sum": 18,
-    "mxr": 19,
-    "tvm": 20,
-    "tw": 21,
-    "tsr": 22,
-    "sd": 31,
-}
-"""
-Offsets for all mstatus bits
-"""
-
-MSTATUS_LEN_2 = ("mpp", "fs", "xs")
-"""
-All mstatus parts that have length 2. All other mstatus parts have length 1
-"""
-
 CSR_NAME_TO_ADDR: Dict[str, int] = {
+    "fflags": 0x001,
+    "frm": 0x002,
+    "fcsr": 0x003,
     "mstatus": 0x300,
     "misa": 0x301,
     "mie": 0x304,
@@ -66,15 +41,19 @@ CSR_NAME_TO_ADDR: Dict[str, int] = {
     "mcause": 0x342,
     "mtval": 0x343,
     "mip": 0x344,
+    "mtimecmp": 0x780,
+    "mtimecmph": 0x781,
+    "halt": 0x789,
+    "cycle": 0xC00,
+    "time": 0xC01,
+    "instret": 0xC02,
+    "cycleh": 0xC80,
+    "timeh": 0xC81,
+    "instreth": 0xC82,
     "mvendorid": 0xF11,
     "marchid": 0xF12,
     "mimpid": 0xF13,
     "mhartid": 0xF14,
-    "time": 0xC01,
-    "timeh": 0xC81,
-    "halt": 0x789,
-    "mtimecmp": 0x780,
-    "mtimecmph": 0x781,
 }
 """
 Translation for named registers

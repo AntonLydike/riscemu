@@ -8,8 +8,9 @@ from typing import List, Iterable
 
 from .ElfLoader import ElfMemorySection
 from .types import MemoryImageDebugInfos
+from ..assembler import INSTRUCTION_SECTION_NAMES
 from ..colors import FMT_NONE, FMT_PARSE
-from ..types import MemoryFlags, ProgramLoader, Program, T_ParserOpts
+from ..core import MemoryFlags, ProgramLoader, Program, T_ParserOpts
 
 
 class MemoryImageLoader(ProgramLoader):

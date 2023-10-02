@@ -9,7 +9,7 @@ class Int32:
     It implements basically all mathematical dunder magic methods (__add__, __sub__, etc.)
 
     You can use it just like you would any other integer, just be careful when passing it
-    to functions which actually expect an integer and not a Int32.
+    to functions which actually expect an integer and not an Int32.
     """
 
     _type = c_int32
@@ -18,17 +18,15 @@ class Int32:
     def __init__(
         self, val: Union[int, c_int32, c_uint32, "Int32", bytes, bytearray, bool] = 0
     ):
-        if isinstance(val, (bytes, bytearray)):
+        if isinstance(val, (c_uint32, c_int32, Int32)):
+            self._val = self.__class__._type(val.value)
+        elif isinstance(val, (int, bool)):
+            self._val = self.__class__._type(val)
+        elif isinstance(val, (bytes, bytearray)):
             signed = len(val) == 4 and self._type == c_int32
             self._val = self.__class__._type(
                 int.from_bytes(val, "little", signed=signed)
             )
-        elif isinstance(val, self.__class__._type):
-            self._val = val
-        elif isinstance(val, (c_uint32, c_int32, Int32)):
-            self._val = self.__class__._type(val.value)
-        elif isinstance(val, (int, bool)):
-            self._val = self.__class__._type(val)
         else:
             raise RuntimeError(
                 "Unknown {} input type: {} ({})".format(
@@ -99,6 +97,9 @@ class Int32:
 
     def __neg__(self):
         return self.__class__(-self._val.value)
+
+    def __invert__(self):
+        return self.__class__(~self.value)
 
     def __abs__(self):
         return self.__class__(abs(self.value))

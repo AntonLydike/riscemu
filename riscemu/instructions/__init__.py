@@ -12,5 +12,8 @@ from .RV32I import RV32I
 from .RV32A import RV32A
 from .RV32F import RV32F
 from .RV_Debug import RV_Debug
+from .Zicsr import Zicsr
 
-InstructionSetDict = {v.__name__: v for v in [RV32I, RV32M, RV32A, RV32F, RV_Debug]}
+InstructionSetDict = {
+    v.__name__: v for v in [RV32I, RV32M, RV32A, RV32F, Zicsr, RV_Debug]
+}

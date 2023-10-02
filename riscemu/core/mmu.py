@@ -6,9 +6,9 @@ SPDX-License-Identifier: MIT
 
 from typing import Dict, List, Optional, Union
 
-from .colors import *
-from .helpers import align_addr
-from .types import (
+from ..colors import *
+from ..helpers import align_addr
+from . import (
     Instruction,
     MemorySection,
     MemoryFlags,
@@ -17,8 +17,9 @@ from .types import (
     InstructionContext,
     Int32,
     Float32,
+    InvalidAllocationException,
+    MemoryAccessException,
 )
-from .types.exceptions import InvalidAllocationException, MemoryAccessException
 
 
 class MMU:
@@ -53,6 +54,16 @@ class MMU:
     The global symbol table
     """
 
+    _ins_sec: Optional[MemorySection]
+    """
+    Caching the last section where we read instructions from
+    """
+
+    _mem_sec: Optional[MemorySection]
+    """
+    Caching the last section where we read data from
+    """
+
     def __init__(self):
         """
         Create a new MMU
@@ -60,6 +71,8 @@ class MMU:
         self.programs = list()
         self.sections = list()
         self.global_symbols = dict()
+        self._ins_sec = None
+        self._mem_sec = None
 
     def get_sec_containing(self, addr: T_AbsoluteAddress) -> Optional[MemorySection]:
         """
@@ -70,6 +83,7 @@ class MMU:
         """
         for sec in self.sections:
             if sec.base <= addr < sec.base + sec.size:
+                self._mem_sec = sec
                 return sec
         return None
 
@@ -86,17 +100,21 @@ class MMU:
         :param addr: The location
         :return: The Instruction
         """
-        sec = self.get_sec_containing(addr)
-        if sec is None:
-            print(
-                FMT_MEM
-                + "[MMU] Trying to read instruction form invalid region! (read at {}) ".format(
-                    addr
+        sec = self._ins_sec
+        if addr < sec.base or sec.base + sec.size <= addr:
+            sec = self.get_sec_containing(addr)
+            if sec is not None:
+                self._ins_sec = sec
+            else:
+                print(
+                    FMT_MEM
+                    + "[MMU] Trying to read instruction form invalid region! (read at {}) ".format(
+                        addr
+                    )
+                    + "Have you forgotten an exit syscall or ret statement?"
+                    + FMT_NONE
                 )
-                + "Have you forgotten an exit syscall or ret statement?"
-                + FMT_NONE
-            )
-            raise RuntimeError("No next instruction available!")
+                raise RuntimeError("No next instruction available!")
         return sec.read_ins(addr - sec.base)
 
     def read(self, addr: Union[int, Int32], size: int) -> bytearray:
@@ -107,20 +125,22 @@ class MMU:
         :param size: The number of bytes to read
         :return: The bytearray at addr
         """
-        if isinstance(addr, Int32):
-            addr = addr.unsigned_value
-        sec = self.get_sec_containing(addr)
-        if sec is None:
-            print(
-                FMT_MEM
-                + "[MMU] Trying to read data form invalid region at 0x{:x}! ".format(
-                    addr
+        sec = self._mem_sec
+        if addr < sec.base or sec.base + sec.size <= addr:
+            sec = self.get_sec_containing(addr)
+            if sec is not None:
+                self._mem_sec = sec
+            else:
+                print(
+                    FMT_MEM
+                    + "[MMU] Trying to read data form invalid region at 0x{:x}! ".format(
+                        addr
+                    )
+                    + FMT_NONE
                 )
-                + FMT_NONE
-            )
-            raise MemoryAccessException(
-                "region is non-initialized!", addr, size, "read"
-            )
+                raise MemoryAccessException(
+                    "region is non-initialized!", addr, size, "read"
+                )
         return sec.read(addr - sec.base, size)
 
     def write(self, addr: int, size: int, data: bytearray):
@@ -131,18 +151,22 @@ class MMU:
         :param size: The number of bytes to write
         :param data: The bytearray to write (only first size bytes are written)
         """
-        sec = self.get_sec_containing(addr)
-        if sec is None:
-            print(
-                FMT_MEM
-                + "[MMU] Invalid write into non-initialized region at 0x{:08X}".format(
-                    addr
+        sec = self._mem_sec
+        if addr < sec.base or sec.base + sec.size <= addr:
+            sec = self.get_sec_containing(addr)
+            if sec is not None:
+                self._mem_sec = sec
+            else:
+                print(
+                    FMT_MEM
+                    + "[MMU] Invalid write into non-initialized region at 0x{:08X}".format(
+                        addr
+                    )
+                    + FMT_NONE
                 )
-                + FMT_NONE
-            )
-            raise MemoryAccessException(
-                "region is non-initialized!", addr, size, "write"
-            )
+                raise MemoryAccessException(
+                    "region is non-initialized!", addr, size, "write"
+                )
 
         return sec.write(addr - sec.base, size, data)
 
@@ -332,6 +356,8 @@ class MMU:
         """
         self.programs.sort(key=lambda bin: bin.base)
         self.sections.sort(key=lambda sec: sec.base)
+        self._mem_sec = self.sections[-1]
+        self._ins_sec = self.sections[-1]
 
     def get_guaranteed_free_address(self) -> T_AbsoluteAddress:
         if len(self.sections) == 0:

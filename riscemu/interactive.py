@@ -1,12 +1,11 @@
 import sys
 
-from riscemu import RunConfig
-from riscemu.types import InstructionMemorySection, SimpleInstruction, Program
+from riscemu.config import RunConfig
+from riscemu.core import InstructionMemorySection, SimpleInstruction, Program
 
 if __name__ == "__main__":
-    from .CPU import UserModeCPU
+    from core.usermode_cpu import UserModeCPU
     from .instructions import InstructionSetDict
-    from .debug import launch_debug_session
 
     cpu = UserModeCPU(list(InstructionSetDict.values()), RunConfig(verbosity=4))
 

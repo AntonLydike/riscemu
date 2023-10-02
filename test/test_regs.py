@@ -1,7 +1,7 @@
 import pytest
 
-from riscemu.registers import Registers
-from riscemu.types import Float32
+from riscemu.core.registers import Registers
+from riscemu.core import Float32
 
 
 def test_float_regs():

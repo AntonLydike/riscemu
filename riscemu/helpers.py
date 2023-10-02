@@ -7,8 +7,8 @@ SPDX-License-Identifier: MIT
 from math import log10, ceil
 from typing import Iterable, Iterator, TypeVar, Generic, List, Optional
 
-from .types import Int32, UInt32
-from .types.exceptions import *
+from .core import Int32, UInt32
+from .core.exceptions import *
 
 
 def align_addr(addr: int, to_bytes: int = 8) -> int:

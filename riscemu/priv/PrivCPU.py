@@ -6,20 +6,20 @@ SPDX-License-Identifier: MIT
 import sys
 import time
 
-from riscemu.CPU import *
+from core.usermode_cpu import *
 from .CSR import CSR
 from .ElfLoader import ElfBinaryFileLoader
-from .Exceptions import *
+from core.traps import *
 from .ImageLoader import MemoryImageLoader
 from .PrivMMU import PrivMMU
 from .PrivRV32I import PrivRV32I
-from .privmodes import PrivModes
+from core.privmodes import PrivModes
 from ..IO.TextIO import TextIO
 from ..instructions import RV32A, RV32M
-from ..types import Program, UInt32
+from ..core import Program, UInt32
 
 if typing.TYPE_CHECKING:
-    from riscemu.instructions.instruction_set import InstructionSet
+    pass
 
 
 class PrivCPU(CPU):
@@ -270,7 +270,3 @@ class PrivCPU(CPU):
 
     def record_perf_profile(self):
         self._perf_counters.append((time.perf_counter_ns(), self.cycle))
-
-    @classmethod
-    def get_loaders(cls) -> typing.Iterable[Type[ProgramLoader]]:
-        return [AssemblyFileLoader, MemoryImageLoader, ElfBinaryFileLoader]

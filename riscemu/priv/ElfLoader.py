@@ -2,10 +2,10 @@ import os.path
 from io import IOBase, RawIOBase
 from typing import List
 
-from .Exceptions import *
+from core.traps import *
 from .types import ElfMemorySection
 from ..helpers import FMT_PARSE, FMT_NONE, FMT_GREEN, FMT_BOLD
-from ..types import MemoryFlags, Program, ProgramLoader, T_ParserOpts
+from ..core import MemoryFlags, Program, ProgramLoader, T_ParserOpts
 
 FMT_ELF = FMT_GREEN + FMT_BOLD
 
@@ -94,8 +94,6 @@ class ElfBinaryFileLoader(ProgramLoader):
         )
 
     def _parse_symtab(self, symtab: "SymbolTableSection"):
-        from elftools.elf.enums import ENUM_ST_VISIBILITY
-
         for sym in symtab.iter_symbols():
             if not sym.name:
                 continue

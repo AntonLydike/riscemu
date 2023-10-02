@@ -6,12 +6,12 @@ from typing import Tuple, Dict, Set
 
 from riscemu.colors import FMT_NONE, FMT_PARSE
 from riscemu.decoder import format_ins, RISCV_REGS, decode
-from riscemu.priv.Exceptions import (
+from riscemu.core.traps import (
     InstructionAccessFault,
     InstructionAddressMisalignedTrap,
     LoadAccessFault,
 )
-from riscemu.types import (
+from riscemu.core import (
     Instruction,
     InstructionContext,
     T_RelativeAddress,

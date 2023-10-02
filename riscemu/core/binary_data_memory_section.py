@@ -6,7 +6,7 @@ from . import (
     T_RelativeAddress,
     Instruction,
 )
-from ..types.exceptions import MemoryAccessException
+from ..core.exceptions import MemoryAccessException
 
 
 class BinaryDataMemorySection(MemorySection):
