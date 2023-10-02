@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from time import time
 from typing import List, Type, Callable, Set, Dict, TYPE_CHECKING
 
 from ..config import RunConfig
@@ -14,6 +13,7 @@ from . import (
     Registers,
     CSR,
     RTClock,
+    csr_constants,
 )
 
 if TYPE_CHECKING:
@@ -83,7 +83,6 @@ class CPU(ABC):
         if ins.name in self.instructions:
             self.instructions[ins.name](ins)
         else:
-            # this should never be reached, as unknown instructions are imparseable
             raise RuntimeError("Unknown instruction: {}".format(ins))
 
     def load_program(self, program: Program):
@@ -120,6 +119,7 @@ class CPU(ABC):
             entrypoint = self.mmu.programs[0].entrypoint
 
         self.initialize_registers()
+        self.setup_csr()
 
         if self.conf.verbosity > 0:
             print(
@@ -148,8 +148,26 @@ class CPU(ABC):
 
         self.csr.set(CSR.name_to_addr("mhartid"), UInt32(self.hart_id))
         self.csr.register_callback(
-            CSR.name_to_addr("time"), getter=self.rtclock.get_low32
+            CSR.name_to_addr("time"),
+            getter=self.rtclock.get_low32,
         )
         self.csr.register_callback(
-            CSR.name_to_addr("timeh"), getter=self.rtclock.get_hi32
+            CSR.name_to_addr("timeh"),
+            getter=self.rtclock.get_hi32,
+        )
+        self.csr.register_callback(
+            CSR.name_to_addr("instret"),
+            getter=(lambda csr, _: UInt32(self.cycle)),
+        )
+        self.csr.register_callback(
+            CSR.name_to_addr("instreth"),
+            getter=(lambda csr, _: UInt32(self.cycle >> 32)),
+        )
+        self.csr.register_callback(
+            CSR.name_to_addr("cycle"),
+            getter=(lambda csr, _: UInt32(self.cycle)),
+        )
+        self.csr.register_callback(
+            CSR.name_to_addr("cycleh"),
+            getter=(lambda csr, _: UInt32(self.cycle >> 32)),
         )

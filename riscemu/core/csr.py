@@ -223,6 +223,15 @@ class CSR:
         getter: Optional[Callable[[int, UInt32], UInt32]] = None,
         setter: Optional[Callable[[int, UInt32, UInt32], UInt32]] = None,
     ):
+        """
+        addr: the CSR address
+        getter: a function mapping (addr, old_val_in_store) -> actual value
+        setter: a function mapping (addr, old_val_in_store, given_val) -> new_val_in_store
+
+        where the _in_store values denote the values in the CSR store.
+        Values may be handled by external stores, if that's the case
+        these arguments can be safely ignored.
+        """
         if getter is None:
             getter = _invalid_getter
         self.getters[addr] = getter

@@ -71,7 +71,9 @@ class Float32:
         return self.__class__(self.value * other)
 
     def __truediv__(self, other: Any):
-        return self // other
+        if isinstance(other, Float32):
+            other = other.value
+        return self.__class__(self.value / other)
 
     def __floordiv__(self, other: Any):
         if isinstance(other, Float32):

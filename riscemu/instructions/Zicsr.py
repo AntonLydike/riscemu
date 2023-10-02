@@ -24,28 +24,42 @@ class Zicsr(InstructionSet):
         val = self.cpu.csr.get(csr)
         if rd != "zero":
             self.regs.set(rd, val)
-        self.cpu.csr.set(csr, val | bitmask)
+        if bitmask != 0:
+            self.cpu.csr.set(csr, val | bitmask)
 
     def instruction_csrrsi(self, ins: Instruction):
         rd, bitmask, csr = self.parse_csr_imm_ins(ins)
         val = self.cpu.csr.get(csr)
         if rd != "zero":
             self.regs.set(rd, val)
-        self.cpu.csr.set(csr, val | bitmask)
+        if bitmask != 0:
+            self.cpu.csr.set(csr, val | bitmask)
 
     def instruction_csrrc(self, ins: Instruction):
         rd, bitmask, csr = self._parse_csr_ins(ins)
         val = self.cpu.csr.get(csr)
         if rd != "zero":
             self.regs.set(rd, val)
-        self.cpu.csr.set(csr, val & ~bitmask)
+        if bitmask != 0:
+            self.cpu.csr.set(csr, val & ~bitmask)
 
     def instruction_csrrci(self, ins: Instruction):
         rd, bitmask, csr = self.parse_csr_imm_ins(ins)
         val = self.cpu.csr.get(csr)
         if rd != "zero":
             self.regs.set(rd, val)
-        self.cpu.csr.set(csr, val & ~bitmask)
+        if bitmask != 0:
+            self.cpu.csr.set(csr, val & ~bitmask)
+
+    def instruction_rdtime(self, ins: Instruction):
+        rd = ins.get_reg(0)
+        self.regs.set(rd, self.cpu.rtclock.get_low32())
+
+    def instruction_rdtimeh(self, ins: Instruction):
+        rd = ins.get_reg(0)
+        self.regs.set(rd, self.cpu.rtclock.get_hi32())
+
+    # FIXME: rdclycle[h] and rdinstret[h] are not provided yet
 
     def _parse_csr_ins(self, ins: Instruction) -> Tuple[str, UInt32, int]:
         assert len(ins.args) == 3
@@ -67,6 +81,7 @@ class Zicsr(InstructionSet):
 
     @staticmethod
     def _ins_get_csr_addr(ins: Instruction) -> int:
+        # TODO: somehow handle elf instructions at some point?
         if isinstance(ins.args[2], str) and ins.args[2].lower() in CSR_NAME_TO_ADDR:
             return CSR_NAME_TO_ADDR[ins.args[2].lower()]
 

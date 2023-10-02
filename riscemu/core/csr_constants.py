@@ -30,6 +30,9 @@ Assigns tuple (interrupt bit, exception code) to their respective readable names
 """
 
 CSR_NAME_TO_ADDR: Dict[str, int] = {
+    "fflags": 0x001,
+    "frm": 0x002,
+    "fcsr": 0x003,
     "mstatus": 0x300,
     "misa": 0x301,
     "mie": 0x304,
@@ -38,15 +41,19 @@ CSR_NAME_TO_ADDR: Dict[str, int] = {
     "mcause": 0x342,
     "mtval": 0x343,
     "mip": 0x344,
+    "mtimecmp": 0x780,
+    "mtimecmph": 0x781,
+    "halt": 0x789,
+    "cycle": 0xC00,
+    "time": 0xC01,
+    "instret": 0xC02,
+    "cycleh": 0xC80,
+    "timeh": 0xC81,
+    "instreth": 0xC82,
     "mvendorid": 0xF11,
     "marchid": 0xF12,
     "mimpid": 0xF13,
     "mhartid": 0xF14,
-    "time": 0xC01,
-    "timeh": 0xC81,
-    "halt": 0x789,
-    "mtimecmp": 0x780,
-    "mtimecmph": 0x781,
 }
 """
 Translation for named registers

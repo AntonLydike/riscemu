@@ -119,7 +119,7 @@ class RV32I(InstructionSet):
         ASSERT_LEN(ins.args, 2)
         reg = ins.get_reg(0)
         imm = ins.get_imm(1).abs_value << 12
-        self.regs.set(reg, imm + self.pc)
+        self.regs.set(reg, imm + self.cpu.pc)
 
     def instruction_xor(self, ins: "Instruction"):
         rd, rs1, rs2 = self.parse_rd_rs_rs(ins)
@@ -147,54 +147,54 @@ class RV32I(InstructionSet):
 
     def instruction_slt(self, ins: "Instruction"):
         rd, rs1, rs2 = self.parse_rd_rs_rs(ins)
-        self.regs.set(rd, Int32(rs1 < rs2))
+        self.regs.set(rd, UInt32(rs1 < rs2))
 
     def instruction_slti(self, ins: "Instruction"):
         rd, rs1, imm = self.parse_rd_rs_imm(ins)
-        self.regs.set(rd, Int32(rs1 < imm))
+        self.regs.set(rd, UInt32(rs1 < imm))
 
     def instruction_sltu(self, ins: "Instruction"):
-        dst, rs1, rs2 = self.parse_rd_rs_rs(ins, signed=False)
-        self.regs.set(dst, Int32(rs1 < rs2))
+        dst, rs1, rs2 = self.parse_rd_rs_rs(ins)
+        self.regs.set(dst, UInt32(rs1.unsigned_value < rs2.unsigned_value))
 
     def instruction_sltiu(self, ins: "Instruction"):
-        dst, rs1, imm = self.parse_rd_rs_imm(ins, signed=False)
-        self.regs.set(dst, Int32(rs1 < imm))
+        dst, rs1, imm = self.parse_rd_rs_imm(ins)
+        self.regs.set(dst, UInt32(rs1.unsigned_value < imm.abs_value.unsigned_value))
 
     def instruction_beq(self, ins: "Instruction"):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins)
         if rs1 == rs2:
-            self.pc += dst.pcrel_value - 4
+            self.cpu.pc += dst.pcrel_value.value - 4
 
     def instruction_bne(self, ins: "Instruction"):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins)
         if rs1 != rs2:
-            self.pc += dst.pcrel_value - 4
+            self.cpu.pc += dst.pcrel_value.value - 4
 
     def instruction_blt(self, ins: "Instruction"):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins)
         if rs1 < rs2:
-            self.pc += dst.pcrel_value - 4
+            self.cpu.pc += dst.pcrel_value.value - 4
 
     def instruction_bge(self, ins: "Instruction"):
         rs1, rs2, dst = self.parse_rs_rs_imm(ins)
         if rs1 >= rs2:
-            self.pc += dst.pcrel_value - 4
+            self.cpu.pc += dst.pcrel_value.value - 4
 
     def instruction_bltu(self, ins: "Instruction"):
-        rs1, rs2, dst = self.parse_rs_rs_imm(ins, signed=False)
-        if rs1 < rs2:
-            self.pc += dst.pcrel_value - 4
+        rs1, rs2, dst = self.parse_rs_rs_imm(ins)
+        if rs1.unsigned_value < rs2.unsigned_value:
+            self.cpu.pc += dst.pcrel_value.value - 4
 
     def instruction_bgeu(self, ins: "Instruction"):
-        rs1, rs2, dst = self.parse_rs_rs_imm(ins, signed=False)
-        if rs1 >= rs2:
-            self.pc += dst.pcrel_value - 4
+        rs1, rs2, dst = self.parse_rs_rs_imm(ins)
+        if rs1.unsigned_value >= rs2.unsigned_value:
+            self.cpu.pc += dst.pcrel_value.value - 4
 
     def instruction_j(self, ins: "Instruction"):
         ASSERT_LEN(ins.args, 1)
         addr = ins.get_imm(0)
-        self.pc += addr.pcrel_value - 4
+        self.cpu.pc += addr.pcrel_value.value - 4
 
     def instruction_jal(self, ins: "Instruction"):
         reg = "ra"  # default register is ra
@@ -204,20 +204,20 @@ class RV32I(InstructionSet):
             ASSERT_LEN(ins.args, 2)
             reg = ins.get_reg(0)
             addr = ins.get_imm(1)
-        self.regs.set(reg, UInt32(self.pc))
-        self.pc += addr.pcrel_value - 4
+        self.regs.set(reg, UInt32(self.cpu.pc))
+        self.cpu.pc += addr.pcrel_value.value - 4
 
     def instruction_jalr(self, ins: "Instruction"):
-        ASSERT_LEN(ins.args, 2)
+        ASSERT_LEN(ins.args, 3)
         reg = ins.get_reg(0)
         base = ins.get_reg(1)
-        addr = ins.get_imm(2).abs_value
-        self.regs.set(reg, Int32(self.pc))
-        self.pc = self.regs.get(base).unsigned_value + addr
+        addr = ins.get_imm(2).abs_value.value
+        self.regs.set(reg, Int32(self.cpu.pc))
+        self.cpu.pc = self.regs.get(base).unsigned_value + addr
 
     def instruction_ret(self, ins: "Instruction"):
         ASSERT_LEN(ins.args, 0)
-        self.pc = self.regs.get("ra").unsigned_value
+        self.cpu.pc = self.regs.get("ra").unsigned_value
 
     def instruction_ecall(self, ins: "Instruction"):
         self.instruction_scall(ins)
@@ -240,7 +240,7 @@ class RV32I(InstructionSet):
         if self.cpu.conf.debug_instruction:
             print(
                 FMT_DEBUG
-                + "Debug instruction encountered at 0x{:08X}".format(self.pc - 1)
+                + "Debug instruction encountered at 0x{:08X}".format(self.cpu.pc - 1)
                 + FMT_NONE
             )
             raise LaunchDebuggerException()

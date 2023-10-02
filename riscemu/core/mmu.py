@@ -54,6 +54,16 @@ class MMU:
     The global symbol table
     """
 
+    _ins_sec: Optional[MemorySection]
+    """
+    Caching the last section where we read instructions from
+    """
+
+    _mem_sec: Optional[MemorySection]
+    """
+    Caching the last section where we read data from
+    """
+
     def __init__(self):
         """
         Create a new MMU
@@ -61,6 +71,8 @@ class MMU:
         self.programs = list()
         self.sections = list()
         self.global_symbols = dict()
+        self._ins_sec = None
+        self._mem_sec = None
 
     def get_sec_containing(self, addr: T_AbsoluteAddress) -> Optional[MemorySection]:
         """
@@ -71,6 +83,7 @@ class MMU:
         """
         for sec in self.sections:
             if sec.base <= addr < sec.base + sec.size:
+                self._mem_sec = sec
                 return sec
         return None
 
@@ -87,7 +100,12 @@ class MMU:
         :param addr: The location
         :return: The Instruction
         """
-        sec = self.get_sec_containing(addr)
+        if not (self._ins_sec.base <= addr < self._ins_sec.end):
+            new_sec = self.get_sec_containing(addr)
+            if new_sec is not None:
+                self._ins_sec = new_sec
+        sec = self._ins_sec
+
         if sec is None:
             print(
                 FMT_MEM
@@ -108,9 +126,12 @@ class MMU:
         :param size: The number of bytes to read
         :return: The bytearray at addr
         """
-        if isinstance(addr, Int32):
-            addr = addr.unsigned_value
-        sec = self.get_sec_containing(addr)
+        if not (self._mem_sec.base <= addr < self._mem_sec.base + self._mem_sec.size):
+            new_sec = self.get_sec_containing(addr)
+            if new_sec is not None:
+                self._mem_sec = new_sec
+        sec = self._mem_sec
+
         if sec is None:
             print(
                 FMT_MEM
@@ -132,7 +153,12 @@ class MMU:
         :param size: The number of bytes to write
         :param data: The bytearray to write (only first size bytes are written)
         """
-        sec = self.get_sec_containing(addr)
+        if not (self._mem_sec.base <= addr < self._mem_sec.base + self._mem_sec.size):
+            new_sec = self.get_sec_containing(addr)
+            if new_sec is not None:
+                self._mem_sec = new_sec
+        sec = self._mem_sec
+
         if sec is None:
             print(
                 FMT_MEM
@@ -333,6 +359,8 @@ class MMU:
         """
         self.programs.sort(key=lambda bin: bin.base)
         self.sections.sort(key=lambda sec: sec.base)
+        self._mem_sec = self.sections[-1]
+        self._ins_sec = self.sections[-1]
 
     def get_guaranteed_free_address(self) -> T_AbsoluteAddress:
         if len(self.sections) == 0:

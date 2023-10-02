@@ -58,14 +58,6 @@ class UserModeCPU(CPU):
         """
         Execute a single instruction, then return.
         """
-        if self.halted:
-            print(
-                FMT_CPU
-                + "[CPU] Program exited with code {}".format(self.exit_code)
-                + FMT_NONE
-            )
-            return
-
         launch_debugger = False
 
         try:

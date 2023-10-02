@@ -17,11 +17,11 @@ class RTClock:
             self.t0 = time()
         self.tickrate = tickrate
 
-    def get_low32(self, *args):
-        return UInt32(int(time() * self.tickrate))
+    def get_low32(self, *args) -> UInt32:
+        return UInt32(int((time() - self.t0) * self.tickrate))
 
-    def get_hi32(self, *args):
-        return UInt32(int(time() * self.tickrate) >> 32)
+    def get_hi32(self, *args) -> UInt32:
+        return UInt32(int((time() - self.t0) * self.tickrate) >> 32)
 
     def get_as_int(self):
         return time() * self.tickrate
