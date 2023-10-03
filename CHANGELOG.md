@@ -1,5 +1,10 @@
 # Changelog
 
+# 2.2.2
+
+ - Dev: Add `__all__` to `riscemu.{core,instructions,decoder}` modules to make pyright in other projects happy
+ - Perf: very minor fix related to not converting values twice when loaded from memory
+
 # 2.2.1
 
 Version bump to re-trigger CI run.
