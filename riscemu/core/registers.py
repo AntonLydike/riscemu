@@ -178,12 +178,6 @@ class Registers:
         :return: If the operation was successful
         """
 
-        # remove after refactoring is complete
-        if not isinstance(val, Int32):
-            raise RuntimeError(
-                "Setting register to non-Int32 value! Please refactor your code!"
-            )
-
         if reg == "zero":
             return False
         # if reg not in Registers.all_registers():
