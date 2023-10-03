@@ -17,3 +17,13 @@ from .Zicsr import Zicsr
 InstructionSetDict = {
     v.__name__: v for v in [RV32I, RV32M, RV32A, RV32F, Zicsr, RV_Debug]
 }
+
+__all__ = [
+    InstructionSetDict,
+    RV32I,
+    RV32M,
+    RV32A,
+    RV32F,
+    Zicsr,
+    RV_Debug,
+]
