@@ -210,7 +210,7 @@ class RV32I(InstructionSet):
         self.pc += addr.pcrel_value - 4
 
     def instruction_jalr(self, ins: "Instruction"):
-        ASSERT_LEN(ins.args, 2)
+        ASSERT_LEN(ins.args, 3)
         reg = ins.get_reg(0)
         base = ins.get_reg(1)
         addr = ins.get_imm(2).abs_value
