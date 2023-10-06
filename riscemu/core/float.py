@@ -1,14 +1,18 @@
 import struct
-from ctypes import c_float
-from typing import Union, Any
+from ctypes import c_float, c_double
+from typing import Union, Any, ClassVar
+from abc import ABC, abstractmethod
 
 bytes_t = bytes
 
 
-class Float32:
+class BaseFloat(ABC):
     __slots__ = ("_val",)
 
-    _val: c_float
+    _type: ClassVar[type[c_float | c_double]]
+    _struct_fmt_str: ClassVar[str]
+
+    _val: c_float | c_double
 
     @property
     def value(self) -> float:
@@ -22,73 +26,67 @@ class Float32:
         """
         The values bit representation (as a bytes object)
         """
-        return struct.pack("<f", self.value)
-
-    @property
-    def bits(self) -> int:
-        """
-        The values bit representation as an int (for easy bit manipulation)
-        """
-        return int.from_bytes(self.bytes, byteorder="little")
+        return struct.pack("<" + self._struct_fmt_str, self.value)
 
     @classmethod
-    def from_bytes(cls, val: Union[int, bytes_t, bytearray]):
-        if isinstance(val, int):
-            val = struct.unpack("!f", struct.pack("!I", val))[0]
-        return Float32(val)
+    def from_bytes(cls, val: Union[bytes_t, bytearray]):
+        return BaseFloat(val)
 
     def __init__(
-        self, val: Union[float, c_float, "Float32", bytes_t, bytearray, int] = 0
+        self, val: Union[float, c_float, "BaseFloat", bytes_t, bytearray, int] = 0
     ):
         if isinstance(val, (float, int)):
-            self._val = c_float(val)
-        elif isinstance(val, c_float):
-            self._val = c_float(val.value)
+            self._val = self._type(val)
+        elif isinstance(val, c_float | c_double):
+            self._val = self._type(val.value)
         elif isinstance(val, (bytes, bytearray)):
-            self._val = c_float(struct.unpack("<f", val)[0])
-        elif isinstance(val, Float32):
+            self._val = self._type(struct.unpack("<" + self._struct_fmt_str, val)[0])
+            self._val = self._type(struct.unpack("<" + self._struct_fmt_str, val)[0])
+        elif isinstance(val, BaseFloat):
             self._val = val._val
         else:
             raise ValueError(
-                "Unsupported value passed to Float32: {} ({})".format(
-                    repr(val), type(val)
+                "Unsupported value passed to {}: {} ({})".format(
+                    self.__class__.__name__,
+                    repr(val),
+                    type(val),
                 )
             )
 
-    def __add__(self, other: Union["Float32", float]):
-        if isinstance(other, Float32):
+    def __add__(self, other: Union["BaseFloat", float]):
+        if isinstance(other, BaseFloat):
             other = other.value
         return self.__class__(self.value + other)
 
-    def __sub__(self, other: Union["Float32", float]):
-        if isinstance(other, Float32):
+    def __sub__(self, other: Union["BaseFloat", float]):
+        if isinstance(other, BaseFloat):
             other = other.value
         return self.__class__(self.value - other)
 
-    def __mul__(self, other: Union["Float32", float]):
-        if isinstance(other, Float32):
+    def __mul__(self, other: Union["BaseFloat", float]):
+        if isinstance(other, BaseFloat):
             other = other.value
         return self.__class__(self.value * other)
 
     def __truediv__(self, other: Any):
-        if isinstance(other, Float32):
+        if isinstance(other, BaseFloat):
             other = other.value
         return self.__class__(self.value / other)
 
     def __floordiv__(self, other: Any):
-        if isinstance(other, Float32):
+        if isinstance(other, BaseFloat):
             other = other.value
         return self.__class__(self.value // other)
 
-    def __mod__(self, other: Union["Float32", float]):
-        if isinstance(other, Float32):
+    def __mod__(self, other: Union["BaseFloat", float]):
+        if isinstance(other, BaseFloat):
             other = other.value
         return self.__class__(self.value % other)
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, (float, int)):
             return self.value == other
-        elif isinstance(other, Float32):
+        elif isinstance(other, BaseFloat):
             return self.value == other.value
         return False
 
@@ -114,22 +112,22 @@ class Float32:
         return hash(self.value)
 
     def __gt__(self, other: Any):
-        if isinstance(other, Float32):
+        if isinstance(other, BaseFloat):
             other = other.value
         return self.value > other
 
     def __lt__(self, other: Any):
-        if isinstance(other, Float32):
+        if isinstance(other, BaseFloat):
             other = other.value
         return self.value < other
 
     def __le__(self, other: Any):
-        if isinstance(other, Float32):
+        if isinstance(other, BaseFloat):
             other = other.value
         return self.value <= other
 
     def __ge__(self, other: Any):
-        if isinstance(other, Float32):
+        if isinstance(other, BaseFloat):
             other = other.value
         return self.value >= other
 
@@ -161,40 +159,34 @@ class Float32:
     def __rmod__(self, other: Any):
         return self.__class__(other) % self
 
-    def __rand__(self, other: Any):
-        return self.__class__(other) & self
+    @classmethod
+    def bitcast(cls, f: "BaseFloat") -> "BaseFloat":
+        """
+        bitcast the struct up or down to another type.
 
-    def __ror__(self, other: Any):
-        return self.__class__(other) | self
+        Use Float64.bitcast(Float32(...)) to bitcast a f32 to f64
+        """
+        return cls.from_bytes((b"\x00\x00\x00\x00\x00\x00\x00\x00" + f.bytes)[-struct.calcsize(cls._struct_fmt_str):])
 
-    def __rxor__(self, other: Any):
-        return self.__class__(other) ^ self
+    @classmethod
+    def flen_to_cls(cls, bits: int) -> type['BaseFloat']:
+        if bits == 32:
+            return Float32
+        if bits == 64:
+            return Float64
+        raise ValueError(f"Unsupported flen: {bits}")
 
-    # bytewise operators:
 
-    def __and__(self, other: Union["Float32", float, int]):
-        if isinstance(other, float):
-            other = Float32(other)
-        if isinstance(other, Float32):
-            other = other.bits
-        return self.from_bytes(self.bits & other)
+class Float32(BaseFloat):
+    _type = c_float
+    _struct_fmt_str = 'f'
 
-    def __or__(self, other: Union["Float32", float]):
-        if isinstance(other, float):
-            other = Float32(other)
-        if isinstance(other, Float32):
-            other = other.bits
-        return self.from_bytes(self.bits | other)
+    @classmethod
+    def bitcast(cls, f: "BaseFloat") -> "BaseFloat":
+        if isinstance(f, Float32):
+            return f
+        
 
-    def __xor__(self, other: Union["Float32", float]):
-        if isinstance(other, float):
-            other = Float32(other)
-        if isinstance(other, Float32):
-            other = other.bits
-        return self.from_bytes(self.bits ^ other)
-
-    def __lshift__(self, other: int):
-        return self.from_bytes(self.bits << other)
-
-    def __rshift__(self, other: int):
-        return self.from_bytes(self.bits >> other)
+class Float64(BaseFloat):
+    _type = c_double
+    _struct_fmt_str = 'd'

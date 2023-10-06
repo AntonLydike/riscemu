@@ -1,5 +1,5 @@
 from typing import Dict, List, Tuple
-from riscemu.core import Registers, MMU, Float32
+from riscemu.core import Registers, MMU, BaseFloat
 
 from dataclasses import dataclass
 
@@ -63,7 +63,7 @@ class StreamingRegs(Registers):
             self.streams[reg] = stream_def
         super().__init__(infinite_regs)
 
-    def get_f(self, reg, mark_read=True) -> "Float32":
+    def get_f(self, reg, mark_read=True) -> "BaseFloat":
         if not self.enabled or reg not in self.streams:
             return super().get_f(reg, mark_read)
 
@@ -82,7 +82,7 @@ class StreamingRegs(Registers):
         stream.pos += 1
         return val
 
-    def set_f(self, reg, val: "Float32", mark_set=True) -> bool:
+    def set_f(self, reg, val: "BaseFloat", mark_set=True) -> bool:
         if not self.enabled or reg not in self.streams:
             return super().set_f(reg, mark_set)
 

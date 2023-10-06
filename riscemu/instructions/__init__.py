@@ -19,6 +19,8 @@ InstructionSetDict = {
 }
 
 __all__ = [
+    Instruction,
+    InstructionSet,
     InstructionSetDict,
     RV32I,
     RV32M,

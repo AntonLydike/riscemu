@@ -21,6 +21,7 @@ class RunConfig:
     verbosity: int = 0
     slowdown: float = 1
     unlimited_registers: bool = False
+    flen: int = 32
     # runtime config
     use_libc: bool = False
     ignore_exit_code: bool = False

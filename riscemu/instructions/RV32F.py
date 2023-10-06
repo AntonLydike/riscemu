@@ -392,7 +392,7 @@ class RV32F(InstructionSet):
         | x[rd] = sext(f[rs1][31:0])
         """
         rd, rs = self.parse_rd_rs(ins)
-        self.regs.set(rd, UInt32(self.regs.get_f(rs).bits))
+        self.regs.set(rd, UInt32(self.regs.get_f(rs).bytes))
 
     def instruction_feq_s(self, ins: Instruction):
         """

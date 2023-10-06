@@ -9,7 +9,7 @@ from typing import Union
 
 from ..helpers import *
 
-from . import Int32, Float32
+from . import Int32, BaseFloat, Float32, Float64
 
 
 class Registers:
@@ -84,9 +84,14 @@ class Registers:
         "fa7",
     }
 
-    def __init__(self, infinite_regs: bool = False):
+    flen: int
+    _float_type: type[BaseFloat]
+
+    def __init__(self, infinite_regs: bool = False, flen: int = 32):
         self.vals: dict[str, Int32] = defaultdict(UInt32)
-        self.float_vals: dict[str, Float32] = defaultdict(Float32)
+        self.flen = flen
+        self._float_type = BaseFloat.flen_to_cls(flen)
+        self.float_vals: dict[str, BaseFloat] = defaultdict(self._float_type)
 
         self.last_set = None
         self.last_read = None
@@ -169,7 +174,7 @@ class Registers:
             return FMT_GRAY + txt + FMT_NONE
         return txt
 
-    def set(self, reg: str, val: "Int32", mark_set: bool = True) -> bool:
+    def set(self, reg: str, val: Int32, mark_set: bool = True) -> bool:
         """
         Set a register content to val
         :param reg: The register to set
@@ -194,7 +199,7 @@ class Registers:
         self.vals[reg] = val.unsigned()
         return True
 
-    def get(self, reg: str, mark_read: bool = True) -> "Int32":
+    def get(self, reg: str, mark_read: bool = True) -> Int32:
         """
         Returns the contents of register reg
         :param reg: The register name
@@ -213,17 +218,17 @@ class Registers:
             self.last_read = reg
         return self.vals[reg]
 
-    def get_f(self, reg: str, mark_read: bool = True) -> "Float32":
+    def get_f(self, reg: str, mark_read: bool = True) -> BaseFloat:
         if not self.infinite_regs and reg not in self.float_regs:
             raise RuntimeError("Invalid float register: {}".format(reg))
         if mark_read:
             self.last_read = reg
         return self.float_vals[reg]
 
-    def set_f(self, reg: str, val: Union[float, "Float32"]):
+    def set_f(self, reg: str, val: Union[float, BaseFloat]):
         if not self.infinite_regs and reg not in self.float_regs:
             raise RuntimeError("Invalid float register: {}".format(reg))
-        self.float_vals[reg] = Float32(val)
+        self.float_vals[reg] = self._float_type(val)
 
     @staticmethod
     def named_registers():
@@ -234,8 +239,8 @@ class Registers:
         return ["zero", "ra", "sp", "gp", "tp", "fp"]
 
     def __repr__(self):
-        return "<Registers[{}]{}>".format(
-            "float" if self.supports_floats else "nofloat",
+        return "<Registers[xlen=32,flen={}]{}>".format(
+            self.flen,
             "{"
             + ", ".join(self._reg_repr("a{}".format(i), 2, "0x") for i in range(8))
             + "}",

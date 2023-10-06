@@ -2,7 +2,7 @@ from typing import Iterable
 from riscemu.instructions.RV32F import RV32F
 from riscemu.core.registers import Registers
 from riscemu.core import ProgramLoader, CPU
-from riscemu.core.float32 import Float32
+from riscemu.core.float import BaseFloat
 from riscemu.core.int32 import Int32
 from riscemu.core.simple_instruction import SimpleInstruction
 
@@ -39,6 +39,6 @@ def test_cvt_instructions():
     assert 42.0 == cpu.regs.get_f("fa0")
 
     ins = MockInstruction("fcvt.w.s", ("a1", "fa1"), None, None)
-    cpu.regs.set_f("fa1", Float32(42.0))
+    cpu.regs.set_f("fa1", BaseFloat(42.0))
     RV32F(cpu).instruction_fcvt_w_s(ins)
     assert Int32(42) == cpu.regs.get("a1")

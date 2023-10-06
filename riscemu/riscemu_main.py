@@ -119,6 +119,14 @@ class RiscemuMain:
         )
 
         parser.add_argument(
+            "--flen",
+            type=int,
+            help="hardware FLEN, either 32 or 64",
+            nargs="?",
+            default=32,
+        )
+
+        parser.add_argument(
             "-v",
             "--verbose",
             help="Verbosity level (can be used multiple times)",
@@ -169,6 +177,9 @@ class RiscemuMain:
         if not hasattr(args, "ins"):
             setattr(args, "ins", {k: True for k in self.available_ins_sets})
 
+        if args.flen not in (32, 64):
+            raise ValueError("Cannot have flen other than 32 or 64!")
+
         # create RunConfig
         self.cfg = self.create_config(args)
 
@@ -214,6 +225,7 @@ class RiscemuMain:
             verbosity=args.verbose,
             use_libc=args.options["libc"],
             ignore_exit_code=args.options["ignore_exit_code"],
+            flen=args.flen,
         )
         for k, v in dict(cfg_dict).items():
             if v is None:

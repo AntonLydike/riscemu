@@ -55,7 +55,7 @@ class CPU(ABC):
         conf: RunConfig,
     ):
         self.mmu = mmu
-        self.regs = Registers(conf.unlimited_registers)
+        self.regs = Registers(conf.unlimited_registers, conf.flen)
         self.conf = conf
 
         self.instruction_sets = set()

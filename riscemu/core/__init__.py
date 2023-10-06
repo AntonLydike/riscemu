@@ -29,7 +29,7 @@ from .exceptions import (
 # base classes
 from .flags import MemoryFlags
 from .int32 import UInt32, Int32
-from .float32 import Float32
+from .float import BaseFloat, Float32, Float64
 from .rtclock import RTClock
 from .instruction import Instruction, Immediate, InstructionWithEncoding
 from .instruction_context import InstructionContext
@@ -66,7 +66,9 @@ __all__ = [
     MemoryFlags,
     UInt32,
     Int32,
+    BaseFloat,
     Float32,
+    Float64,
     RTClock,
     Instruction,
     Immediate,
