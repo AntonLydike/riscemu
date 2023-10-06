@@ -121,9 +121,9 @@ class RiscemuMain:
         parser.add_argument(
             "--flen",
             type=int,
-            help="hardware FLEN, either 32 or 64",
+            help="hardware FLEN, either 32 or 64. Defaults to 64",
             nargs="?",
-            default=32,
+            default=64,
         )
 
         parser.add_argument(

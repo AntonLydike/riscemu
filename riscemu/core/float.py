@@ -30,7 +30,7 @@ class BaseFloat(ABC):
 
     @classmethod
     def from_bytes(cls, val: Union[bytes_t, bytearray]):
-        return BaseFloat(val)
+        return cls(val)
 
     def __init__(
         self, val: Union[float, c_float, "BaseFloat", bytes_t, bytearray, int] = 0
@@ -41,8 +41,7 @@ class BaseFloat(ABC):
             self._val = self._type(val.value)
         elif isinstance(val, (bytes, bytearray)):
             self._val = self._type(struct.unpack("<" + self._struct_fmt_str, val)[0])
-            self._val = self._type(struct.unpack("<" + self._struct_fmt_str, val)[0])
-        elif isinstance(val, BaseFloat):
+        elif isinstance(val, self.__class__):
             self._val = val._val
         else:
             raise ValueError(
@@ -105,9 +104,6 @@ class BaseFloat(ABC):
     def __str__(self):
         return str(self.value)
 
-    def __format__(self, format_spec: str):
-        return self.value.__format__(format_spec)
-
     def __hash__(self):
         return hash(self.value)
 
@@ -133,6 +129,12 @@ class BaseFloat(ABC):
 
     def __bool__(self):
         return bool(self.value)
+
+    def __int__(self):
+        return int(self.value)
+
+    def __float__(self):
+        return self.value
 
     def __pow__(self, power, modulo=None):
         if modulo is not None:
@@ -163,9 +165,12 @@ class BaseFloat(ABC):
     def bitcast(cls, f: "BaseFloat") -> "BaseFloat":
         """
         bitcast the struct up or down to another type.
+        Fills upper bits with zero.
 
         Use Float64.bitcast(Float32(...)) to bitcast a f32 to f64
         """
+        if isinstance(f, cls):
+            return f
         return cls.from_bytes((b"\x00\x00\x00\x00\x00\x00\x00\x00" + f.bytes)[-struct.calcsize(cls._struct_fmt_str):])
 
     @classmethod
@@ -176,16 +181,18 @@ class BaseFloat(ABC):
             return Float64
         raise ValueError(f"Unsupported flen: {bits}")
 
+    def __format__(self, spec: str):
+        if spec[-2:] == '32':
+            return Float32.bitcast(self).__format__(spec[:-2])
+        if spec[-2:] == '64':
+            return Float64.bitcast(self).__format__(spec[:-2])
+        return format(self.value, spec)
+
 
 class Float32(BaseFloat):
     _type = c_float
     _struct_fmt_str = 'f'
 
-    @classmethod
-    def bitcast(cls, f: "BaseFloat") -> "BaseFloat":
-        if isinstance(f, Float32):
-            return f
-        
 
 class Float64(BaseFloat):
     _type = c_double

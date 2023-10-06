@@ -1,7 +1,7 @@
 import pytest
 
 from riscemu.core.registers import Registers
-from riscemu.core import BaseFloat
+from riscemu.core import Float32
 
 
 def test_float_regs():
@@ -9,9 +9,18 @@ def test_float_regs():
     # uninitialized register is zero
     assert r.get_f("fs0") == 0
     # get/set
-    val = BaseFloat(3.14)
+    val = Float32(3.14)
     r.set_f("fs0", val)
     assert r.get_f("fs0") == val
+
+def test_float_regs_flen64():
+    r = Registers(flen=64)
+    # uninitialized register is zero
+    assert r.get_f("fs0") == 0
+    # get/set
+    val = Float32(3.14)
+    r.set_f("fs0", val)
+    assert Float32.bitcast(r.get_f("fs0")) == val
 
 
 def test_unlimited_regs_works():

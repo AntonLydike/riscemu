@@ -228,7 +228,7 @@ class Registers:
     def set_f(self, reg: str, val: Union[float, BaseFloat]):
         if not self.infinite_regs and reg not in self.float_regs:
             raise RuntimeError("Invalid float register: {}".format(reg))
-        self.float_vals[reg] = self._float_type(val)
+        self.float_vals[reg] = self._float_type.bitcast(val)
 
     @staticmethod
     def named_registers():
