@@ -1,7 +1,7 @@
 import struct
 from ctypes import c_float, c_double
 from typing import Union, Any, ClassVar
-from abc import ABC, abstractmethod
+from abc import ABC
 
 bytes_t = bytes
 
@@ -9,7 +9,7 @@ bytes_t = bytes
 class BaseFloat(ABC):
     __slots__ = ("_val",)
 
-    _type: ClassVar[type[c_float | c_double]]
+    _type: ClassVar[type[Union[c_float, c_double]]]
     _struct_fmt_str: ClassVar[str]
 
     _val: c_float | c_double
