@@ -43,4 +43,4 @@ def test_random_float_ops64():
 
 
 def test_float_from_raw_bytes_conversion():
-    assert Float32.from_bytes(b'\x00\x00\xa0@') == Float32(5.0)
+    assert Float32.from_bytes(b"\x00\x00\xa0@") == Float32(5.0)

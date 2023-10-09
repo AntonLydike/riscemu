@@ -13,6 +13,7 @@ def test_float_regs():
     r.set_f("fs0", val)
     assert r.get_f("fs0") == val
 
+
 def test_float_regs_flen64():
     r = Registers(flen=64)
     # uninitialized register is zero

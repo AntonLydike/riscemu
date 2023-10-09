@@ -12,6 +12,7 @@ def is_close(a0: float | int | BaseFloat, a1: float | int | BaseFloat):
     mag = max(abs(float(a0)), abs(float(a1)))
     return (mag / 1e7) > diff
 
+
 class MockInstruction(SimpleInstruction):
     ...
 
@@ -21,7 +22,7 @@ class MockRegisters(Registers):
 
 
 class MockCPU(CPU):
-    def __init__(self, flen: int=32):
+    def __init__(self, flen: int = 32):
         self.regs = MockRegisters(True, flen)
 
     def run(self, verbose: bool = False):
@@ -48,65 +49,66 @@ def test_fcvt_instructions():
 def test_single_precision_on_flen64():
     cpu = MockCPU(flen=64)
 
-    cpu.regs.set_f('ft0', Float32(100))
-    cpu.regs.set_f('ft1', Float32(3))
+    cpu.regs.set_f("ft0", Float32(100))
+    cpu.regs.set_f("ft1", Float32(3))
     # instruction doing ft2 <- ft1 <op> ft2
 
     ins = MockInstruction("<noname>", ("ft2", "ft0", "ft1"), None, None)
 
     # div
     RV32F(cpu).base_fdiv(ins)
-    assert is_close(Float32.bitcast(cpu.regs.get_f('ft2')), (100.0/3))
+    assert is_close(Float32.bitcast(cpu.regs.get_f("ft2")), (100.0 / 3))
 
     # multiplication
     RV32F(cpu).base_fmul(ins)
-    assert is_close(Float32.bitcast(cpu.regs.get_f('ft2')), (100.0 * 3))
+    assert is_close(Float32.bitcast(cpu.regs.get_f("ft2")), (100.0 * 3))
 
     # fadd
     RV32F(cpu).base_fadd(ins)
-    assert is_close(Float32.bitcast(cpu.regs.get_f('ft2')), (100.0 + 3))
+    assert is_close(Float32.bitcast(cpu.regs.get_f("ft2")), (100.0 + 3))
 
     # fsub
     RV32F(cpu).base_fsub(ins)
-    assert is_close(Float32.bitcast(cpu.regs.get_f('ft2')), (100.0 - 3))
+    assert is_close(Float32.bitcast(cpu.regs.get_f("ft2")), (100.0 - 3))
 
     # fmin
     RV32F(cpu).base_fmin(ins)
-    assert is_close(Float32.bitcast(cpu.regs.get_f('ft2')), min(100.0, 3))
+    assert is_close(Float32.bitcast(cpu.regs.get_f("ft2")), min(100.0, 3))
 
     # fmax
     RV32F(cpu).base_fmax(ins)
-    assert is_close(Float32.bitcast(cpu.regs.get_f('ft2')), max(100.0, 3))
+    assert is_close(Float32.bitcast(cpu.regs.get_f("ft2")), max(100.0, 3))
+
 
 def test_single_precision_on_flen32():
     cpu = MockCPU(flen=32)
 
-    cpu.regs.set_f('ft0', Float32(100))
-    cpu.regs.set_f('ft1', Float32(3))
+    cpu.regs.set_f("ft0", Float32(100))
+    cpu.regs.set_f("ft1", Float32(3))
     # instruction doing ft2 <- ft1 <op> ft2
 
     ins = MockInstruction("<noname>", ("ft2", "ft0", "ft1"), None, None)
 
     # div
     RV32F(cpu).base_fdiv(ins)
-    assert is_close(Float32.bitcast(cpu.regs.get_f('ft2')), (100.0/3))
+    assert is_close(Float32.bitcast(cpu.regs.get_f("ft2")), (100.0 / 3))
 
     # multiplication
     RV32F(cpu).base_fmul(ins)
-    assert is_close(Float32.bitcast(cpu.regs.get_f('ft2')), (100.0 * 3))
+    assert is_close(Float32.bitcast(cpu.regs.get_f("ft2")), (100.0 * 3))
 
     # fadd
     RV32F(cpu).base_fadd(ins)
-    assert is_close(Float32.bitcast(cpu.regs.get_f('ft2')), (100.0 + 3))
+    assert is_close(Float32.bitcast(cpu.regs.get_f("ft2")), (100.0 + 3))
 
     # fsub
     RV32F(cpu).base_fsub(ins)
-    assert is_close(Float32.bitcast(cpu.regs.get_f('ft2')), (100.0 - 3))
+    assert is_close(Float32.bitcast(cpu.regs.get_f("ft2")), (100.0 - 3))
 
     # fmin
     RV32F(cpu).base_fmin(ins)
-    assert is_close(Float32.bitcast(cpu.regs.get_f('ft2')), min(100.0, 3))
+    assert is_close(Float32.bitcast(cpu.regs.get_f("ft2")), min(100.0, 3))
 
     # fmax
     RV32F(cpu).base_fmax(ins)
-    assert is_close(Float32.bitcast(cpu.regs.get_f('ft2')), max(100.0, 3))
+    assert is_close(Float32.bitcast(cpu.regs.get_f("ft2")), max(100.0, 3))
