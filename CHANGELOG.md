@@ -1,15 +1,20 @@
 # Changelog
 
-# 2.2.2
+## 2.2.3
+
+ - Feature: Adding support for 64 bit floating point operations
+ - BugFix: Fix `__all__` to now properly work (use name strings instead of values)
+
+## 2.2.2
 
  - Dev: Add `__all__` to `riscemu.{core,instructions,decoder}` modules to make pyright in other projects happy
  - Perf: very minor fix related to not converting values twice when loaded from memory
 
-# 2.2.1
+## 2.2.1
 
 Version bump to re-trigger CI run.
 
-# 2.2.0
+## 2.2.0
 
  - Feature: Added Zicsr extension and with that support for CSRs
  - Feature: Starting to add support for Snitch architecture (Xssr)
