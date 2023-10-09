@@ -3,7 +3,7 @@ from typing import ClassVar, Generic, TypeVar, Tuple, Iterable, Callable
 from .instruction_set import InstructionSet, Instruction
 from riscemu.core import BaseFloat, CPU, INS_NOT_IMPLEMENTED, UInt32
 
-_FloatT = TypeVar('_FloatT', bound=BaseFloat)
+_FloatT = TypeVar("_FloatT", bound=BaseFloat)
 
 
 class FloatArithBase(Generic[_FloatT], InstructionSet):
@@ -11,8 +11,9 @@ class FloatArithBase(Generic[_FloatT], InstructionSet):
     _float_cls: ClassVar[type[BaseFloat]]
 
     def __init__(self, cpu: CPU):
-        assert cpu.regs.flen >= self.flen, "{} implies cpu flen of at least {}".format(self.__class__.__name__,
-                                                                                       self.flen)
+        assert cpu.regs.flen >= self.flen, "{} implies cpu flen of at least {}".format(
+            self.__class__.__name__, self.flen
+        )
         super().__init__(cpu)
 
     def base_fmadd(self, ins: Instruction):
@@ -339,29 +340,29 @@ class FloatArithBase(Generic[_FloatT], InstructionSet):
     def get_instructions(self) -> Iterable[Tuple[str, Callable[[Instruction], None]]]:
         yield from super().get_instructions()
 
-        qual = {32: 's', 64: 'd', 128: 'q'}.get(self.flen)
-        load_save_qual = {32: 'w', 64: 'd', 128: 'q'}.get(self.flen)
+        qual = {32: "s", 64: "d", 128: "q"}.get(self.flen)
+        load_save_qual = {32: "w", 64: "d", 128: "q"}.get(self.flen)
 
         yield from (
-            ('fmadd.' + qual, self.base_fmadd),
-            ('fmsub.' + qual, self.base_fmsub),
-            ('fnmsub.' + qual, self.base_fnmsub),
-            ('fnmadd.' + qual, self.base_fnmadd),
-            ('fadd.' + qual, self.base_fadd),
-            ('fsub.' + qual, self.base_fnmadd),
-            ('fmul.' + qual, self.base_fmul),
-            ('fdiv.' + qual, self.base_fdiv),
-            ('fsqrt.' + qual, self.base_fsqrt),
-            ('fsgnj.' + qual, self.base_fsgnj),
-            ('fsgnjn.' + qual, self.base_fsgnjn),
-            ('fsgnjx.' + qual, self.base_fsgnjx),
-            ('fmin.' + qual, self.base_fmin),
-            ('fmax.' + qual, self.base_fmax),
-            ('feq.' + qual, self.base_feq),
-            ('flt.' + qual, self.base_flt),
-            ('fle.' + qual, self.base_fle),
-            ('fl' + load_save_qual, self.base_load),
-            ('fs' + load_save_qual, self.base_save),
+            ("fmadd." + qual, self.base_fmadd),
+            ("fmsub." + qual, self.base_fmsub),
+            ("fnmsub." + qual, self.base_fnmsub),
+            ("fnmadd." + qual, self.base_fnmadd),
+            ("fadd." + qual, self.base_fadd),
+            ("fsub." + qual, self.base_fnmadd),
+            ("fmul." + qual, self.base_fmul),
+            ("fdiv." + qual, self.base_fdiv),
+            ("fsqrt." + qual, self.base_fsqrt),
+            ("fsgnj." + qual, self.base_fsgnj),
+            ("fsgnjn." + qual, self.base_fsgnjn),
+            ("fsgnjx." + qual, self.base_fsgnjx),
+            ("fmin." + qual, self.base_fmin),
+            ("fmax." + qual, self.base_fmax),
+            ("feq." + qual, self.base_feq),
+            ("flt." + qual, self.base_flt),
+            ("fle." + qual, self.base_fle),
+            ("fl" + load_save_qual, self.base_load),
+            ("fs" + load_save_qual, self.base_save),
         )
 
     def parse_rd_rs(self, ins: Instruction) -> Tuple[str, str]:
@@ -377,7 +378,7 @@ class FloatArithBase(Generic[_FloatT], InstructionSet):
         )
 
     def parse_rd_rs_rs_rs(
-            self, ins: Instruction
+        self, ins: Instruction
     ) -> Tuple[str, _FloatT, _FloatT, _FloatT]:
         assert len(ins.args) == 4
         return (

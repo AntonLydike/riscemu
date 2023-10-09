@@ -171,10 +171,14 @@ class BaseFloat(ABC):
         """
         if isinstance(f, cls):
             return f
-        return cls.from_bytes((b"\x00\x00\x00\x00\x00\x00\x00\x00" + f.bytes)[-struct.calcsize(cls._struct_fmt_str):])
+        return cls.from_bytes(
+            (b"\x00\x00\x00\x00\x00\x00\x00\x00" + f.bytes)[
+                -struct.calcsize(cls._struct_fmt_str) :
+            ]
+        )
 
     @classmethod
-    def flen_to_cls(cls, bits: int) -> type['BaseFloat']:
+    def flen_to_cls(cls, bits: int) -> type["BaseFloat"]:
         if bits == 32:
             return Float32
         if bits == 64:
@@ -182,18 +186,18 @@ class BaseFloat(ABC):
         raise ValueError(f"Unsupported flen: {bits}")
 
     def __format__(self, spec: str):
-        if spec[-2:] == '32':
+        if spec[-2:] == "32":
             return Float32.bitcast(self).__format__(spec[:-2])
-        if spec[-2:] == '64':
+        if spec[-2:] == "64":
             return Float64.bitcast(self).__format__(spec[:-2])
         return format(self.value, spec)
 
 
 class Float32(BaseFloat):
     _type = c_float
-    _struct_fmt_str = 'f'
+    _struct_fmt_str = "f"
 
 
 class Float64(BaseFloat):
     _type = c_double
-    _struct_fmt_str = 'd'
+    _struct_fmt_str = "d"

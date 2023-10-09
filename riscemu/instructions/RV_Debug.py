@@ -24,7 +24,11 @@ class RV_Debug(InstructionSet):
 
     def instruction_print_float_s(self, ins: Instruction):
         reg = ins.get_reg(0)
-        print("register {} contains value {}".format(reg, Float32.bitcast(self.regs.get_f(reg)).value))
+        print(
+            "register {} contains value {}".format(
+                reg, Float32.bitcast(self.regs.get_f(reg)).value
+            )
+        )
 
     def instruction_print_uint(self, ins: Instruction):
         reg = ins.get_reg(0)
