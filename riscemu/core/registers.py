@@ -5,7 +5,7 @@ SPDX-License-Identifier: MIT
 """
 
 from collections import defaultdict
-from typing import Union
+from typing import Union, Type
 
 from ..helpers import *
 
@@ -85,7 +85,7 @@ class Registers:
     }
 
     flen: int
-    _float_type: type[BaseFloat]
+    _float_type: Type[BaseFloat]
 
     def __init__(self, infinite_regs: bool = False, flen: int = 32):
         self.vals: dict[str, Int32] = defaultdict(UInt32)

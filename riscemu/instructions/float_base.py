@@ -1,4 +1,4 @@
-from typing import ClassVar, Generic, TypeVar, Tuple, Iterable, Callable
+from typing import ClassVar, Generic, TypeVar, Tuple, Iterable, Callable, Type
 
 from .instruction_set import InstructionSet, Instruction
 from riscemu.core import BaseFloat, CPU, INS_NOT_IMPLEMENTED, UInt32
@@ -8,7 +8,7 @@ _FloatT = TypeVar("_FloatT", bound=BaseFloat)
 
 class FloatArithBase(Generic[_FloatT], InstructionSet):
     flen: ClassVar[int]
-    _float_cls: ClassVar[type[BaseFloat]]
+    _float_cls: ClassVar[Type[BaseFloat]]
 
     def __init__(self, cpu: CPU):
         assert cpu.regs.flen >= self.flen, "{} implies cpu flen of at least {}".format(
