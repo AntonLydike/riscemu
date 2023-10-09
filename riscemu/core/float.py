@@ -37,7 +37,7 @@ class BaseFloat(ABC):
     ):
         if isinstance(val, (float, int)):
             self._val = self._type(val)
-        elif isinstance(val, c_float | c_double):
+        elif isinstance(val, (c_float, c_double)):
             self._val = self._type(val.value)
         elif isinstance(val, (bytes, bytearray)):
             self._val = self._type(struct.unpack("<" + self._struct_fmt_str, val)[0])
@@ -178,7 +178,7 @@ class BaseFloat(ABC):
         )
 
     @classmethod
-    def flen_to_cls(cls, bits: int) -> type["BaseFloat"]:
+    def flen_to_cls(cls, bits: int) -> Type["BaseFloat"]:
         if bits == 32:
             return Float32
         if bits == 64:
