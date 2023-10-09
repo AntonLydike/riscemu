@@ -1,8 +1,10 @@
+from typing import Union
+
 from riscemu.instructions.RV32F import RV32F
 from riscemu.core import CPU, Float32, Int32, SimpleInstruction, Registers, BaseFloat
 
 
-def is_close(a0: float | int | BaseFloat, a1: float | int | BaseFloat):
+def is_close(a0: Union[float, int, BaseFloat], a1: Union[float, int, BaseFloat]):
     """
     Compares if two numbers are close to 7 digits.
     This should be close enough to catch any real erros but ignore
