@@ -12,7 +12,7 @@ class BaseFloat(ABC):
     _type: ClassVar[Type[Union[c_float, c_double]]]
     _struct_fmt_str: ClassVar[str]
 
-    _val: c_float | c_double
+    _val: Union[c_float, c_double]
 
     @property
     def value(self) -> float:
