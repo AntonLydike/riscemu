@@ -61,7 +61,7 @@ class StreamingRegs(Registers):
             stream_def = StreamDef()
             self.dm_by_id.append(stream_def)
             self.streams[reg] = stream_def
-        super().__init__(infinite_regs)
+        super().__init__(infinite_regs, flen=32)
 
     def get_f(self, reg) -> "BaseFloat":
         if not self.enabled or reg not in self.streams:

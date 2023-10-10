@@ -16,12 +16,12 @@ from riscemu.riscemu_main import RiscemuMain
 class SnitchMain(RiscemuMain):
     def instantiate_cpu(self):
         self.cpu = FrepEnabledCpu(self.selected_ins_sets, self.cfg)
-        self.cpu.regs = StreamingRegs(self.cpu.mmu)
         self.configure_cpu()
 
     def register_all_isas(self):
         super().register_all_isas()
         self.available_ins_sets.update({"Xssr": Xssr_pseudo, "Xfrep": Xfrep})
+        self.available_ins_sets.pop("RV32D", None)
 
 
 if __name__ == "__main__":

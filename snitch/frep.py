@@ -3,9 +3,11 @@ from typing import List, Type, Union, Set, Literal
 from riscemu.colors import FMT_CPU, FMT_NONE
 from riscemu.config import RunConfig
 from riscemu.core import UserModeCPU
-from riscemu.instructions import InstructionSet, Instruction, RV32F
+from riscemu.instructions import InstructionSet, Instruction, RV32F, RV32D
 
 from dataclasses import dataclass
+
+from snitch.regs import StreamingRegs
 
 
 @dataclass(frozen=True)
@@ -20,11 +22,11 @@ class FrepEnabledCpu(UserModeCPU):
     allowed_ins: Set[str]
 
     def __init__(self, instruction_sets: List[Type["InstructionSet"]], conf: RunConfig):
+        super().__init__(instruction_sets, conf)
+        self.regs = StreamingRegs(self.mmu, infinite_regs=conf.unlimited_registers)
         self.repeats = None
         # only floating point instructions are allowed inside an frep!
         self.allowed_ins = set(x for x, y in RV32F(self).get_instructions())
-
-        super().__init__(instruction_sets, conf)
 
     def step(self, verbose: bool = False):
         if self.repeats is None:
