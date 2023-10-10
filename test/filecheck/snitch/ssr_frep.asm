@@ -71,3 +71,5 @@ fail:
     printf          "Assertion failure: {} != {} (at {})", ft0, ft1, a0
     li              a0, -1
     ret
+
+// CHECK: [CPU] Program exited with code 0
