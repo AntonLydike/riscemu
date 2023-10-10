@@ -5,7 +5,7 @@ SPDX-License-Identifier: MIT
 """
 
 from collections import defaultdict
-from typing import Union, Type
+from typing import Type
 
 from ..helpers import *
 
