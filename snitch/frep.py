@@ -1,4 +1,4 @@
-from typing import List, Type, Union, Set
+from typing import List, Type, Union, Set, Literal
 
 from riscemu.config import RunConfig
 from riscemu.core import UserModeCPU
@@ -11,9 +11,7 @@ from dataclasses import dataclass
 class FrepState:
     rep_count: int
     ins_count: int
-
-    stagger_max: int
-    stagger_mask: int
+    mode: Literal["inner", "outer"]
 
 
 class FrepEnabledCpu(UserModeCPU):
@@ -22,48 +20,51 @@ class FrepEnabledCpu(UserModeCPU):
 
     def __init__(self, instruction_sets: List[Type["InstructionSet"]], conf: RunConfig):
         self.repeats = None
-
+        # only floating point instructions are allowed inside an frep!
         self.allowed_ins = set(x for x, y in RV32F(self).get_instructions())
-        self.allowed_ins.union(set(x for x, y in Xfrep(self).get_instructions()))
 
         super().__init__(instruction_sets, conf)
 
-    def step(self, verbose: bool = False, depth: int = 0):
+    def step(self, verbose: bool = False):
         if self.repeats is None:
-            assert (
-                self.mmu.read_ins(self.pc).name in self.allowed_ins
-            ), "must be a float ins"
-            super().step(verbose=verbose)
-            return
-
-        if depth > 1:
-            raise RuntimeError("frep depth exceeded?")
-
+            super().step()
         # get the spec
         spec: FrepState = self.repeats
         self.repeats = None
 
+        instructions = [
+            self.mmu.read_ins(self.pc + i * self.INS_XLEN)
+            for i in range(spec.ins_count)
+        ]
+
         pc = self.pc
-        for _ in range(spec.rep_count + 1):
-            self.pc = pc
-            c0 = self.cycle
-            while self.cycle < c0 + spec.ins_count:
-                self.step(verbose=verbose, depth=depth + 1)
+        if spec.mode == "outer":
+            for _ in range(spec.rep_count + 1):
+                for ins in instructions:
+                    self.run_instruction(ins)
+        elif spec.mode == "inner":
+            for ins in instructions:
+                for _ in range(spec.rep_count + 1):
+                    self.run_instruction(ins)
+
+        self.pc = pc + (spec.ins_count * self.INS_XLEN)
 
 
 class Xfrep(InstructionSet):
     def instruction_frep_o(self, ins: Instruction):
-        self.frep(ins)
+        self.frep(ins, "outer")
 
     def instruction_frep_i(self, ins: Instruction):
-        self.frep(ins)
+        self.frep(ins, "inner")
 
-    def frep(self, ins: Instruction):
+    def frep(self, ins: Instruction, mode: Literal["inner", "outer"]):
         assert isinstance(self.cpu, FrepEnabledCpu)
         assert len(ins.args) == 4
+        assert ins.get_imm(2).abs_value.value == 0, "staggering not supported yet"
+        assert ins.get_imm(3).abs_value.value == 0, "staggering not supported yet"
+
         self.cpu.repeats = FrepState(
             rep_count=self.regs.get(ins.get_reg(0)).unsigned_value,
             ins_count=ins.get_imm(1).abs_value.value,
-            stagger_max=ins.get_imm(2).abs_value.value,
-            stagger_mask=ins.get_imm(3).abs_value.value,
+            mode=mode,
         )
