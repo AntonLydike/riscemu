@@ -9,7 +9,7 @@ from typing import Union, Type
 
 from ..helpers import *
 
-from . import Int32, BaseFloat, Float32, Float64
+from . import Int32, BaseFloat
 
 
 class Registers:
@@ -223,7 +223,7 @@ class Registers:
             raise RuntimeError("Invalid float register: {}".format(reg))
         return self.float_vals[reg]
 
-    def set_f(self, reg: str, val: Union[float, BaseFloat]):
+    def set_f(self, reg: str, val: BaseFloat):
         if not self.infinite_regs and reg not in self.float_regs:
             raise RuntimeError("Invalid float register: {}".format(reg))
         self.float_vals[reg] = self._float_type.bitcast(val)

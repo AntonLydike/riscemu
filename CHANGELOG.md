@@ -1,8 +1,7 @@
 # Changelog
 
-## Upcoming
+## 2.2.3
 
- - Feature: Added `Xfrep` extension for the snitch emulator getting us closer to full snitch emulation
  - Feature: Adding support for 64 bit floating point operations
  - BugFix: Fix `__all__` to now properly work (use name strings instead of values)
 

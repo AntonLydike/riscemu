@@ -12,6 +12,7 @@ from .instructions import InstructionSet, InstructionSetDict
 from .config import RunConfig
 from .helpers import FMT_GRAY, FMT_NONE
 from .parser import AssemblyFileLoader
+from .instructions.float_base import FloatArithBase
 
 
 @dataclass
@@ -193,7 +194,12 @@ class RiscemuMain:
             if selected
         )
 
-        # if use_libc is given, attach libc to path
+        # remove floating point isas if they do not meet the flen requirements
+        for isa in tuple(self.selected_ins_sets):
+            if issubclass(isa, FloatArithBase) and isa.flen > args.flen:
+                self.selected_ins_sets.remove(isa)
+
+        # if "use_libc" is given, attach libc to path
         if self.cfg.use_libc:
             self.add_libc_to_input_files()
 
