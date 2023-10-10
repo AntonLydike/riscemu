@@ -64,7 +64,7 @@ def launch_debug_session(cpu: "CPU", prompt=""):
 
     def step():
         try:
-            cpu.step()
+            cpu.step(verbose=True)
         except LaunchDebuggerException:
             return
 

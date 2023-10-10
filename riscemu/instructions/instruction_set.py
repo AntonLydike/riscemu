@@ -4,12 +4,12 @@ RiscEmu (c) 2021 Anton Lydike
 SPDX-License-Identifier: MIT
 """
 
-from typing import Tuple, Callable, Dict, Union
+from typing import Tuple, Callable, Dict, Union, Iterable
 
 from abc import ABC
 
 from ..core.exceptions import ASSERT_LEN
-from ..core import Instruction, Int32, UInt32, Immediate, CPU
+from ..core import Instruction, Int32, UInt32, Immediate, CPU, Registers
 
 
 class InstructionSet(ABC):
@@ -39,7 +39,7 @@ class InstructionSet(ABC):
         """
         return {name: ins for name, ins in self.get_instructions()}
 
-    def get_instructions(self):
+    def get_instructions(self) -> Iterable[Tuple[str, Callable[[Instruction], None]]]:
         """
         Returns a list of all valid instruction names included in this instruction set
 
@@ -128,7 +128,7 @@ class InstructionSet(ABC):
         return self.cpu.mmu
 
     @property
-    def regs(self):
+    def regs(self) -> Registers:
         return self.cpu.regs
 
     def __repr__(self):

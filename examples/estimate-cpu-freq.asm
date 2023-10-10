@@ -61,7 +61,7 @@ measure_loop:
     fcvt.s.w ft1, t0        // ft1 = 1k
     fdiv.s  ft2, ft2, ft1   // ft2 = kins/sec
 
-    printf  "executed {} instructions in {:.4f} seconds ({:.2f}ki/s)", s0, ft0, ft2
+    printf  "executed {} instructions in {:.4f32} seconds ({:.2f32}ki/s)", s0, ft0, ft2
     mv      ra, s4
     ret
 

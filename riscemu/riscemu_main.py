@@ -12,6 +12,7 @@ from .instructions import InstructionSet, InstructionSetDict
 from .config import RunConfig
 from .helpers import FMT_GRAY, FMT_NONE
 from .parser import AssemblyFileLoader
+from .instructions.float_base import FloatArithBase
 
 
 @dataclass
@@ -119,6 +120,14 @@ class RiscemuMain:
         )
 
         parser.add_argument(
+            "--flen",
+            type=int,
+            help="hardware FLEN, either 32 or 64. Defaults to 64",
+            nargs="?",
+            default=64,
+        )
+
+        parser.add_argument(
             "-v",
             "--verbose",
             help="Verbosity level (can be used multiple times)",
@@ -169,6 +178,9 @@ class RiscemuMain:
         if not hasattr(args, "ins"):
             setattr(args, "ins", {k: True for k in self.available_ins_sets})
 
+        if args.flen not in (32, 64):
+            raise ValueError("Cannot have flen other than 32 or 64!")
+
         # create RunConfig
         self.cfg = self.create_config(args)
 
@@ -182,7 +194,12 @@ class RiscemuMain:
             if selected
         )
 
-        # if use_libc is given, attach libc to path
+        # remove floating point isas if they do not meet the flen requirements
+        for isa in tuple(self.selected_ins_sets):
+            if issubclass(isa, FloatArithBase) and isa.flen > args.flen:
+                self.selected_ins_sets.remove(isa)
+
+        # if "use_libc" is given, attach libc to path
         if self.cfg.use_libc:
             self.add_libc_to_input_files()
 
@@ -214,6 +231,7 @@ class RiscemuMain:
             verbosity=args.verbose,
             use_libc=args.options["libc"],
             ignore_exit_code=args.options["ignore_exit_code"],
+            flen=args.flen,
         )
         for k, v in dict(cfg_dict).items():
             if v is None:

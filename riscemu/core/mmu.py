@@ -17,6 +17,7 @@ from . import (
     InstructionContext,
     Int32,
     Float32,
+    Float64,
     InvalidAllocationException,
     MemoryAccessException,
 )
@@ -214,6 +215,9 @@ class MMU:
 
     def read_float(self, addr: int) -> Float32:
         return Float32(self.read(addr, 4))
+
+    def read_double(self, addr: int) -> Float64:
+        return Float64(self.read(addr, 8))
 
     def translate_address(self, address: T_AbsoluteAddress) -> str:
         sec = self.get_sec_containing(address)
