@@ -1,4 +1,4 @@
-// RUN: python3 -m snitch %s -o libc | filecheck %s
+// RUN: python3 -m snitch %s -o libc -v | filecheck %s
 
 .data
 
@@ -30,40 +30,44 @@ main:
     ssr.enable
 
     // set up loop
-    li a0, 10
+    li              a0, 10
 loop:
-    fadd.s      ft2, ft0, ft1
+    fadd.s          ft2, ft0, ft1
 
-    addi a0, a0, -1
-    bne  a0, zero, loop
+    addi            a0, a0, -1
+    bne             a0, zero, loop
 
     // end of loop:
     ssr.disable
 
     // check values were written correctly:
-    la t0, vec0
-    la t1, vec1
-    li a0, 40
+    la              t0, vec0
+    la              t1, vec1
+    la              t2, dest
+    li              a0, 36
 loop2:
-    add     s0, t0, a0
-    add     s1, t1, a0
-    // load vec0 element
-    flw     ft0, 0(s0)
-    // load vec1 element
-    flw     ft1, 0(s1)
-    // assert ft1 - ft0 == ft0
-    fsub.s  ft2, ft1, ft0
-    feq.s   s0, ft2, ft0
-    beq     zero, s0, fail
+    add             s0, t0, a0
+    add             s1, t1, a0
+    add             s2, t2, a0
 
-    addi a0, a0, -4
-    bne  a0, zero, loop2
+    // load vec0, vec1 and dest elements
+    flw             ft0, 0(s0)
+    flw             ft1, 0(s1)
+    flw             ft2, 0(s2)
+
+    // assert ft2 == ft1 + ft2
+    fadd.s          ft3, ft1, ft0
+    feq.s           s0, ft2, ft3
+    beq             zero, s0, fail
+
+    addi            a0, a0, -4
+    bne             a0, zero, loop2
 
     ret
 
 fail:
-    printf "failed {} != {} (at {})", ft0, ft1, a0
-    li a0, -1
+    printf          "failed {} + {} != {} (at {})", ft0, ft1, ft2, a0
+    li              a0, -1
     ret
 
 // CHECK: [CPU] Program exited with code 0

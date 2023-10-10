@@ -63,9 +63,9 @@ class StreamingRegs(Registers):
             self.streams[reg] = stream_def
         super().__init__(infinite_regs)
 
-    def get_f(self, reg, mark_read=True) -> "BaseFloat":
+    def get_f(self, reg) -> "BaseFloat":
         if not self.enabled or reg not in self.streams:
-            return super().get_f(reg, mark_read)
+            return super().get_f(reg)
 
         # do the streaming stuff:
         stream = self.streams[reg]
@@ -79,9 +79,9 @@ class StreamingRegs(Registers):
         stream.pos += 1
         return val
 
-    def set_f(self, reg, val: "BaseFloat", mark_set=True) -> bool:
+    def set_f(self, reg, val: "BaseFloat") -> bool:
         if not self.enabled or reg not in self.streams:
-            return super().set_f(reg, mark_set)
+            return super().set_f(reg, val)
 
         stream = self.streams[reg]
         assert stream.mode is StreamMode.WRITE

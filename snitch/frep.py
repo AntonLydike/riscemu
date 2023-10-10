@@ -66,7 +66,7 @@ class FrepEnabledCpu(UserModeCPU):
                     self.run_instruction(ins)
         else:
             raise RuntimeError(f"Unknown frep mode: {spec.mode}")
-
+        self.cycle += (spec.rep_count + 1) * spec.ins_count
         self.pc = pc + (spec.ins_count * self.INS_XLEN)
 
 
