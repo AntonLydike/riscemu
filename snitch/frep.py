@@ -1,5 +1,6 @@
 from typing import List, Type, Union, Set, Literal
 
+from riscemu.colors import FMT_CPU, FMT_NONE
 from riscemu.config import RunConfig
 from riscemu.core import UserModeCPU
 from riscemu.instructions import InstructionSet, Instruction, RV32F
@@ -27,7 +28,8 @@ class FrepEnabledCpu(UserModeCPU):
 
     def step(self, verbose: bool = False):
         if self.repeats is None:
-            super().step()
+            super().step(verbose=verbose)
+            return
         # get the spec
         spec: FrepState = self.repeats
         self.repeats = None
@@ -36,6 +38,22 @@ class FrepEnabledCpu(UserModeCPU):
             self.mmu.read_ins(self.pc + i * self.INS_XLEN)
             for i in range(spec.ins_count)
         ]
+
+        if verbose:
+            print(
+                FMT_CPU
+                + "┌────── floating point repetition ({}) {} times".format(
+                    spec.mode, spec.rep_count + 1
+                )
+            )
+            for i, ins in enumerate(instructions):
+                print(
+                    FMT_CPU
+                    + "│  0x{:08X}:{} {}".format(
+                        self.pc + i * self.INS_XLEN, FMT_NONE, ins
+                    )
+                )
+            print(FMT_CPU + "└────── end of floating point repetition" + FMT_NONE)
 
         pc = self.pc
         if spec.mode == "outer":
@@ -46,6 +64,8 @@ class FrepEnabledCpu(UserModeCPU):
             for ins in instructions:
                 for _ in range(spec.rep_count + 1):
                     self.run_instruction(ins)
+        else:
+            raise RuntimeError(f"Unknown frep mode: {spec.mode}")
 
         self.pc = pc + (spec.ins_count * self.INS_XLEN)
 

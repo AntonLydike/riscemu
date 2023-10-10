@@ -76,9 +76,6 @@ class StreamingRegs(Registers):
         addr = stream.base + (stream.pos * stream.stride)
         val = self.mem.read_float(addr)
         # increment pos
-        print(
-            "stream: got val {} from addr 0x{:x}, stream {}".format(val, addr, stream)
-        )
         stream.pos += 1
         return val
 
@@ -92,8 +89,5 @@ class StreamingRegs(Registers):
         addr = stream.base + (stream.pos * stream.stride)
         self.mem.write(addr, 4, bytearray(val.bytes))
 
-        print(
-            "stream: wrote val {} into addr 0x{:x}, stream {}".format(val, addr, stream)
-        )
         stream.pos += 1
         return True

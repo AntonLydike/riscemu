@@ -64,9 +64,7 @@ class UserModeCPU(CPU):
             self.cycle += 1
             ins = self.mmu.read_ins(self.pc)
             if verbose:
-                print(
-                    FMT_CPU + "   Running 0x{:08X}:{} {}".format(self.pc, FMT_NONE, ins)
-                )
+                print(FMT_CPU + "   0x{:08X}:{} {}".format(self.pc, FMT_NONE, ins))
             self.pc += self.INS_XLEN
             self.run_instruction(ins)
         except RiscemuBaseException as ex:

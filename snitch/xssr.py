@@ -3,7 +3,7 @@ from riscemu.instructions.instruction_set import InstructionSet, Instruction
 from .regs import StreamingRegs, StreamDef, StreamMode
 
 
-class RV32_Xssr_pseudo(InstructionSet):
+class Xssr_pseudo(InstructionSet):
     def instruction_ssr_enable(self, ins: Instruction):
         self._stream.enabled = True
 
