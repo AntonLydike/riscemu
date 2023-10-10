@@ -14,6 +14,16 @@ def test_float_regs():
     assert r.get_f("fs0") == val
 
 
+def test_float_regs_flen64():
+    r = Registers(flen=64)
+    # uninitialized register is zero
+    assert r.get_f("fs0") == 0
+    # get/set
+    val = Float32(3.14)
+    r.set_f("fs0", val)
+    assert Float32.bitcast(r.get_f("fs0")) == val
+
+
 def test_unlimited_regs_works():
     r = Registers(infinite_regs=True)
     r.get("infinite")
