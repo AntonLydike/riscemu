@@ -52,6 +52,7 @@ class StreamingRegs(Registers):
         mem: MMU,
         xssr_regs: Tuple[str] = ("ft0", "ft1", "ft2"),
         infinite_regs: bool = False,
+        flen: int = 64,
     ):
         self.mem = mem
         self.enabled = False
@@ -61,11 +62,11 @@ class StreamingRegs(Registers):
             stream_def = StreamDef()
             self.dm_by_id.append(stream_def)
             self.streams[reg] = stream_def
-        super().__init__(infinite_regs)
+        super().__init__(infinite_regs=infinite_regs, flen=flen)
 
-    def get_f(self, reg, mark_read=True) -> "BaseFloat":
+    def get_f(self, reg) -> "BaseFloat":
         if not self.enabled or reg not in self.streams:
-            return super().get_f(reg, mark_read)
+            return super().get_f(reg)
 
         # do the streaming stuff:
         stream = self.streams[reg]
@@ -74,26 +75,21 @@ class StreamingRegs(Registers):
         # TODO: Check overflow
         # TODO: repetition
         addr = stream.base + (stream.pos * stream.stride)
-        val = self.mem.read_float(addr)
+        val = self._float_type(self.mem.read(addr, self.flen // 8))
         # increment pos
-        print(
-            "stream: got val {} from addr 0x{:x}, stream {}".format(val, addr, stream)
-        )
         stream.pos += 1
         return val
 
-    def set_f(self, reg, val: "BaseFloat", mark_set=True) -> bool:
+    def set_f(self, reg, val: "BaseFloat") -> bool:
         if not self.enabled or reg not in self.streams:
-            return super().set_f(reg, mark_set)
+            return super().set_f(reg, val)
 
         stream = self.streams[reg]
         assert stream.mode is StreamMode.WRITE
 
         addr = stream.base + (stream.pos * stream.stride)
-        self.mem.write(addr, 4, bytearray(val.bytes))
+        data = val.bytes
+        self.mem.write(addr + (self.flen // 8) - len(data), len(data), bytearray(data))
 
-        print(
-            "stream: wrote val {} into addr 0x{:x}, stream {}".format(val, addr, stream)
-        )
         stream.pos += 1
         return True
