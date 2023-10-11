@@ -52,6 +52,7 @@ class StreamingRegs(Registers):
         mem: MMU,
         xssr_regs: Tuple[str] = ("ft0", "ft1", "ft2"),
         infinite_regs: bool = False,
+        flen: int = 64,
     ):
         self.mem = mem
         self.enabled = False
@@ -61,7 +62,7 @@ class StreamingRegs(Registers):
             stream_def = StreamDef()
             self.dm_by_id.append(stream_def)
             self.streams[reg] = stream_def
-        super().__init__(infinite_regs, flen=32)
+        super().__init__(infinite_regs=infinite_regs, flen=flen)
 
     def get_f(self, reg) -> "BaseFloat":
         if not self.enabled or reg not in self.streams:
@@ -74,7 +75,7 @@ class StreamingRegs(Registers):
         # TODO: Check overflow
         # TODO: repetition
         addr = stream.base + (stream.pos * stream.stride)
-        val = self.mem.read_float(addr)
+        val = self._float_type(self.mem.read(addr, self.flen // 8))
         # increment pos
         stream.pos += 1
         return val
@@ -87,7 +88,8 @@ class StreamingRegs(Registers):
         assert stream.mode is StreamMode.WRITE
 
         addr = stream.base + (stream.pos * stream.stride)
-        self.mem.write(addr, 4, bytearray(val.bytes))
+        data = val.bytes
+        self.mem.write(addr + (self.flen // 8) - len(data), len(data), bytearray(data))
 
         stream.pos += 1
         return True

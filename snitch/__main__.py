@@ -7,7 +7,6 @@ This file holds the logic for starting the emulator from the CLI
 """
 import sys
 
-from .regs import StreamingRegs
 from .xssr import Xssr_pseudo
 from .frep import FrepEnabledCpu, Xfrep
 from riscemu.riscemu_main import RiscemuMain
@@ -21,7 +20,6 @@ class SnitchMain(RiscemuMain):
     def register_all_isas(self):
         super().register_all_isas()
         self.available_ins_sets.update({"Xssr": Xssr_pseudo, "Xfrep": Xfrep})
-        self.available_ins_sets.pop("RV32D", None)
 
 
 if __name__ == "__main__":

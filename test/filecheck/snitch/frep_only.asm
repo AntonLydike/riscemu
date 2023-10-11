@@ -1,4 +1,4 @@
-// RUN: python3 -m snitch %s -o libc -v | filecheck %s
+// RUN: python3 -m snitch %s -o libc -v| filecheck %s
 
 .text
 .globl main
