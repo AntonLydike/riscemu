@@ -1,6 +1,6 @@
 # Changelog
 
-## Upcoming
+## 2.2.4
 
  - BugFix: Found and added some missing floating point registers (`ft8` to `ft11`)
  - Feature: Add frep support to the snitch emulation
