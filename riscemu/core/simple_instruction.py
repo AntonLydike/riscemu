@@ -41,7 +41,10 @@ class SimpleInstruction(Instruction):
             value = self.context.resolve_label(token)
 
         # TODO: make it raise a nice error instead
-        assert value is not None
+        if value is None:
+            raise NumberFormatException(
+                "{} is neither a number now a known symbol!".format(token)
+            )
         return Immediate(abs_value=value, pcrel_value=value - self.addr)
 
     def get_reg(self, num: int) -> str:

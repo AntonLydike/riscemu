@@ -1,21 +1,21 @@
 from enum import Enum, auto
-from typing import List
-from typing import Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
-from .colors import FMT_PARSE, FMT_NONE
-from riscemu.core.exceptions import ParseException, ASSERT_LEN
-from .helpers import parse_numeric_argument, align_addr, get_section_base_name
-from .tokenizer import Token
+from riscemu.core.exceptions import ASSERT_LEN, ParseException
+
+from .colors import FMT_NONE, FMT_PARSE
 from .core import (
-    Program,
-    T_RelativeAddress,
-    InstructionContext,
-    Instruction,
     BinaryDataMemorySection,
+    Instruction,
+    InstructionContext,
     InstructionMemorySection,
     Int32,
+    Program,
     SimpleInstruction,
+    T_RelativeAddress,
 )
+from .helpers import align_addr, get_section_base_name, parse_numeric_argument
+from .tokenizer import Token
 
 INSTRUCTION_SECTION_NAMES = (".text", ".init", ".fini")
 """
@@ -168,11 +168,6 @@ class AssemblerDirectives:
             return
         num_bytes_fill = align_to - current_mod
         # fill in with nops:
-        print(
-            "p2align from {} to {}, filling {}".format(
-                context.current_address(), align_to, num_bytes_fill
-            )
-        )
         NOP_SIZE = 4
         for i in range(num_bytes_fill // NOP_SIZE):
             context.section.data.append(
