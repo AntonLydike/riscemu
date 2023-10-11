@@ -41,6 +41,13 @@ class FrepEnabledCpu(UserModeCPU):
             for i in range(spec.ins_count)
         ]
 
+        for ins in instructions:
+            if ins.name not in self.allowed_ins:
+                # TODO: wrap in a nicer error type
+                raise RuntimeError(
+                    "Forbidden instruction inside frep loop: {}".format(ins)
+                )
+
         if verbose:
             print(
                 FMT_CPU
