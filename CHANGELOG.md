@@ -3,6 +3,8 @@
 ## Upcoming
 
  - BugFix: Found and added some missing floating point registers (`ft8` to `ft11`)
+ - Feature: Add frep support to the snitch emulation
+ - Feature: Add support for 64-bit floats to the snitch Xssr emulation
 
 ## 2.2.3
 
