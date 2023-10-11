@@ -3,6 +3,7 @@
 ## 2.2.3
 
  - Feature: Adding support for 64 bit floating point operations
+ - BugFix: Fix a bug where `-o libc` would fail with packaged versions of riscemu
  - BugFix: Fix `__all__` to now properly work (use name strings instead of values)
 
 ## 2.2.2
