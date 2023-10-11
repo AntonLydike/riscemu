@@ -5,11 +5,11 @@ SPDX-License-Identifier: MIT
 """
 
 from collections import defaultdict
-from typing import Union, Type
+from typing import Type
 
 from ..helpers import *
 
-from . import Int32, BaseFloat, Float32, Float64
+from . import Int32, BaseFloat
 
 
 class Registers:
@@ -222,14 +222,12 @@ class Registers:
             self.last_read = reg
         return self.vals[reg]
 
-    def get_f(self, reg: str, mark_read: bool = True) -> BaseFloat:
+    def get_f(self, reg: str) -> BaseFloat:
         if not self.infinite_regs and reg not in self.float_regs:
             raise RuntimeError("Invalid float register: {}".format(reg))
-        if mark_read:
-            self.last_read = reg
         return self.float_vals[reg]
 
-    def set_f(self, reg: str, val: Union[float, BaseFloat]):
+    def set_f(self, reg: str, val: BaseFloat):
         if not self.infinite_regs and reg not in self.float_regs:
             raise RuntimeError("Invalid float register: {}".format(reg))
         self.float_vals[reg] = self._float_type.bitcast(val)
