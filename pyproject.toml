@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "riscemu"
-version = "2.2.2"
+version = "2.2.3"
 description = "A basic RISC-V emulator"
 authors = ["Anton Lydike <me@antonlydike.de>"]
 license = "MIT"
@@ -8,10 +8,6 @@ readme = "README.md"
 homepage = "https://github.com/antonlydike/riscemu"
 repository = "https://github.com/antonlydike/riscemu"
 keywords = ["RISC-V"]
-# include libc in build:
-include = [
-    "libc/"
-]
 # classifiers
 classifiers = [
         "Programming Language :: Python :: 3",
@@ -27,7 +23,8 @@ riscemu = "riscemu.__main__:main"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-pyelftools = "^0.29"
+pyelftools = "^0.30"
+importlib-resources = "^6.1.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.7.0"

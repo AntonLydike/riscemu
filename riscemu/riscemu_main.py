@@ -1,10 +1,9 @@
 import argparse
-import glob
-import os
 import sys
 from dataclasses import dataclass
 from io import IOBase, RawIOBase, TextIOBase
 from typing import Type, Dict, List, Optional, Union
+import importlib_resources
 
 from . import __version__, __copyright__
 from .core import CPU, ProgramLoader, Program, UserModeCPU
@@ -207,15 +206,10 @@ class RiscemuMain:
         """
         This adds the provided riscemu libc to the programs runtime.
         """
-        libc_path = os.path.join(
-            os.path.dirname(__file__),
-            "..",
-            "libc",
-            "*.s",
-        )
-        for path in glob.iglob(libc_path):
-            if path not in self.input_files:
-                self.input_files.append(RiscemuSource(path, open(path, "r")))
+        for file in importlib_resources.files("riscemu.libc").iterdir():
+            if file.name.lower().endswith(".s"):
+                source = RiscemuSource(file.name, file.open("r"))
+                self.input_files.append(source)
 
     def create_config(self, args: argparse.Namespace) -> RunConfig:
         # create a RunConfig from the cli args
