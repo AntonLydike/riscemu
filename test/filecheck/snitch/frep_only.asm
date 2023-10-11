@@ -1,4 +1,4 @@
-// RUN: python3 -m snitch %s -o libc -v| filecheck %s
+// RUN: python3 -m snitch %s -o libc -v | filecheck %s
 
 .text
 .globl main
@@ -15,7 +15,7 @@ main:
         fadd.s      ft0, ft0, ft1   // add one
 
         // print result to stdout
-        printf      "100 * 1 = {}", ft0
+        printf      "100 * 1 = {:f32}", ft0
 // CHECK: 100 * 1 = 100.0
         // return 0
         li          a0, 0
