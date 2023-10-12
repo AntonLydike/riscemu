@@ -187,7 +187,7 @@ def INS_NOT_IMPLEMENTED(ins):
 
 class NumberFormatException(RiscemuBaseException):
     def __init__(self, msg):
-        super().__init__()
+        super().__init__(msg)
         self.msg = msg
 
     def message(self):

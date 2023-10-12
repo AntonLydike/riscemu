@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.5
+
+ - BugFix: Fix missed import in core.simple_instruction
+
 ## 2.2.4
 
  - BugFix: Found and added some missing floating point registers (`ft8` to `ft11`)
