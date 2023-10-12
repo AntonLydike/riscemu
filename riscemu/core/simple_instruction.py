@@ -2,7 +2,13 @@ import re
 from typing import Union, Tuple
 from functools import lru_cache
 
-from . import Instruction, T_RelativeAddress, InstructionContext, Immediate
+from . import (
+    Instruction,
+    T_RelativeAddress,
+    InstructionContext,
+    Immediate,
+    NumberFormatException,
+)
 from ..helpers import parse_numeric_argument
 
 _NUM_LABEL_RE = re.compile(r"[0-9][fb]")
@@ -32,7 +38,7 @@ class SimpleInstruction(Instruction):
 
         if _INT_IMM_RE.fullmatch(token):
             value = parse_numeric_argument(token)
-            return Immediate(abs_value=value, pcrel_value=value + self.addr)
+            return Immediate(abs_value=value, pcrel_value=value - self.addr)
 
         # resolve label correctly
         if _NUM_LABEL_RE.fullmatch(token):
@@ -43,7 +49,7 @@ class SimpleInstruction(Instruction):
         # TODO: make it raise a nice error instead
         if value is None:
             raise NumberFormatException(
-                "{} is neither a number now a known symbol!".format(token)
+                "{} is neither a number now a known symbol".format(token)
             )
         return Immediate(abs_value=value, pcrel_value=value - self.addr)
 
