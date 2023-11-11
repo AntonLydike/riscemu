@@ -18,6 +18,7 @@ from .core import (
     SimpleInstruction,
     ParseException,
 )
+from .regs import REG_NAME_CANONICALIZER
 
 
 def parse_instruction(token: Token, args: Tuple[str], context: ParseContext):
@@ -28,7 +29,7 @@ def parse_instruction(token: Token, args: Tuple[str], context: ParseContext):
             "{} {} encountered in invalid context: {}".format(token, args, context)
         )
     ins = SimpleInstruction(
-        token.value, args, context.context, context.current_address()
+        token.value, parse_instruction_arguments(args), context.context, context.current_address()
     )
     context.section.data.append(ins)
 
@@ -110,6 +111,28 @@ def take_arguments(tokens: Peekable[Token]) -> Iterable[str]:
             break
 
         # raise ParseException("Expected newline, instead got {}".format(tokens.peek()))
+
+
+def parse_instruction_arguments(args: Tuple[str]) -> Tuple[str]:
+    """
+    Parses argument Tuples of instructions. In this process canonicalize register names
+    :param args: A tuple of an instructions arguments
+    :return: A tuple of an instructions parsed arguments
+    """
+    return tuple(canonicalize_register_names(args))
+
+
+def canonicalize_register_names(args: Tuple[str]) -> Iterable[str]:
+    """
+    Canonicalizes register names.
+    :param args: A tuple of an instructions arguments
+    :return: An iterator over the arguments of an instruction, but with canonicalized register names
+    """
+    for arg in args:
+        if arg in REG_NAME_CANONICALIZER.keys():
+            yield REG_NAME_CANONICALIZER[arg]
+        else:
+            yield arg
 
 
 class AssemblyFileLoader(ProgramLoader):
