@@ -124,15 +124,17 @@ def parse_instruction_arguments(args: Tuple[str]) -> Tuple[str]:
 
 def canonicalize_register_names(args: Tuple[str]) -> Iterable[str]:
     """
-    Canonicalizes register names.
+    Translate register indices names to ABI names. Leaves other arguments unchanged.
+    Examples:
+    "x0" -> "zero"
+    "x5" -> "t0"
+    "x8" -> "s0"
+    "fp" -> "s0"
     :param args: A tuple of an instructions arguments
     :return: An iterator over the arguments of an instruction, but with canonicalized register names
     """
     for arg in args:
-        if arg in REG_NAME_CANONICALIZER.keys():
-            yield REG_NAME_CANONICALIZER[arg]
-        else:
-            yield arg
+        yield REG_NAME_CANONICALIZER.get(arg, arg)
 
 
 class AssemblyFileLoader(ProgramLoader):
