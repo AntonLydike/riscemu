@@ -1,4 +1,6 @@
 REG_NAME_CANONICALIZER = {
+    "fp":   "s0",
+    
     "x0":   "zero",
     "x1":   "ra",
     "x2":   "sp",
