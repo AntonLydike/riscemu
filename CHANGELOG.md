@@ -1,5 +1,9 @@
 # Changelog
 
+## Upcoming:
+
+ - Feature: Canonicalize register names when parsing, converting e.g. `x0 -> zero` or `fp -> s0`.
+
 ## 2.2.5
 
  - BugFix: Fix missed import in core.simple_instruction

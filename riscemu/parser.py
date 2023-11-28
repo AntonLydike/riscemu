@@ -29,7 +29,10 @@ def parse_instruction(token: Token, args: Tuple[str], context: ParseContext):
             "{} {} encountered in invalid context: {}".format(token, args, context)
         )
     ins = SimpleInstruction(
-        token.value, parse_instruction_arguments(args), context.context, context.current_address()
+        token.value,
+        parse_instruction_arguments(args),
+        context.context,
+        context.current_address(),
     )
     context.section.data.append(ins)
 

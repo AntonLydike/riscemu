@@ -12,4 +12,4 @@ msg:    .ascii "Hello world\n"
         scall
 
 // CHECK: Hello world
-// CHECK: [CPU] Program exited with code 
+// CHECK: [CPU] Program exited with code 0
