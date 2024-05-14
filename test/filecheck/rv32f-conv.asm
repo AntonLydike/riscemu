@@ -34,14 +34,14 @@ main:
     fcvt.s.w fa0, a1
     fmv.x.w a1, fa0
     print a1
-// CHECK-NEXT: register a1 contains value 3221225472
+// CHECK-NEXT: register a1 contains value -1073741824
 
     // test fmv.w.x
     li a1, 1073741824
     fmv.w.x fa0, a1
     print.float.s fa0
 // CHECK-NEXT: register fa0 contains value 2.0
-    li a1, 3221225472
+    li a1, -1073741824
     fmv.w.x fa0, a1
     print.float.s fa0
 // CHECK-NEXT: register fa0 contains value -2.0

@@ -200,7 +200,7 @@ class Registers:
         if not self.infinite_regs and reg not in self.valid_regs:
             raise RuntimeError("Invalid register: {}".format(reg))
 
-        self.vals[reg] = val.unsigned()
+        self.vals[reg] = val.signed()
         return True
 
     def get(self, reg: str, mark_read: bool = True) -> Int32:
