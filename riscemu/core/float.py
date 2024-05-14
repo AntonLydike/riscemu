@@ -188,7 +188,7 @@ class BaseFloat(ABC):
             return Float32.bitcast(self).__format__(spec[:-2])
         if spec[-2:] == "64":
             return Float64.bitcast(self).__format__(spec[:-2])
-        return f
+        return format(self.value, spec)
 
     def __int__(self):
         warnings.warn(
