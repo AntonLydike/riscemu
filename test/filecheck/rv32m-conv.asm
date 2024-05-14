@@ -11,7 +11,7 @@ main:
 // CHECK: register a0 contains value 0
     li a2, 2
     mulh a0, a1, a2
-    print.hex a0
+    print.uhex a0
 // CHECK-NEXT: register a0 contains value 0xffffffff
 
     // test mulhu
@@ -20,12 +20,12 @@ main:
 // CHECK: register a0 contains value 1
 
     mulhu a0, a1, a1
-    print.hex a0
+    print.uhex a0
 // CHECK-NEXT: register a0 contains value 0xfffffffe
 
     // test mulhsu
     mulhsu a0, a1, a2
-    print.hex a0
+    print.uhex a0
 // CHECK: register a0 contains value 0xffffffff
 
     mulhsu a0, a2, a1
