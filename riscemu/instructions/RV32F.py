@@ -35,7 +35,7 @@ class RV32F(FloatArithBase[Float32]):
         | x[rd] = sext(s32_{f32}(f[rs1]))
         """
         rd, rs = self.parse_rd_rs(ins)
-        self.regs.set(rd, Int32(int(self.regs.get_f(rs).value)))
+        self.regs.set(rd, Int32.from_float(self.regs.get_f(rs).value))
 
     def instruction_fcvt_wu_s(self, ins: Instruction):
         """
@@ -55,7 +55,7 @@ class RV32F(FloatArithBase[Float32]):
         | x[rd] = sext(u32_{f32}(f[rs1]))
         """
         rd, rs = self.parse_rd_rs(ins)
-        self.regs.set(rd, UInt32(int(self.regs.get_f(rs).value)))
+        self.regs.set(rd, UInt32.from_float((self.regs.get_f(rs).value)))
 
     def instruction_fmv_x_w(self, ins: Instruction):
         """
