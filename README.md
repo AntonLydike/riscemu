@@ -102,3 +102,19 @@ generate and make all doc files for you. Finally, you can open the docs locall b
  * Add a cycle limit to the options and CPU to catch infinite loops
  * Move away from `print` and use `logging.logger` instead
  * Writer proper tests
+
+
+## How To Release:
+
+Create a new commit that:
+1. Changes the "Upcoming" heading to the new versions number
+2. Increments the version in the pyproject.toml to the next version
+
+Commit this, and tag it with `v<version>`. Push the commit and the tag:
+```bash
+git push
+git push origin "v<version>"
+```
+
+On GitHub, [draft a new release](https://github.com/AntonLydike/riscemu/releases/new), and
+then approve the workflow run [here](https://github.com/AntonLydike/riscemu/actions).
