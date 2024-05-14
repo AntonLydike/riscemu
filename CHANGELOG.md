@@ -5,6 +5,9 @@
  - Feature: Canonicalize register names when parsing, converting e.g. `x0 -> zero` or `fp -> s0`.
  - Feature: Added support for `fcvt.d.w[u]` and `fcvt.w[u].d` instructions
  - BugFix: Fixed that registers were treated as UInt32s instead of Int32 (this may have caused subtle bugs before)
+ - Feature: Added the remainder of the `M` extension
+ - BugFix: Fixed a bug in the overflow behavior of `mulh`
+ - BugFix: Fix faulty length assertion in `jalr`
 
 ## 2.2.5
 
