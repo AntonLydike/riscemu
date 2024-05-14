@@ -310,4 +310,5 @@ class UInt32(Int32):
         return UInt32(self.value >> amount)
 
     def signed(self) -> "Int32":
-        return Int32(self)
+        # Overflow is handled natively by the underlying c_uint32 to c_int32 conversion!
+        return Int32(self._val)
