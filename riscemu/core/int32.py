@@ -1,4 +1,6 @@
-from typing import Any, Union
+import math
+
+from typing import Any, Union, ClassVar
 from ctypes import c_int32, c_uint32
 
 
@@ -14,6 +16,9 @@ class Int32:
 
     _type = c_int32
     __slots__ = ("_val",)
+
+    MIN_VALUE: ClassVar[int] = -(2**31)
+    MAX_VALUE: ClassVar[int] = 2**31 - 1
 
     def __init__(
         self, val: Union[int, c_int32, c_uint32, "Int32", bytes, bytearray, bool] = 0
@@ -205,9 +210,7 @@ class Int32:
         Convert to a signed representation. See :class:Int32
         :return:
         """
-        if self.__class__ == Int32:
-            return self
-        return Int32(self)
+        return self
 
     @property
     def unsigned_value(self):
@@ -255,6 +258,24 @@ class Int32:
             data = (data & (2 ** (bits - 1) - 1)) - 2 ** (bits - 1)
         return cls(data)
 
+    @classmethod
+    def from_float(cls, number: float) -> "Int32":
+        """
+        Convert a floating point number to an instance of Int32, handling overflows and NaN according to RISC-V spec.
+
+        - Valid values and infinities are clamped between MIN_VALUE and MAX_VALUE
+        - NaN is treated as -inf
+        """
+        if math.isnan(number):
+            number = cls.MIN_VALUE
+        elif number > cls.MAX_VALUE:
+            number = cls.MAX_VALUE
+        elif number < cls.MIN_VALUE:
+            number = cls.MIN_VALUE
+        else:
+            number = int(number)
+        return cls(number)
+
 
 class UInt32(Int32):
     """
@@ -262,6 +283,9 @@ class UInt32(Int32):
     """
 
     _type = c_uint32
+
+    MIN_VALUE: ClassVar[int] = 0
+    MAX_VALUE: ClassVar[int] = 2**32 - 1
 
     def unsigned(self) -> "UInt32":
         """
@@ -284,3 +308,7 @@ class UInt32(Int32):
         if isinstance(amount, Int32):
             amount = amount.value
         return UInt32(self.value >> amount)
+
+    def signed(self) -> "Int32":
+        # Overflow is handled natively by the underlying c_uint32 to c_int32 conversion!
+        return Int32(self._val)

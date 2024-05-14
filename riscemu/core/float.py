@@ -1,4 +1,5 @@
 import struct
+import warnings
 from ctypes import c_float, c_double
 from typing import Union, Any, ClassVar, Type
 from abc import ABC
@@ -130,9 +131,6 @@ class BaseFloat(ABC):
     def __bool__(self):
         return bool(self.value)
 
-    def __int__(self):
-        return int(self.value)
-
     def __float__(self):
         return self.value
 
@@ -191,6 +189,13 @@ class BaseFloat(ABC):
         if spec[-2:] == "64":
             return Float64.bitcast(self).__format__(spec[:-2])
         return format(self.value, spec)
+
+    def __int__(self):
+        warnings.warn(
+            "Float32.__int__ is deprecated due its inability to handle infities and NaNs correctly! Use {Int32,UInt32).from_float instead!",
+            DeprecationWarning,
+        )
+        return int(self.value)
 
 
 class Float32(BaseFloat):
