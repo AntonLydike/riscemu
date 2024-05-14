@@ -95,7 +95,7 @@ class RV32F(FloatArithBase[Float32]):
         | f[rd] = f32_{s32}(x[rs1])
         """
         rd, rs = self.parse_rd_rs(ins)
-        self.regs.set_f(rd, Float32(self.regs.get(rs).signed().value))
+        self.regs.set_f(rd, Float32(self.regs.get(rs).value))
 
     def instruction_fcvt_s_wu(self, ins: Instruction):
         """
