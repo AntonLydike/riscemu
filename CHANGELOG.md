@@ -1,5 +1,12 @@
 # Changelog
 
+## Upcoming
+
+- BugFix: Fix `malloc` implementation from being just wrong to being right (I think?)
+- BugFix: Fix `MMU.translate_address` to actually return the best match (wow!)
+- Feature: The instruction trace now contains register and symbol values starting at verbosity level 3
+- BugFix: RVDebug got better at finding out if a float or int register was meant
+
 ## 2.2.6
 
  - Feature: Canonicalize register names when parsing, converting e.g. `x0 -> zero` or `fp -> s0`.

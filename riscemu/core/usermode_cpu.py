@@ -10,7 +10,7 @@ import typing
 from typing import List, Type
 
 from ..config import RunConfig
-from ..colors import FMT_CPU, FMT_NONE, FMT_ERROR
+from ..colors import FMT_CPU, FMT_NONE, FMT_ERROR, FMT_GRAY, FMT_CYAN
 from ..debug import launch_debug_session
 from ..syscall import SyscallInterface, get_syscall_symbols
 from . import (
@@ -21,6 +21,8 @@ from . import (
     RiscemuBaseException,
     LaunchDebuggerException,
     PrivModes,
+    Instruction,
+    SimpleInstruction,
 )
 
 if typing.TYPE_CHECKING:
@@ -64,7 +66,11 @@ class UserModeCPU(CPU):
             self.cycle += 1
             ins = self.mmu.read_ins(self.pc)
             if verbose:
-                print(FMT_CPU + "   0x{:08X}:{} {}".format(self.pc, FMT_NONE, ins))
+                if self.conf.verbosity > 2:
+                    ins_str = self._format_ins(ins)
+                else:
+                    ins_str = str(ins)
+                print(FMT_CPU + "   0x{:08X}:{} {}".format(self.pc, FMT_NONE, ins_str))
             self.pc += self.INS_XLEN
             self.run_instruction(ins)
         except RiscemuBaseException as ex:
@@ -125,3 +131,22 @@ class UserModeCPU(CPU):
             )
 
         return True
+
+    def _format_arg(self, arg: str, ins: Instruction) -> str:
+        if arg in self.regs.vals or arg in self.regs.valid_regs:
+            return "{}{}=0x{:x}{}".format(
+                arg, FMT_GRAY, self.regs.get(arg, False), FMT_NONE
+            )
+        elif arg in self.regs.float_vals or arg in self.regs.float_regs:
+            return "{}{}={}{}".format(arg, FMT_GRAY, self.regs.get_f(arg), FMT_NONE)
+        elif isinstance(ins, SimpleInstruction):
+            val = ins.context.resolve_label(arg)
+            if val is None:
+                val = ins.context.resolve_numerical_label(arg, ins.addr)
+            if val is None:
+                return FMT_CYAN + arg + FMT_NONE
+            return "{}{}=0x{:x}{}".format(arg, FMT_GRAY, val, FMT_NONE)
+
+    def _format_ins(self, ins: Instruction) -> str:
+        args = ", ".join(self._format_arg(arg, ins) for arg in ins.args)
+        return "{}\t{}".format(ins.name, args)

@@ -33,7 +33,7 @@ _malloc_base_ptr:
 malloc:
         // set aside size in s0
         sw  s0, -4(sp)
-        mv  a0, s0
+        mv  s0, a0
         la  t0, _malloc_base_ptr
         lw  t1, 0(t0)
         beq t1, zero, _malloc_init
@@ -41,7 +41,7 @@ _malloc_post_init:
         // if we are here, we always have
         // t0 = (&_malloc_base_ptr)
         // t1 = *(&_malloc_base_ptr)
-        // new we load
+        // now we load
         // t2 = base_ptr_offset
         lw  t2, 4(t0)
         // add allocated size to offset
@@ -66,12 +66,11 @@ _malloc_init:
         li  a7, SCALL_MMAP2
         ecall           // invoke syscall
         // check for error code
-        li  t0, -1
-        beq a0, t0, _malloc_fail
+        li  t2, -1
+        beq a0, t2, _malloc_fail
         // if succeeded, load &_malloc_base_ptr
-        la  t0, _malloc_base_ptr
         // put value of _malloc_base_ptr into t1
-        mv  a0, t1
+        mv  t1, a0
         // save base ptr to _malloc_base_ptr
         sw  t1, 0(t0)
         // jump to post_init

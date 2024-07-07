@@ -53,6 +53,6 @@ class RV_Debug(InstructionSet):
         )
 
     def smart_get_reg(self, reg_name: str) -> Union[Int32, BaseFloat]:
-        if reg_name[0] == "f":
+        if reg_name[0] == "f" or reg_name in self.regs.float_vals:
             return self.regs.get_f(reg_name)
         return self.regs.get(reg_name)

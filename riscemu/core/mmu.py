@@ -250,7 +250,7 @@ class MMU:
         best = ("", float("inf"))
         for name, val in best_fit:
             if address - val < best[1]:
-                best = (name, val)
+                best = (name, address - val)
             if address - val == best[1]:
                 if best[0] in elf_markers:
                     best = (name, val)
@@ -264,10 +264,11 @@ class MMU:
                 sec.owner, sec.name, address - sec.base, address
             )
 
-        return str(
-            "{}:{} at {} (0x{:0x}) + 0x{:0x}".format(
-                sec.owner, sec.name, name, val, address - val
-            )
+        if val == 0:
+            return "{}:{} {}".format(sec.owner, sec.name, name)
+
+        return "{}:{} at {} (0x{:0x}) + 0x{:0x}".format(
+            sec.owner, sec.name, name, address + val, val
         )
 
     def has_continuous_free_region(self, start: int, end: int) -> bool:
