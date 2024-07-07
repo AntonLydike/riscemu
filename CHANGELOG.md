@@ -1,6 +1,6 @@
 # Changelog
 
-## Upcoming
+## 2.2.7
 
 - BugFix: Fix `malloc` implementation from being just wrong to being right (I think?)
 - BugFix: Fix `MMU.translate_address` to actually return the best match (wow!)
