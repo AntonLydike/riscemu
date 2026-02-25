@@ -73,6 +73,7 @@ def parse_line(parts: List[str]) -> Iterable[Token]:
         yield from parse_line(parts[1:])
         return
     else:
+        check_mem_syntax(parts) # hacky, simple solution
         yield Token(TokenType.INSTRUCTION_NAME, first_token)
 
     for part in parts[1:]:
@@ -81,6 +82,10 @@ def parse_line(parts: List[str]) -> Iterable[Token]:
             continue
         yield from parse_arg(part)
 
+def check_mem_syntax(parts: List[str]) -> None:
+    MEM_INSTR = ['lb', 'lbu', 'lh', 'lhu', 'lw', 'sb', 'sh', 'sw']
+    if parts[0] in MEM_INSTR and len(parts) != 2:
+        raise ParseException('Load/store instructions expect 2 arguments')
 
 def parse_arg(arg: str) -> Iterable[Token]:
     comma = arg[-1] == ","
