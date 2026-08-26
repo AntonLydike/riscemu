@@ -9,7 +9,7 @@ from typing import Dict, Tuple, Iterable, Callable, List, TextIO
 
 from .assembler import MemorySectionType, ParseContext, AssemblerDirectives
 from .colors import FMT_PARSE
-from .helpers import Peekable
+from .helpers import MEMORY_OPERAND_RE, Peekable
 from .tokenizer import Token, TokenType, tokenize
 from .core import (
     Program,
@@ -204,7 +204,16 @@ def canonicalize_register_names(args: Tuple[str]) -> Iterable[str]:
     :return: An iterator over the arguments of an instruction, but with canonicalized register names
     """
     for arg in args:
-        yield REG_NAME_CANONICALIZER.get(arg, arg)
+        mem_operand = MEMORY_OPERAND_RE.fullmatch(arg)
+        if mem_operand:
+            # canonicalize the base register inside a memory operand, e.g. 4(x5) -> 4(t0)
+            register = mem_operand["register"]
+            yield "{}({})".format(
+                mem_operand["immediate"],
+                REG_NAME_CANONICALIZER.get(register, register),
+            )
+        else:
+            yield REG_NAME_CANONICALIZER.get(arg, arg)
 
 
 class AssemblyFileLoader(ProgramLoader):

@@ -5,7 +5,7 @@ Assembly tokenization should be working completely. It knows what instructions t
 
 ## Instruction sets:
 * RV32I
-    * Loads/Stores: `lb, lh, lw, lbu, lhu, sw, sh, sb` (supported arg format is either `rd, imm(reg)` or `rd, reg, imm`)
+    * Loads/Stores: `lb, lh, lw, lbu, lhu, sw, sh, sb` (arg format is `rd, imm(reg)`, e.g. `lw a0, 4(t0)`; the old `rd, reg, imm` form is no longer accepted)
     * Branch statements: `beq, bne, blt, bge, bltu, bgeu`
     * Jumps `j, jal, jalr, ret`
     * Basic arithmetic: `add, addi, sub, lui, auipc`

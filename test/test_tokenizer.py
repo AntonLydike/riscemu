@@ -53,6 +53,23 @@ class TestTokenizer(TestCase):
         ]
         self.assertEqual(list(tokenize(program)), tokens)
 
+    def test_memory_operand_is_single_argument(self):
+        # memory operands must stay a single argument so they can be told
+        # apart from the improper `lw a0, t0, 0` form
+        tokens = list(tokenize(["lw a0, 4(t0)", "sw a1, 0(ra)"]))
+        assert tokens == [
+            ins("lw"),
+            arg("a0"),
+            COMMA,
+            arg("4(t0)"),
+            NEWLINE,
+            ins("sw"),
+            arg("a1"),
+            COMMA,
+            arg("0(ra)"),
+            NEWLINE,
+        ]
+
     def test_comments(self):
         parsed_res = [ins("li"), arg("a0"), COMMA, arg("144"), NEWLINE]
         for c in ("#", "//", ";"):
@@ -99,8 +116,7 @@ section:
             ins("sw"),
             arg("s0"),
             COMMA,
-            arg("ra"),
-            arg("0"),
+            arg("0(ra)"),
             NEWLINE,
             lbl("section:"),
             NEWLINE,

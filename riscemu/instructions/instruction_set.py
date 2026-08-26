@@ -8,8 +8,9 @@ from typing import Tuple, Callable, Dict, Union, Iterable
 
 from abc import ABC
 
-from ..core.exceptions import ASSERT_LEN
+from ..core.exceptions import ASSERT_LEN, ParseException
 from ..core import Instruction, Int32, UInt32, Immediate, CPU, Registers
+from ..helpers import MEMORY_OPERAND_RE
 
 
 class InstructionSet(ABC):
@@ -53,12 +54,38 @@ class InstructionSet(ABC):
         """
         parses rd, imm(rs) argument format and returns (rd, imm+rs1)
         (so a register and address tuple for memory instructions)
+
+        Memory operands must be written in the `offset(base_register)` form as
+        per the RISC-V spec, the improper `rd, rs, imm` form is rejected.
         """
-        assert len(ins.args) == 3
-        # handle rd, rs1, imm
+        if len(ins.args) == 3:
+            # the improper, non-standard `instr rd, rs, imm` form
+            raise ParseException(
+                "Invalid memory instruction '{} {}': memory addresses must be "
+                "written in the form 'offset(base_register)', e.g. "
+                "'{} {}, {}({})'.".format(
+                    ins.name,
+                    ", ".join(ins.args),
+                    ins.name,
+                    ins.args[0],
+                    ins.args[2],
+                    ins.args[1],
+                ),
+                (ins.args,),
+            )
+        ASSERT_LEN(ins.args, 2)
         rd = ins.get_reg(0)
-        rs = self.regs.get(ins.get_reg(1)).unsigned()
-        imm = ins.get_imm(2)
+        mem_operand = MEMORY_OPERAND_RE.fullmatch(ins.args[1])
+        if mem_operand is None:
+            raise ParseException(
+                "'{}' is not a valid memory operand in instruction '{}': "
+                "expected the form 'offset(base_register)'.".format(
+                    ins.args[1], ins.name
+                ),
+                (ins.args[1],),
+            )
+        rs = self.regs.get(mem_operand["register"]).unsigned()
+        imm = ins.resolve_immediate(mem_operand["immediate"])
         return rd, rs + imm.abs_value.unsigned()
 
     def parse_rd_rs_rs(
