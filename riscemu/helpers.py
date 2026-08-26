@@ -4,11 +4,21 @@ RiscEmu (c) 2021 Anton Lydike
 SPDX-License-Identifier: MIT
 """
 
+import re
 from math import log10, ceil
 from typing import Iterable, Iterator, TypeVar, Generic, List, Optional
 
 from .core import Int32, UInt32
 from .core.exceptions import *
+
+MEMORY_OPERAND_RE = re.compile(
+    r"^(?P<immediate>0[xX][A-f0-9]+|\d+|0b[0-1]+|[A-z0-9_-]+)"
+    r"\((?P<register>[A-z]+[0-9]*)\)$"
+)
+"""
+Matches memory operands of the form `immediate(register)`, as used by load and
+store instructions (e.g. `0(ra)` or `4(my_offset)`).
+"""
 
 
 def align_addr(addr: int, to_bytes: int = 8) -> int:

@@ -14,9 +14,6 @@ from riscemu.core.exceptions import ParseException
 
 LINE_COMMENT_STARTERS = ("#", ";", "//")
 WHITESPACE_PATTERN = re.compile(r"\s+")
-MEMORY_ADDRESS_PATTERN = re.compile(
-    r"^(0[xX][A-f0-9]+|\d+|0b[0-1]+|[A-z0-9_-]+)\(([A-z]+[0-9]*)\)$"
-)
 REGISTER_NAMES = RISCV_REGS
 
 
@@ -85,14 +82,9 @@ def parse_line(parts: List[str]) -> Iterable[Token]:
 def parse_arg(arg: str) -> Iterable[Token]:
     comma = arg[-1] == ","
     arg = arg[:-1] if comma else arg
-    mem_match_result = re.match(MEMORY_ADDRESS_PATTERN, arg)
-    if mem_match_result:
-        register = mem_match_result.group(2).lower()
-        immediate = mem_match_result.group(1)
-        yield Token(TokenType.ARGUMENT, register)
-        yield Token(TokenType.ARGUMENT, immediate)
-    else:
-        yield Token(TokenType.ARGUMENT, arg)
+    # memory operands such as `4(t0)` are kept as a single argument,
+    # so that they can be told apart from the improper `t0, 4` form.
+    yield Token(TokenType.ARGUMENT, arg)
     if comma:
         yield COMMA
 

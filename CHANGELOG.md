@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+ - BugFix: Removed support for the improper `lw/sw a0, t0, 0` (i.e. `rd, reg, imm`) load/store syntax. Memory addresses must now be written in the standard `rd, imm(reg)` form, e.g. `lw a0, 0(t0)`, matching the RISC-V spec and other assemblers (see issue #54)
+
 ## 2.2.7
 
 - BugFix: Fix `malloc` implementation from being just wrong to being right (I think?)

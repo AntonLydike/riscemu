@@ -34,8 +34,14 @@ class SimpleInstruction(Instruction):
 
     @lru_cache(maxsize=None)
     def get_imm(self, num: int) -> Immediate:
-        token = self.args[num]
+        return self.resolve_immediate(self.args[num])
 
+    @lru_cache(maxsize=None)
+    def resolve_immediate(self, token: str) -> Immediate:
+        """
+        Resolve an immediate argument from a raw string token, whether it is a
+        number, a label, or a numerical label such as `1b`.
+        """
         if _INT_IMM_RE.fullmatch(token):
             value = parse_numeric_argument(token)
             return Immediate(abs_value=value, pcrel_value=value - self.addr)
