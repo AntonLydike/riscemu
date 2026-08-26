@@ -7,10 +7,12 @@ from riscemu.tokenizer import tokenize
 import pytest
 
 
-class MockInstruction(SimpleInstruction): ...
+class MockInstruction(SimpleInstruction):
+    ...
 
 
-class MockRegisters(Registers): ...
+class MockRegisters(Registers):
+    ...
 
 
 class MockCPU(CPU):
